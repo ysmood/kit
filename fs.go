@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-
-	"github.com/mattn/go-zglob"
 )
 
 // MkdirOptions ...
@@ -23,11 +21,6 @@ func Mkdir(path string, options *MkdirOptions) error {
 	}
 
 	return os.MkdirAll(path, options.perm)
-}
-
-// Glob ...
-func Glob(pattern string) ([]string, error) {
-	return zglob.Glob(pattern)
 }
 
 // OutputFileOptions ...

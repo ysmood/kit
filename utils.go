@@ -3,7 +3,10 @@ package gokit
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"sync"
+
+	"github.com/mgutz/ansi"
 )
 
 // E if find an error in args, panic it
@@ -51,4 +54,9 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 func GenerateRandomString(s int) (string, error) {
 	b, err := GenerateRandomBytes(s)
 	return base64.URLEncoding.EncodeToString(b), err
+}
+
+// C color terminal string
+func C(str interface{}, color string) string {
+	return ansi.Color(fmt.Sprint(str), color)
 }

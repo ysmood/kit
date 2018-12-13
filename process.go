@@ -5,15 +5,21 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 	"syscall"
 
-	"github.com/mitchellh/go-ps"
+	ps "github.com/mitchellh/go-ps"
 )
 
 // ExecOptions ...
 type ExecOptions struct {
-	Cmd    *exec.Cmd
+	Cmd *exec.Cmd
+	Dir string
+
+	// Prefix prefix has a special syntax, the string after "@" can specify the color
+	// of the prefix and will be removed from the output
 	Prefix string
+
 	NoWait bool
 }
 
@@ -52,15 +58,25 @@ func Exec(args []string, opts *ExecOptions) (*exec.Cmd, error) {
 	} else {
 		clone := *opts.Cmd
 		opts.Cmd = &clone
-		opts.Cmd.Path = cmd.Path
-		opts.Cmd.Args = cmd.Args
+	}
+	if opts.Dir != "" {
+		opts.Cmd.Dir = opts.Dir
 	}
 
+	opts.Cmd.Path = cmd.Path
+	opts.Cmd.Args = cmd.Args
+
 	if opts.Cmd.Stdout == nil {
-		opts.Cmd.Stdout = &prefixWriter{opts.Prefix, os.Stdout}
+		opts.Cmd.Stdout = &prefixWriter{
+			formatPrefix(opts.Prefix),
+			os.Stdout,
+		}
 	}
 	if opts.Cmd.Stdin == nil {
-		opts.Cmd.Stderr = &prefixWriter{opts.Prefix, os.Stderr}
+		opts.Cmd.Stderr = &prefixWriter{
+			formatPrefix(opts.Prefix),
+			os.Stderr,
+		}
 	}
 	if opts.Cmd.Stdin == nil {
 		opts.Cmd.Stdin = os.Stdin
@@ -75,13 +91,20 @@ func Exec(args []string, opts *ExecOptions) (*exec.Cmd, error) {
 // KillTree kill process and all its children process
 func KillTree(pid int) error {
 	ids, err := childrenProcessIDs(pid)
+	ids = append(ids, pid)
 
 	if err != nil {
 		return err
 	}
 
 	for _, id := range ids {
-		err = syscall.Kill(id, syscall.SIGINT)
+		p, err := os.FindProcess(id)
+
+		if err != nil {
+			return err
+		}
+
+		err = p.Signal(syscall.SIGINT)
 
 		if err != nil {
 			return err
@@ -89,6 +112,17 @@ func KillTree(pid int) error {
 	}
 
 	return nil
+}
+
+func formatPrefix(prefix string) string {
+	i := strings.LastIndex(prefix, "@")
+	if i == -1 {
+		return prefix
+	}
+
+	color := prefix[i+1:]
+
+	return C(prefix[:i], color)
 }
 
 func childrenProcessIDs(id int) ([]int, error) {
