@@ -32,6 +32,7 @@ func build(name, osName string) {
 
 	g.Exec([]string{
 		"go", "build",
+		`-ldflags=-w -s`,
 		"-o", fmt.Sprint("dist/", fmt.Sprint(name, "-", osName)),
 		fmt.Sprint("./cmd/", name),
 	}, &g.ExecOptions{
