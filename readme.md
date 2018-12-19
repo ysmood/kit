@@ -8,3 +8,5 @@ This library won't have the best performance, but it will have sane defaults to 
 ```bash
 go run ./tasks/build
 ```
+
+Binaries will be built into dist folder.

@@ -59,3 +59,27 @@ func TestMkdir(t *testing.T) {
 
 	assert.Equal(t, true, g.DirExists(p))
 }
+
+func TestGlob(t *testing.T) {
+	g.OutputFile("fixtures/glob/a/b", "", nil)
+	g.OutputFile("fixtures/glob/a/c", "", nil)
+
+	l, err := g.Glob([]string{"glob/**"}, &g.WalkOptions{
+		Dir: "fixtures",
+	})
+	g.E(err)
+	assert.Equal(t, 3, len(l))
+}
+
+func TestRemove(t *testing.T) {
+	g.OutputFile("fixtures/remove/a", "", nil)
+	g.OutputFile("fixtures/remove/b/c", "", nil)
+	g.OutputFile("fixtures/remove/b/d", "", nil)
+	g.OutputFile("fixtures/remove/e/f/g", "", nil)
+
+	g.E(g.Remove("fixtures/remove/**"))
+
+	l, err := g.Glob([]string{"fixtures/remove/**"}, nil)
+	g.E(err)
+	assert.Equal(t, 0, len(l))
+}

@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/mholt/archiver"
 	g "github.com/ysmood/gokit"
 )
 
@@ -16,6 +17,8 @@ func main() {
 		panic(err)
 	}
 
+	g.Remove("dist/**")
+
 	for _, name := range list {
 		name = path.Base(name)
 		build(name, "darwin")
@@ -25,21 +28,31 @@ func main() {
 }
 
 func build(name, osName string) {
+	g.Log("build", name, osName)
+
+	f := fmt.Sprint
+
 	env := []string{
-		fmt.Sprint("GOOS=", osName),
+		f("GOOS=", osName),
 		"GOARCH=amd64",
 	}
+
+	oPath := f("dist/", name, "-", osName, extByOS(osName))
 
 	g.Exec([]string{
 		"go", "build",
 		"-ldflags=-w -s",
-		"-o", fmt.Sprint("dist/", name, "-", osName, extByOS(osName)),
-		fmt.Sprint("./cmd/", name),
+		"-o", oPath,
+		f("./cmd/", name),
 	}, &g.ExecOptions{
 		Cmd: &exec.Cmd{
 			Env: append(os.Environ(), env...),
 		},
 	})
+
+	archiver.Archive([]string{oPath}, f(oPath, ".tar.gz"))
+
+	g.Remove(oPath)
 }
 
 func extByOS(osName string) string {

@@ -12,7 +12,7 @@ import (
 )
 
 // E if find an error in args, panic it
-func E(args ...interface{}) {
+func E(args ...interface{}) []interface{} {
 	for _, arg := range args {
 		err, ok := arg.(error)
 
@@ -20,6 +20,7 @@ func E(args ...interface{}) {
 			panic(err)
 		}
 	}
+	return args
 }
 
 // All run all actions concurrently

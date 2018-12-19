@@ -9,8 +9,10 @@ func main() {
 		g.Guard(
 			[]string{"go", "run", "./server"},
 			nil,
-			&g.ExecOptions{
-				Prefix: "server | @yellow",
+			&g.GuardOptions{
+				ExecOpts: &g.ExecOptions{
+					Prefix: "server | @yellow",
+				},
 			},
 		),
 	)
