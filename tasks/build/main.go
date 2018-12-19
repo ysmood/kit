@@ -32,12 +32,19 @@ func build(name, osName string) {
 
 	g.Exec([]string{
 		"go", "build",
-		`-ldflags=-w -s`,
-		"-o", fmt.Sprint("dist/", fmt.Sprint(name, "-", osName)),
+		"-ldflags=-w -s",
+		"-o", fmt.Sprint("dist/", name, "-", osName, extByOS(osName)),
 		fmt.Sprint("./cmd/", name),
 	}, &g.ExecOptions{
 		Cmd: &exec.Cmd{
 			Env: append(os.Environ(), env...),
 		},
 	})
+}
+
+func extByOS(osName string) string {
+	if osName == "windows" {
+		return ".exe"
+	}
+	return ""
 }

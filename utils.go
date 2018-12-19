@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"go/build"
+	"os"
 	"sync"
 
 	"github.com/mgutz/ansi"
@@ -59,4 +61,13 @@ func GenerateRandomString(s int) (string, error) {
 // C color terminal string
 func C(str interface{}, color string) string {
 	return ansi.Color(fmt.Sprint(str), color)
+}
+
+// GoPath get the current GOPATH properly
+func GoPath() string {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = build.Default.GOPATH
+	}
+	return gopath
 }
