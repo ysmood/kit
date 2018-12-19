@@ -17,7 +17,7 @@ func main() {
 
 		Examples:
 
-		 guard -- ls -al
+		 guard -- ls -al # follow the "--" is the command and its arguments you want to execute
 		 guard -w '*.go' -w 'lib/**/*.go' -- go run main.go # the pattern must be quoted
 		 guard -p 'my-app | @red' -- python test.py # the output will be prefix with red 'my-app | '
 		`,
