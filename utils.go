@@ -75,3 +75,14 @@ func GoPath() string {
 	}
 	return gopath
 }
+
+// Try try fn with recover, return the panic as value
+func Try(fn func()) (err interface{}) {
+	defer func() {
+		err = recover()
+	}()
+
+	fn()
+
+	return err
+}
