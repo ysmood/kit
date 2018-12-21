@@ -14,6 +14,7 @@ var GuardDefaultPatterns = []string{".", "**/*", WalkGitIgnore, WalkHidden}
 // GuardOptions ...
 type GuardOptions struct {
 	Interval time.Duration // default 300ms
+	Close    chan Nil
 	ExecOpts *ExecOptions
 }
 
@@ -132,13 +133,26 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 			case err := <-w.Error:
 				Err(prefix, err)
+
+			case <-w.Closed:
+				return
 			}
 		}
+	}()
+
+	go func() {
+		if opts.Close == nil {
+			return
+		}
+
+		<-opts.Close
+		w.Close()
 	}()
 
 	interval := opts.Interval
 	if opts.Interval == 0 {
 		interval = time.Millisecond * 300
 	}
+
 	return w.Start(interval)
 }

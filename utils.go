@@ -11,6 +11,9 @@ import (
 	"github.com/mgutz/ansi"
 )
 
+// Nil used to create empty channel
+type Nil struct{}
+
 // E if find an error in args, panic it
 func E(args ...interface{}) []interface{} {
 	for _, arg := range args {
