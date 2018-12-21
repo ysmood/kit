@@ -36,58 +36,17 @@ func Walk(patterns []string, cb godirwalk.WalkFunc, opts *WalkOptions) error {
 		}
 	}
 
-	dir := opts.Dir
-
-	if dir == "" {
-		dir = "."
+	m, err := newMatcher(opts.Dir, patterns)
+	if err != nil {
+		return err
 	}
 
-	var gitIgnorer *gitignorer
-
-	patterns = normalizePatterns(dir, patterns)
-
-	if hasWalkGitIgnore(patterns) {
-		var err error
-		gitIgnorer, err = newGitignorer(dir)
-		if err != nil {
-			Err(err)
-		}
-	}
-
-	return godirwalk.Walk(dir, &godirwalk.Options{
+	return godirwalk.Walk(m.dir, &godirwalk.Options{
 		Unsorted:             !opts.Sorted,
 		FollowSymbolicLinks:  opts.FollowSymbolicLinks,
-		Callback:             genMatchFn(patterns, gitIgnorer, cb),
-		PostChildrenCallback: genMatchFn(patterns, gitIgnorer, opts.PostChildrenCallback),
+		Callback:             genMatchFn(m, cb),
+		PostChildrenCallback: genMatchFn(m, opts.PostChildrenCallback),
 	})
-}
-
-type gitignorer struct {
-	gi  gitignore.IgnoreMatcher
-	ggi gitignore.IgnoreMatcher
-}
-
-func newGitignorer(dir string) (*gitignorer, error) {
-	user, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-
-	gi, err := gitignore.NewGitIgnore(path.Join(dir, ".gitignore"))
-	if err != nil {
-		return nil, err
-	}
-
-	ggi, err := gitignore.NewGitIgnore(path.Join(user.HomeDir, ".gitignore_global"), dir)
-	if err != nil {
-		return nil, err
-	}
-
-	return &gitignorer{gi, ggi}, nil
-}
-
-func (g *gitignorer) match(p string, isDir bool) bool {
-	return g.gi.Match(p, isDir) || g.ggi.Match(p, isDir)
 }
 
 func pathMatch(pattern, name string) (bool, bool, error) {
@@ -109,6 +68,14 @@ func pathMatch(pattern, name string) (bool, bool, error) {
 func normalizePatterns(dir string, patterns []string) []string {
 	list := []string{}
 	for _, p := range patterns {
+		if p == WalkGitIgnore {
+			list = append(list, p)
+			continue
+		}
+		if p[0] == '!' {
+			list = append(list, path.Clean(fmt.Sprint("!", dir, "/", p[1:])))
+			continue
+		}
 		list = append(list, path.Clean(fmt.Sprint(dir, "/", p)))
 	}
 	return list
@@ -124,60 +91,14 @@ func hasWalkGitIgnore(patterns []string) bool {
 	return false
 }
 
-// TODO: for the best performance, this is just a partial hacky solution.
-// We need a syntax analyzer to detect if a path is a subpath of a pattern.
-func isSubpath(p, pattern string) bool {
-	if path.Clean(p) == "." {
-		return true
-	}
-	return len(p) <= len(pattern) && p == pattern[:len(p)]
-}
-
 func genMatchFn(
-	patterns []string,
-	gitIgnorer *gitignorer,
+	m *matcher,
 	cb godirwalk.WalkFunc,
 ) godirwalk.WalkFunc {
 	return func(p string, info *godirwalk.Dirent) (resErr error) {
-		matched := false
-		isDir := info.IsDir()
-		for _, pattern := range patterns {
-			if pattern == WalkGitIgnore {
-				if gitIgnorer != nil && gitIgnorer.match(p, info.IsDir()) {
-					if isDir {
-						resErr = filepath.SkipDir
-					}
-					matched = false
-				}
-				continue
-			}
-
-			m, negative, err := pathMatch(pattern, p)
-
-			if err != nil {
-				return err
-			}
-
-			if m {
-				if negative {
-					matched = false
-				} else {
-					matched = true
-					resErr = nil
-				}
-			}
-
-			if isDir && !matched {
-				resErr = filepath.SkipDir
-			}
-
-			// TODO: for the best performance, this is just a partial hacky solution.
-			// We need a syntax analyzer to detect if a path is a subpath of a pattern.
-			if resErr == filepath.SkipDir {
-				if isSubpath(p, pattern) {
-					resErr = nil
-				}
-			}
+		matched, negative, err := m.match(p, info.IsDir())
+		if err != nil {
+			return err
 		}
 
 		if matched && cb != nil {
@@ -186,6 +107,88 @@ func genMatchFn(
 				return err
 			}
 		}
-		return resErr
+
+		if negative {
+			return filepath.SkipDir
+		}
+
+		return nil
 	}
 }
+
+type matcher struct {
+	dir      string
+	gs       []gitignore.IgnoreMatcher
+	patterns []string
+}
+
+func newMatcher(dir string, patterns []string) (*matcher, error) {
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+
+	gs := []gitignore.IgnoreMatcher{}
+	if hasWalkGitIgnore(patterns) {
+		g, err := gitignore.NewGitIgnore(path.Join(user.HomeDir, ".gitignore_global"), dir)
+		if err == nil {
+			gs = append(gs, g)
+		}
+	}
+
+	return &matcher{
+		dir:      dir,
+		gs:       gs,
+		patterns: normalizePatterns(dir, patterns),
+	}, nil
+}
+
+func (m *matcher) gitMatch(p string, isDir bool) bool {
+	if isDir {
+		g, err := gitignore.NewGitIgnore(path.Join(p, ".gitignore"))
+		if err == nil {
+			m.gs = append(m.gs, g)
+		}
+	}
+
+	for _, g := range m.gs {
+		if g.Match(p, isDir) {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *matcher) match(p string, isDir bool) (matched, negative bool, err error) {
+	for _, pattern := range m.patterns {
+		if pattern == WalkGitIgnore {
+			if m.gitMatch(p, isDir) {
+				matched = false
+				negative = true
+			}
+			continue
+		}
+
+		mm, negative, err := pathMatch(pattern, p)
+
+		if err != nil {
+			return matched, negative, err
+		}
+
+		if mm {
+			if negative {
+				matched = false
+			} else {
+				matched = true
+			}
+		}
+	}
+
+	return matched, negative, nil
+}
+

@@ -9,7 +9,7 @@ import (
 )
 
 // GuardDefaultPatterns match all, then ignore all gitignore rules and hidden files
-var GuardDefaultPatterns = []string{"**/*", WalkGitIgnore, WalkHidden}
+var GuardDefaultPatterns = []string{".", "**/*", WalkGitIgnore, WalkHidden}
 
 // GuardOptions ...
 type GuardOptions struct {
@@ -58,25 +58,69 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	go run()
 
 	w := watcher.New()
-	w.SetMaxEvents(1)
 
-	list, err := Glob(patterns, &WalkOptions{Dir: opts.ExecOpts.Dir})
+	watchFiles := func(dir string) error {
+		list, err := Glob(patterns, &WalkOptions{Dir: dir})
 
-	if err != nil {
+		if err != nil {
+			return err
+		}
+
+		for _, p := range list {
+			w.Add(p)
+		}
+
+		var watched string
+		if len(list) > 10 {
+			watched = strings.Join(append(list[0:10], "..."), " ")
+		} else {
+			watched = strings.Join(list, " ")
+		}
+
+		Log(prefix, "watched", len(list), "files:", C(watched, "green"))
+
+		return nil
+	}
+
+	if err := watchFiles(opts.ExecOpts.Dir); err != nil {
 		return err
 	}
 
-	for _, p := range list {
-		w.Add(p)
+	m, err := newMatcher(opts.ExecOpts.Dir, patterns)
+	if err != nil {
+		return err
 	}
 
 	go func() {
 		for {
 			select {
 			case event := <-w.Event:
+				if event.Op == watcher.Create {
+					continue
+				}
+
+				matched, _, err := m.match(event.Path, event.IsDir())
+				if err != nil {
+					Err(err)
+				}
+
+				if !matched {
+					continue
+				}
+
 				Log(prefix, event)
 
-				err := KillTree(cmd.Process.Pid)
+				if event.Op == watcher.Create {
+					if event.IsDir() {
+						if err := watchFiles(event.Path); err != nil {
+							Err(err)
+						}
+					} else {
+						w.Add(event.Path)
+					}
+				}
+
+				err = KillTree(cmd.Process.Pid)
 
 				if err != nil {
 					Err(prefix, err)
@@ -91,15 +135,6 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 			}
 		}
 	}()
-
-	var watched string
-	if len(list) > 10 {
-		watched = strings.Join(append(list[0:10], "..."), " ")
-	} else {
-		watched = strings.Join(list, " ")
-	}
-
-	Log(prefix, "watched", len(list), "files:", C(watched, "green"))
 
 	interval := opts.Interval
 	if opts.Interval == 0 {
