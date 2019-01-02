@@ -83,3 +83,14 @@ func TestRemove(t *testing.T) {
 	g.E(err)
 	assert.Equal(t, 0, len(l))
 }
+
+func TestRemoveSingleFile(t *testing.T) {
+	p := "fixtures/remove-single/a"
+	g.OutputFile(p, "", nil)
+
+	assert.Equal(t, true, g.FileExists(p))
+
+	g.Remove(p)
+
+	assert.Equal(t, false, g.FileExists(p))
+}
