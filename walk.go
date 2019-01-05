@@ -8,7 +8,7 @@ import (
 
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
-	"github.com/monochromegane/go-gitignore"
+	gitignore "github.com/monochromegane/go-gitignore"
 )
 
 // WalkOptions ...
@@ -108,7 +108,7 @@ func genMatchFn(
 			}
 		}
 
-		if negative {
+		if negative && info.IsDir() {
 			return filepath.SkipDir
 		}
 
@@ -174,14 +174,15 @@ func (m *matcher) match(p string, isDir bool) (matched, negative bool, err error
 			continue
 		}
 
-		mm, negative, err := pathMatch(pattern, p)
+		mm, neg, err := pathMatch(pattern, p)
 
 		if err != nil {
-			return matched, negative, err
+			return matched, neg, err
 		}
 
 		if mm {
-			if negative {
+			if neg {
+				negative = true
 				matched = false
 			} else {
 				matched = true
@@ -191,4 +192,3 @@ func (m *matcher) match(p string, isDir bool) (matched, negative bool, err error
 
 	return matched, negative, nil
 }
-

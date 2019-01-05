@@ -65,7 +65,7 @@ func genOptions(args []string) *options {
 	opts.dir = app.Flag("dir", "base dir path").Short('d').String()
 	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').String()
 
-	app.Version("0.0.1")
+	app.Version("0.0.2")
 
 	args, cmdArgs := parseArgs(args)
 
