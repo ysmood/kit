@@ -6,7 +6,7 @@ This library won't have the best performance, but it will have sane defaults to 
 # Build Project
 
 ```bash
-go run ./tasks/build
+go run ./dev build
 ```
 
 Binaries will be built into dist folder.
