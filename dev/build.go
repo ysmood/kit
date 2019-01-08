@@ -10,7 +10,7 @@ import (
 	g "github.com/ysmood/gokit"
 )
 
-func build() {
+func build(deployTag *string) {
 	list, err := g.Glob([]string{"cmd/*"}, nil)
 
 	if err != nil {
@@ -30,6 +30,25 @@ func build() {
 		}
 	}
 	g.All(tasks...)
+
+	if deployTag != nil {
+		deploy(*deployTag)
+	}
+}
+
+func deploy(tag string) {
+	files, err := g.Glob([]string{"dist/*"}, nil)
+	g.E(err)
+
+	g.Exec([]string{"hub", "release", "delete", tag}, nil)
+
+	args := []string{"hub", "release", "create", "-m", tag}
+	for _, f := range files {
+		args = append(args, "-a", f)
+	}
+	args = append(args, tag)
+
+	g.E(g.Exec(args, nil))
 }
 
 func buildForOS(name, osName string) {

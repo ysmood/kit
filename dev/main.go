@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	app      = kingpin.New("dev", "dev tool for gokit")
-	cmdTest  = app.Command("test", "run test").Default()
-	cmdLab   = app.Command("lab", "run lab")
-	cmdBuild = app.Command("build", "cross build project")
+	app       = kingpin.New("dev", "dev tool for gokit")
+	cmdTest   = app.Command("test", "run test").Default()
+	cmdLab    = app.Command("lab", "run lab")
+	cmdBuild  = app.Command("build", "cross build project")
+	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').String()
 )
 
 func main() {
@@ -23,6 +24,6 @@ func main() {
 		g.Guard([]string{"go", "test", "-v", "./..."}, nil, nil)
 
 	case cmdBuild.FullCommand():
-		build()
+		build(deployTag)
 	}
 }
