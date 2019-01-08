@@ -2,9 +2,11 @@ package gokit
 
 import (
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/hoisie/mustache"
 	"github.com/radovskyb/watcher"
 )
 
@@ -13,13 +15,15 @@ var GuardDefaultPatterns = []string{".", "**/*", WalkGitIgnore, WalkHidden}
 
 // GuardOptions ...
 type GuardOptions struct {
-	Interval time.Duration // default 300ms
-	Close    chan Nil
-	ExecOpts *ExecOptions
+	Interval  time.Duration // default 300ms
+	Close     chan Nil
+	ExecOpts  *ExecOptions
+	NoInitRun bool
 }
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
-// Because it's based on polling, so it's cross-platform and file system
+// Because it's based on polling, so it's cross-platform and file system.
+// The args supports mustach template, variables {{path}}, {{op}} are available.
 func Guard(args, patterns []string, opts *GuardOptions) error {
 	prefix := C("[guard]", "cyan")
 
@@ -38,11 +42,42 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	var cmd *exec.Cmd
 	wait := make(chan struct{})
 
-	run := func() {
-		Log(prefix, "run command", C(args, "green"))
+	unescapeArgs := func(args []string, e *watcher.Event) []string {
+		if e == nil {
+			e = &watcher.Event{}
+		}
+
+		newArgs := []string{}
+		for _, arg := range args {
+			dir, err := filepath.Abs(opts.ExecOpts.Dir)
+			if err != nil {
+				Err(err)
+			}
+
+			p, err := filepath.Abs(e.Path)
+			if err != nil {
+				Err(err)
+			}
+
+			p, err = filepath.Rel(dir, p)
+			if err != nil {
+				Err(err)
+			}
+
+			newArgs = append(
+				newArgs,
+				mustache.Render(arg, map[string]string{"path": p, "op": e.Op.String()}),
+			)
+		}
+		return newArgs
+	}
+
+	run := func(e *watcher.Event) {
+		eArgs := unescapeArgs(args, e)
+		Log(prefix, "run command", C(eArgs, "green"))
 
 		var err error
-		cmd, err = Exec(args, opts.ExecOpts)
+		cmd, err = Exec(eArgs, opts.ExecOpts)
 
 		if err != nil {
 			Err(prefix, C(err, "red"))
@@ -50,13 +85,15 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 		err = cmd.Wait()
 		if err != nil {
-			Err(prefix, C(err, "red"))
+			Log(prefix, C(err, "red"))
 		}
 		Log(prefix, "command done", C(args, "green"))
 		wait <- struct{}{}
 	}
 
-	go run()
+	if !opts.NoInitRun {
+		go run(nil)
+	}
 
 	w := watcher.New()
 
@@ -95,12 +132,12 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	go func() {
 		for {
 			select {
-			case event := <-w.Event:
-				if event.Op == watcher.Create {
+			case e := <-w.Event:
+				if e.Op == watcher.Create {
 					continue
 				}
 
-				matched, _, err := m.match(event.Path, event.IsDir())
+				matched, _, err := m.match(e.Path, e.IsDir())
 				if err != nil {
 					Err(err)
 				}
@@ -109,27 +146,25 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 					continue
 				}
 
-				Log(prefix, event)
+				Log(prefix, e)
 
-				if event.Op == watcher.Create {
-					if event.IsDir() {
-						if err := watchFiles(event.Path); err != nil {
+				if e.Op == watcher.Create {
+					if e.IsDir() {
+						if err := watchFiles(e.Path); err != nil {
 							Err(err)
 						}
 					} else {
-						w.Add(event.Path)
+						w.Add(e.Path)
 					}
 				}
 
-				err = KillTree(cmd.Process.Pid)
+				if cmd != nil {
+					KillTree(cmd.Process.Pid)
 
-				if err != nil {
-					Err(prefix, err)
+					<-wait
 				}
 
-				<-wait
-
-				go run()
+				go run(&e)
 
 			case err := <-w.Error:
 				Err(prefix, err)

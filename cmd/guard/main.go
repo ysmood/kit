@@ -11,10 +11,11 @@ import (
 )
 
 type options struct {
-	patterns *[]string
-	dir      *string
-	cmd      []string
-	prefix   *string
+	patterns  *[]string
+	dir       *string
+	cmd       []string
+	prefix    *string
+	noInitRun *bool
 }
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 						Dir:    *opts.dir,
 						Prefix: genPrefix(*opts.prefix, opts.cmd),
 					},
+					NoInitRun: *opts.noInitRun,
 				}))
 			}
 		}(opts))
@@ -49,7 +51,13 @@ func genOptions(args []string) *options {
 		Examples:
 
 		 # follow the "--" is the command and its arguments you want to execute
-		 guard -- ls -al
+		 guard -- echo changed
+
+		 # support mustache template
+		 guard -- echo {{op}} {{path}}
+
+		 # watch and sync current dir to remote dir with rsync
+		 guard -n -- rsync -z {{path}} root@host:/home/me/app/{{path}}
 
 		 # the pattern must be quoted
 		 guard -w '*.go' -w 'lib/**/*.go' -- go run main.go
@@ -64,8 +72,9 @@ func genOptions(args []string) *options {
 	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns, syntax https://github.com/bmatcuk/doublestar#patterns").Short('w').Strings()
 	opts.dir = app.Flag("dir", "base dir path").Short('d').String()
 	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').String()
+	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 
-	app.Version("0.0.2")
+	app.Version("0.0.3")
 
 	args, cmdArgs := parseArgs(args)
 
