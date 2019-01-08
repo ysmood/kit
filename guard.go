@@ -16,7 +16,7 @@ var GuardDefaultPatterns = []string{".", "**/*", WalkGitIgnore, WalkHidden}
 // GuardOptions ...
 type GuardOptions struct {
 	Interval  time.Duration // default 300ms
-	Close     chan Nil
+	Stop      chan Nil      // send signal to it to stop the watcher
 	ExecOpts  *ExecOptions
 	NoInitRun bool
 }
@@ -176,11 +176,11 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	}()
 
 	go func() {
-		if opts.Close == nil {
+		if opts.Stop == nil {
 			return
 		}
 
-		<-opts.Close
+		<-opts.Stop
 		w.Close()
 	}()
 
