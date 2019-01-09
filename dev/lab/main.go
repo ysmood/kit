@@ -1,9 +1,13 @@
 package main
 
 import (
+	"strings"
+
 	g "github.com/ysmood/gokit"
 )
 
 func main() {
-	g.Log("ok")
+	list, _ := g.Glob(g.GuardDefaultPatterns, nil)
+
+	g.Log(strings.Join(list, "\n"))
 }

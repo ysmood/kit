@@ -2,9 +2,11 @@ package gokit
 
 import (
 	"fmt"
+	"os/exec"
 	"os/user"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
@@ -117,9 +119,10 @@ func genMatchFn(
 }
 
 type matcher struct {
-	dir      string
-	gs       []gitignore.IgnoreMatcher
-	patterns []string
+	dir           string
+	gitMatchers   []gitignore.IgnoreMatcher
+	gitSubmodules []string
+	patterns      []string
 }
 
 func newMatcher(dir string, patterns []string) (*matcher, error) {
@@ -134,7 +137,9 @@ func newMatcher(dir string, patterns []string) (*matcher, error) {
 	}
 
 	gs := []gitignore.IgnoreMatcher{}
+	var submodules []string
 	if hasWalkGitIgnore(patterns) {
+		submodules = getGitSubmodules()
 		g, err := gitignore.NewGitIgnore(path.Join(user.HomeDir, ".gitignore_global"), dir)
 		if err == nil {
 			gs = append(gs, g)
@@ -142,21 +147,53 @@ func newMatcher(dir string, patterns []string) (*matcher, error) {
 	}
 
 	return &matcher{
-		dir:      dir,
-		gs:       gs,
-		patterns: normalizePatterns(dir, patterns),
+		dir:           dir,
+		gitMatchers:   gs,
+		gitSubmodules: submodules,
+		patterns:      normalizePatterns(dir, patterns),
 	}, nil
+}
+
+func getGitSubmodules() []string {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		return nil
+	}
+
+	root := strings.TrimSpace(string(out))
+
+	p := filepath.Join(root, ".git/modules/*")
+
+	l, _ := filepath.Glob(p)
+
+	for i, p := range l {
+		l[i] = strings.Replace(p, filepath.Join(root, ".git/modules"), root, 1)
+	}
+
+	return l
 }
 
 func (m *matcher) gitMatch(p string, isDir bool) bool {
 	if isDir {
+		if l := len(p); l > 4 && p[len(p)-4:] == ".git" {
+			return true
+		}
+
+		if m.gitSubmodules != nil {
+			for _, sub := range m.gitSubmodules {
+				if sub == p {
+					return true
+				}
+			}
+		}
+
 		g, err := gitignore.NewGitIgnore(path.Join(p, ".gitignore"))
 		if err == nil {
-			m.gs = append(m.gs, g)
+			m.gitMatchers = append(m.gitMatchers, g)
 		}
 	}
 
-	for _, g := range m.gs {
+	for _, g := range m.gitMatchers {
 		if g.Match(p, isDir) {
 			return true
 		}

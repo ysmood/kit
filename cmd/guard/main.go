@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"os"
 	"strings"
+	"time"
 
 	g "github.com/ysmood/gokit"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -16,6 +17,7 @@ type options struct {
 	cmd       []string
 	prefix    *string
 	noInitRun *bool
+	poll      *time.Duration
 }
 
 func main() {
@@ -34,6 +36,7 @@ func main() {
 						Prefix: genPrefix(*opts.prefix, opts.cmd),
 					},
 					NoInitRun: *opts.noInitRun,
+					Interval:  *opts.poll,
 				}))
 			}
 		}(opts))
@@ -53,28 +56,36 @@ func genOptions(args []string) *options {
 		 # follow the "--" is the command and its arguments you want to execute
 		 guard -- echo changed
 
+		 # use ! prefix to ignore pattern, the below means watch all files but not those in tmp dir
+		 guard -w '**' -w '!tmp/**' -- echo changed
+
+		 # the special !g pattern will read the gitignore files and ignore patterns in them
+		 # the below is the default patterns guard will use
+		 guard -w '**' -w '!g' -- echo changed
+
 		 # support mustache template
 		 guard -- echo {{op}} {{path}}
 
 		 # watch and sync current dir to remote dir with rsync
 		 guard -n -- rsync -z {{path}} root@host:/home/me/app/{{path}}
 
-		 # the pattern must be quoted
+		 # the patterns must be quoted
 		 guard -w '*.go' -w 'lib/**/*.go' -- go run main.go
 
 		 # the output will be prefix with red 'my-app | '
 		 guard -p 'my-app | @red' -- python test.py
 		 
 		 # use "---" as separator to watch multiple commands
-		 guard -p a/* -- ls a --- -p b/* -- ls b
+		 guard -w a/* -- ls a --- -w b/* -- ls b
 		`,
 	)
-	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns, syntax https://github.com/bmatcuk/doublestar#patterns").Short('w').Strings()
+	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns").Short('w').Strings()
 	opts.dir = app.Flag("dir", "base dir path").Short('d').String()
 	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').String()
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
+	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 
-	app.Version("0.0.3")
+	app.Version("0.0.4")
 
 	args, cmdArgs := parseArgs(args)
 

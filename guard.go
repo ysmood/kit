@@ -10,8 +10,8 @@ import (
 	"github.com/radovskyb/watcher"
 )
 
-// GuardDefaultPatterns match all, then ignore all gitignore rules and hidden files
-var GuardDefaultPatterns = []string{".", "**/*", WalkGitIgnore, WalkHidden}
+// GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
+var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
 
 // GuardOptions ...
 type GuardOptions struct {
@@ -24,6 +24,7 @@ type GuardOptions struct {
 // Guard run and guard a command, kill and rerun it if watched files are modified.
 // Because it's based on polling, so it's cross-platform and file system.
 // The args supports mustach template, variables {{path}}, {{op}} are available.
+// The default patterns are GuardDefaultPatterns
 func Guard(args, patterns []string, opts *GuardOptions) error {
 	prefix := C("[guard]", "cyan")
 
