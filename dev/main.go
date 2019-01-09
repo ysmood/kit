@@ -18,12 +18,21 @@ var (
 func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case cmdLab.FullCommand():
-		g.Guard([]string{"go", "run", "./dev/lab"}, nil, nil)
+		lab()
 
 	case cmdTest.FullCommand():
-		g.Guard([]string{"go", "test", "-v", "./..."}, nil, nil)
+		test()
 
 	case cmdBuild.FullCommand():
+		g.E(g.Exec([]string{"go", "test", "./..."}, nil))
 		build(deployTag)
 	}
+}
+
+func lab() {
+	g.Guard([]string{"go", "run", "./dev/lab"}, nil, nil)
+}
+
+func test() {
+	g.Guard([]string{"go", "test", "-v", "./..."}, nil, nil)
 }
