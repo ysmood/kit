@@ -75,8 +75,8 @@ func genOptions(args []string) *options {
 		 # the output will be prefix with red 'my-app | '
 		 guard -p 'my-app | @red' -- python test.py
 		 
-		 # use "---" as separator to watch multiple commands
-		 guard -w a/* -- ls a --- -w b/* -- ls b
+		 # use "---" as separator to guard multiple commands
+		 guard -w 'a/*' -- ls a --- -w 'b/*' -- ls b
 		`,
 	)
 	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns").Short('w').Strings()
