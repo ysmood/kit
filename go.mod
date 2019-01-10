@@ -9,6 +9,7 @@ require (
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/karrick/godirwalk v1.7.7
+	github.com/kr/pty v1.1.3
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b

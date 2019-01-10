@@ -1,25 +1,23 @@
-package gokit_test
+package gokit
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	g "github.com/ysmood/gokit"
 )
 
 func TestExec(t *testing.T) {
-	_, err := g.Exec([]string{"go", "version"}, nil)
+	err := Exec([]string{"go", "version"}, nil)
 	assert.Equal(t, nil, err)
 }
 func TestExecPrefix(t *testing.T) {
-	_, err := g.Exec([]string{"echo", "test"}, &g.ExecOptions{
+	err := Exec([]string{"echo", "test"}, &ExecOptions{
 		Prefix: "[app] ",
 	})
 	assert.Equal(t, nil, err)
 }
 
 func TestExecErr(t *testing.T) {
-	_, err := g.Exec([]string{"exitexit"}, nil)
+	err := Exec([]string{"exitexit"}, nil)
 	assert.NotEqual(t, nil, err)
 }

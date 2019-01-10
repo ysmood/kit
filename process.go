@@ -1,10 +1,8 @@
 package gokit
 
 import (
-	"io"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"syscall"
 
@@ -19,31 +17,10 @@ type ExecOptions struct {
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
 	// of the prefix and will be removed from the output
 	Prefix string
-
-	NoWait bool
-}
-
-type prefixWriter struct {
-	prefix string
-	output io.Writer
-}
-
-var prefixReg = regexp.MustCompile(`.*\n`)
-
-func (pw *prefixWriter) Write(p []byte) (int, error) {
-	_, err := pw.output.Write(
-		prefixReg.ReplaceAllFunc(p, func(m []byte) []byte {
-			return append([]byte(pw.prefix), m...)
-		}),
-	)
-
-	// TODO: I don't why we have to return the same size, even the size has changed,
-	// or it will throw an error
-	return len(p), err
 }
 
 // Exec execute os command and auto pipe stdout and stdin
-func Exec(args []string, opts *ExecOptions) (*exec.Cmd, error) {
+func Exec(args []string, opts *ExecOptions) error {
 	cmd := exec.Command(args[0], args[1:]...)
 
 	if opts == nil {
@@ -66,26 +43,7 @@ func Exec(args []string, opts *ExecOptions) (*exec.Cmd, error) {
 	opts.Cmd.Path = cmd.Path
 	opts.Cmd.Args = cmd.Args
 
-	if opts.Cmd.Stdout == nil {
-		opts.Cmd.Stdout = &prefixWriter{
-			formatPrefix(opts.Prefix),
-			os.Stdout,
-		}
-	}
-	if opts.Cmd.Stdin == nil {
-		opts.Cmd.Stderr = &prefixWriter{
-			formatPrefix(opts.Prefix),
-			os.Stderr,
-		}
-	}
-	if opts.Cmd.Stdin == nil {
-		opts.Cmd.Stdin = os.Stdin
-	}
-
-	if opts.NoWait {
-		return opts.Cmd, opts.Cmd.Start()
-	}
-	return opts.Cmd, opts.Cmd.Run()
+	return run(formatPrefix(opts.Prefix), opts.Cmd)
 }
 
 // KillTree kill process and all its children process

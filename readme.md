@@ -9,7 +9,7 @@ Goto the [release page](https://github.com/ysmood/gokit/releases) download the b
 ## guard
 
 ```bash
-$ guard --help          
+$ guard --help                
 usage: guard [<flags>]
 
 run and guard a command, kill and rerun it when watched files are modified
@@ -17,7 +17,8 @@ run and guard a command, kill and rerun it when watched files are modified
   Examples:
 
    # follow the "--" is the command and its arguments you want to execute
-   guard -- echo changed
+   # kill and restart the web server when a file changes
+   guard -- node server.js
 
    # use ! prefix to ignore pattern, the below means watch all files but not those in tmp dir
    guard -w '**' -w '!tmp/**' -- echo changed
@@ -30,7 +31,7 @@ run and guard a command, kill and rerun it when watched files are modified
    guard -- echo {{op}} {{path}}
 
    # watch and sync current dir to remote dir with rsync
-   guard -n -- rsync -z {{path}} root@host:/home/me/app/{{path}}
+   guard -n -- rsync {{path}} root@host:/home/me/app/{{path}}
 
    # the patterns must be quoted
    guard -w '*.go' -w 'lib/**/*.go' -- go run main.go

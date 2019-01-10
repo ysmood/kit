@@ -34,7 +34,6 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	if opts.ExecOpts == nil {
 		opts.ExecOpts = &ExecOptions{}
 	}
-	opts.ExecOpts.NoWait = true
 
 	if patterns == nil || len(patterns) == 0 {
 		patterns = GuardDefaultPatterns
@@ -75,20 +74,15 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 	run := func(e *watcher.Event) {
 		eArgs := unescapeArgs(args, e)
-		Log(prefix, "run command", C(eArgs, "green"))
+		Log(prefix, "run", C(eArgs, "green"))
 
-		var err error
-		cmd, err = Exec(eArgs, opts.ExecOpts)
-
+		err := Exec(eArgs, opts.ExecOpts)
+		errMsg := ""
 		if err != nil {
-			Err(prefix, C(err, "red"))
+			errMsg = C(err, "red")
 		}
+		Log(prefix, "done", C(args, "green"), errMsg)
 
-		err = cmd.Wait()
-		if err != nil {
-			Log(prefix, C(err, "red"))
-		}
-		Log(prefix, "command done", C(args, "green"))
 		wait <- struct{}{}
 	}
 

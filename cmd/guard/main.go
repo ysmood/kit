@@ -54,7 +54,8 @@ func genOptions(args []string) *options {
 		Examples:
 
 		 # follow the "--" is the command and its arguments you want to execute
-		 guard -- echo changed
+		 # kill and restart the web server when a file changes
+		 guard -- node server.js
 
 		 # use ! prefix to ignore pattern, the below means watch all files but not those in tmp dir
 		 guard -w '**' -w '!tmp/**' -- echo changed
@@ -67,7 +68,7 @@ func genOptions(args []string) *options {
 		 guard -- echo {{op}} {{path}}
 
 		 # watch and sync current dir to remote dir with rsync
-		 guard -n -- rsync -z {{path}} root@host:/home/me/app/{{path}}
+		 guard -n -- rsync {{path}} root@host:/home/me/app/{{path}}
 
 		 # the patterns must be quoted
 		 guard -w '*.go' -w 'lib/**/*.go' -- go run main.go
@@ -85,7 +86,7 @@ func genOptions(args []string) *options {
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 
-	app.Version("0.0.4")
+	app.Version("0.0.5")
 
 	args, cmdArgs := parseArgs(args)
 
