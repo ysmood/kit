@@ -18,6 +18,7 @@ type options struct {
 	prefix    *string
 	noInitRun *bool
 	poll      *time.Duration
+	debounce  *time.Duration
 }
 
 func main() {
@@ -36,7 +37,8 @@ func main() {
 						Prefix: genPrefix(*opts.prefix, opts.cmd),
 					},
 					NoInitRun: *opts.noInitRun,
-					Interval:  *opts.poll,
+					Interval:  opts.poll,
+					Debounce:  opts.debounce,
 				}))
 			}
 		}(opts))
@@ -85,6 +87,7 @@ func genOptions(args []string) *options {
 	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').String()
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
+	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
 
 	app.Version("0.0.5")
 

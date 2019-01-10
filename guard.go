@@ -15,9 +15,10 @@ var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
 
 // GuardOptions ...
 type GuardOptions struct {
-	Interval  time.Duration // default 300ms
-	Stop      chan Nil      // send signal to it to stop the watcher
+	Interval  *time.Duration // default 300ms
+	Stop      chan Nil       // send signal to it to stop the watcher
 	ExecOpts  *ExecOptions
+	Debounce  *time.Duration // default 300ms, suppress the frequency of the event
 	NoInitRun bool
 }
 
@@ -125,9 +126,22 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	}
 
 	go func() {
+		debounce := opts.Debounce
+		var lastRun time.Time
+		if debounce == nil {
+			t := time.Millisecond * 300
+			debounce = &t
+		}
+
 		for {
 			select {
 			case e := <-w.Event:
+				if time.Since(lastRun) < *debounce {
+					lastRun = time.Now()
+					continue
+				}
+				lastRun = time.Now()
+
 				if e.Op == watcher.Create {
 					continue
 				}
@@ -180,9 +194,10 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	}()
 
 	interval := opts.Interval
-	if opts.Interval == 0 {
-		interval = time.Millisecond * 300
+	if interval == nil {
+		t := time.Millisecond * 300
+		interval = &t
 	}
 
-	return w.Start(interval)
+	return w.Start(*interval)
 }

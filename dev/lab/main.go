@@ -5,7 +5,5 @@ import (
 )
 
 func main() {
-	g.Exec([]string{"ls", "-aG"}, &g.ExecOptions{
-		Prefix: "test | ",
-	})
+	g.Guard([]string{"echo", "ok"}, nil, &g.GuardOptions{})
 }

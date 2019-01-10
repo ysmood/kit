@@ -50,6 +50,7 @@ Flags:
   -p, --prefix=PREFIX    prefix for command output
   -n, --no-init-run      don't execute the cmd on startup
       --poll=300ms       poll interval
+      --debounce=300ms   suppress the frequency of the event
       --version          Show application version.
 ```
 
