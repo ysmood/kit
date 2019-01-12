@@ -11,7 +11,8 @@ import (
 )
 
 // GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
-var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
+// "." is for CREAT and REMOVE event
+var GuardDefaultPatterns = []string{".", "**", WalkGitIgnore}
 
 // GuardOptions ...
 type GuardOptions struct {
@@ -176,7 +177,7 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 				go run(&e)
 
 			case err := <-w.Error:
-				Err(prefix, err)
+				Log(prefix, err)
 
 			case <-w.Closed:
 				return

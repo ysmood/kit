@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -23,7 +24,7 @@ type options struct {
 
 func main() {
 	optsList := []*options{}
-	for _, args := range split(os.Args[1:], "---") {
+	for _, args := range split(argsFromConfigFile(os.Args[1:]), "---") {
 		optsList = append(optsList, genOptions(args))
 	}
 
@@ -89,7 +90,7 @@ func genOptions(args []string) *options {
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
 
-	app.Version("0.0.5")
+	app.Version("0.0.6")
 
 	args, cmdArgs := parseArgs(args)
 
@@ -127,6 +128,19 @@ func indexOf(list []string, str string) int {
 	}
 
 	return -1
+}
+
+func argsFromConfigFile(args []string) []string {
+	for _, elem := range args {
+		if len(elem) > 1 && elem[0] == '@' {
+			f, err := g.ReadFile(elem[1:])
+			if err != nil {
+				return args
+			}
+			return regexp.MustCompile(`[\n\r]+`).Split(string(f), -1)
+		}
+	}
+	return args
 }
 
 func genPrefix(prefix string, args []string) string {
