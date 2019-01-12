@@ -27,9 +27,23 @@ func run(prefix string, cmd *exec.Cmd) error {
 		return err
 	}
 
-	scanner := bufio.NewScanner(io.MultiReader(stderr, stdout))
-	for scanner.Scan() {
-		os.Stdout.Write([]byte(prefix + scanner.Text() + "\n"))
+	reader := bufio.NewReader(io.MultiReader(stderr, stdout))
+	newline := true
+	for {
+		r, _, err := reader.ReadRune()
+		if err != nil {
+			os.Stdout.Write([]byte(string(r)))
+			break
+		}
+		if newline {
+			os.Stdout.Write([]byte(prefix))
+			newline = false
+		}
+		if r == '\n' {
+			newline = true
+		}
+		os.Stdout.Write([]byte(string(r)))
 	}
+
 	return nil
 }
