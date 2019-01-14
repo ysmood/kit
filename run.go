@@ -8,14 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/kr/pty"
-	"golang.org/x/crypto/ssh/terminal"
 )
-
-var runLock = sync.Mutex{}
 
 func run(prefix string, cmd *exec.Cmd) error {
 	p, err := pty.Start(cmd)
@@ -37,19 +33,6 @@ func run(prefix string, cmd *exec.Cmd) error {
 		}
 	}()
 	ch <- syscall.SIGWINCH // Initial resize.
-
-	// Set stdin in raw mode.
-	runLock.Lock()
-	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		Log("[exec] set stdin to raw mode:", err)
-	}
-	defer func() {
-		if oldState != nil {
-			terminal.Restore(int(os.Stdin.Fd()), oldState)
-		}
-		runLock.Unlock()
-	}() // Best effort.
 
 	go func() {
 		io.Copy(p, os.Stdin)

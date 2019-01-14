@@ -88,10 +88,6 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		wait <- struct{}{}
 	}
 
-	if !opts.NoInitRun {
-		go run(nil)
-	}
-
 	w := watcher.New()
 
 	watchFiles := func(dir string) error {
@@ -193,6 +189,10 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		<-opts.Stop
 		w.Close()
 	}()
+
+	if !opts.NoInitRun {
+		go run(nil)
+	}
 
 	interval := opts.Interval
 	if interval == nil {

@@ -8,7 +8,7 @@ require (
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
-	github.com/karrick/godirwalk v1.7.7
+	github.com/karrick/godirwalk v1.7.8
 	github.com/kr/pty v1.1.3
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
@@ -18,12 +18,12 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/radovskyb/watcher v1.0.2
-	github.com/stretchr/testify v1.2.2
+	github.com/pkg/errors v0.8.1 // indirect
+	github.com/radovskyb/watcher v1.0.5
+	github.com/stretchr/testify v1.3.0
 	github.com/ulikunitz/xz v0.5.5 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
-	golang.org/x/sys v0.0.0-20181218192612-074acd46bca6 // indirect
+	golang.org/x/sys v0.0.0-20190114130336-2be517255631 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

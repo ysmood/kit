@@ -90,7 +90,7 @@ func genOptions(args []string) *options {
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
 
-	app.Version("0.0.7")
+	app.Version("0.0.8")
 
 	args, cmdArgs := parseArgs(args)
 
