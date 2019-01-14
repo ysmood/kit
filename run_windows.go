@@ -10,7 +10,7 @@ import (
 )
 
 // The pty lib doesn't support Windows, so we just pipe everything
-func run(prefix string, cmd *exec.Cmd) error {
+func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	cmd.Stdin = os.Stdin
 
 	stderr, err := cmd.StderrPipe()

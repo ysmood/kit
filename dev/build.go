@@ -40,7 +40,7 @@ func deploy(tag string) {
 	files, err := g.Glob([]string{"dist/*"}, nil)
 	g.E(err)
 
-	g.Exec([]string{"hub", "release", "delete", tag}, nil)
+	g.Exec([]string{"hub", "release", "delete", tag}, &g.ExecOptions{IsRaw: true})
 
 	args := []string{"hub", "release", "create", "-m", tag}
 	for _, f := range files {

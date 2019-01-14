@@ -17,6 +17,8 @@ type ExecOptions struct {
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
 	// of the prefix and will be removed from the output
 	Prefix string
+
+	IsRaw bool
 }
 
 // Exec execute os command and auto pipe stdout and stdin
@@ -43,7 +45,7 @@ func Exec(args []string, opts *ExecOptions) error {
 	opts.Cmd.Path = cmd.Path
 	opts.Cmd.Args = cmd.Args
 
-	return run(formatPrefix(opts.Prefix), opts.Cmd)
+	return run(formatPrefix(opts.Prefix), opts.IsRaw, opts.Cmd)
 }
 
 // KillTree kill process and all its children process
