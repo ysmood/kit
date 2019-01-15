@@ -31,7 +31,7 @@ func build(deployTag *string) {
 	}
 	g.All(tasks...)
 
-	if deployTag != nil {
+	if *deployTag != "" {
 		deploy(*deployTag)
 	}
 }
@@ -62,6 +62,10 @@ func buildForOS(name, osName string) {
 	}
 
 	oPath := f("dist/", name, "-", osName)
+
+	if osName == "darwin" {
+		oPath = f("dist/", name, "-mac")
+	}
 
 	g.Exec([]string{
 		"go", "build",
