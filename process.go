@@ -19,6 +19,8 @@ type ExecOptions struct {
 	Prefix string
 
 	IsRaw bool
+
+	OnStart func(opts *ExecOptions)
 }
 
 // Exec execute os command and auto pipe stdout and stdin
@@ -44,6 +46,10 @@ func Exec(args []string, opts *ExecOptions) error {
 
 	opts.Cmd.Path = cmd.Path
 	opts.Cmd.Args = cmd.Args
+
+	if opts.OnStart != nil {
+		opts.OnStart(opts)
+	}
 
 	return run(formatPrefix(opts.Prefix), opts.IsRaw, opts.Cmd)
 }

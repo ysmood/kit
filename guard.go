@@ -44,6 +44,10 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	var cmd *exec.Cmd
 	wait := make(chan struct{})
 
+	opts.ExecOpts.OnStart = func(opts *ExecOptions) {
+		cmd = opts.Cmd
+	}
+
 	unescapeArgs := func(args []string, e *watcher.Event) []string {
 		if e == nil {
 			e = &watcher.Event{}
