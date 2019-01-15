@@ -1,7 +1,7 @@
 package gokit
 
 import (
-	"fmt"
+	"os"
 	"os/exec"
 	"os/user"
 	"path"
@@ -26,7 +26,7 @@ type WalkOptions struct {
 const WalkGitIgnore = "!g"
 
 // WalkHidden special pattern to match all hidden files
-const WalkHidden = "!**/.[^.]*"
+const WalkHidden = "!**" + string(os.PathSeparator) + ".[^.]*"
 
 // Walk If the pattern begins with "!", it will become a negative filter pattern.
 // Each path will be tested against all pattern, each pattern will override the previous
@@ -75,10 +75,10 @@ func normalizePatterns(dir string, patterns []string) []string {
 			continue
 		}
 		if p[0] == '!' {
-			list = append(list, path.Clean(fmt.Sprint("!", dir, "/", p[1:])))
+			list = append(list, path.Clean("!"+dir+string(os.PathSeparator)+p[1:]))
 			continue
 		}
-		list = append(list, path.Clean(fmt.Sprint(dir, "/", p)))
+		list = append(list, path.Clean(dir+string(os.PathSeparator)+p))
 	}
 	return list
 }
@@ -162,12 +162,12 @@ func getGitSubmodules() []string {
 
 	root := strings.TrimSpace(string(out))
 
-	p := filepath.Join(root, ".git/modules/*")
+	p := filepath.Join(root, filepath.Join(".git", "modules", "*"))
 
 	l, _ := filepath.Glob(p)
 
 	for i, p := range l {
-		l[i] = strings.Replace(p, filepath.Join(root, ".git/modules"), root, 1)
+		l[i] = strings.Replace(p, filepath.Join(root, ".git", "modules"), root, 1)
 	}
 
 	return l

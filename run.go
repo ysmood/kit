@@ -62,17 +62,17 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			os.Stdout.Write([]byte(string(r)))
+			Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			os.Stdout.Write([]byte(prefix))
+			Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		os.Stdout.Write([]byte(string(r)))
+		Stdout.Write([]byte(string(r)))
 	}
 
 	return cmd.Wait()

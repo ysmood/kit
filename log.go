@@ -2,18 +2,18 @@ package gokit
 
 import (
 	"fmt"
-	"os"
 	"runtime/debug"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/k0kubun/go-ansi"
 )
 
 // Stdout ...
-var Stdout = os.Stdout
+var Stdout = ansi.NewAnsiStdout()
 
 // Stderr ...
-var Stderr = os.Stderr
+var Stderr = ansi.NewAnsiStderr()
 
 // Log log to stdout with timestamp
 func Log(v ...interface{}) {

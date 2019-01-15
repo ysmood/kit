@@ -8,6 +8,7 @@ require (
 	github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
+	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/karrick/godirwalk v1.7.8
 	github.com/kr/pty v1.1.3
 	github.com/mattn/go-colorable v0.0.9 // indirect

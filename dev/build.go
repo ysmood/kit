@@ -78,7 +78,7 @@ func buildForOS(name, osName string) {
 		},
 	})
 
-	compress(oPath, f(oPath, ".tar.gz"), name+extByOS(osName))
+	compress(oPath, f(oPath, ".zip"), name+extByOS(osName))
 
 	g.Remove(oPath)
 
@@ -98,7 +98,7 @@ func compress(from, to, name string) {
 	fileInfo, err := file.Stat()
 	g.E(err)
 
-	tar := archiver.NewTarGz()
+	tar := archiver.NewZip()
 	tar.CompressionLevel = 9
 	oFile, err := os.Create(to)
 	tar.Create(oFile)
