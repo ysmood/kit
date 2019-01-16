@@ -12,7 +12,7 @@ var (
 	cmdTest   = app.Command("test", "run test").Default()
 	cmdLab    = app.Command("lab", "run lab")
 	cmdBuild  = app.Command("build", "cross build project")
-	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').String()
+	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').Bool()
 )
 
 func main() {

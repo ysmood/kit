@@ -10,7 +10,7 @@ import (
 	g "github.com/ysmood/gokit"
 )
 
-func build(deployTag *string) {
+func build(deployTag *bool) {
 	list, err := g.Glob([]string{"cmd/*"}, nil)
 
 	if err != nil {
@@ -31,8 +31,8 @@ func build(deployTag *string) {
 	}
 	g.All(tasks...)
 
-	if *deployTag != "" {
-		deploy(*deployTag)
+	if *deployTag {
+		deploy(g.Version)
 	}
 }
 

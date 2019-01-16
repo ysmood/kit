@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
 // The pty lib doesn't support Windows, so we just pipe everything
@@ -46,4 +47,9 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	}
 
 	return nil
+}
+
+// KillTree kill process and all its children process
+func KillTree(pid int) error {
+	return exec.Command("taskkill", "/t", "/f", "/pid", strconv.Itoa(pid)).Run()
 }

@@ -77,3 +77,13 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 
 	return cmd.Wait()
 }
+
+// KillTree kill process and all its children process
+func KillTree(pid int) error {
+	group, err := os.FindProcess(-1 * pid)
+	if err != nil {
+		return err
+	}
+
+	return group.Signal(syscall.SIGINT)
+}
