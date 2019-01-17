@@ -120,7 +120,7 @@ func genMatchFn(
 
 type matcher struct {
 	dir           string
-	gitMatchers   []gitignore.IgnoreMatcher
+	gitMatchers   map[string]gitignore.IgnoreMatcher
 	gitSubmodules []string
 	patterns      []string
 }
@@ -136,13 +136,15 @@ func newMatcher(dir string, patterns []string) (*matcher, error) {
 		return nil, err
 	}
 
-	gs := []gitignore.IgnoreMatcher{}
+	gs := map[string]gitignore.IgnoreMatcher{}
 	var submodules []string
 	if hasWalkGitIgnore(patterns) {
 		submodules = getGitSubmodules()
-		g, err := gitignore.NewGitIgnore(path.Join(user.HomeDir, ".gitignore_global"), dir)
+		gPath := path.Join(user.HomeDir, ".gitignore_global")
+		g, err := gitignore.NewGitIgnore(gPath, dir)
 		if err == nil {
-			gs = append(gs, g)
+
+			gs[gPath] = g
 		}
 	}
 
@@ -187,9 +189,12 @@ func (m *matcher) gitMatch(p string, isDir bool) bool {
 			}
 		}
 
-		g, err := gitignore.NewGitIgnore(path.Join(p, ".gitignore"))
-		if err == nil {
-			m.gitMatchers = append(m.gitMatchers, g)
+		gPath := path.Join(p, ".gitignore")
+		if _, has := m.gitMatchers[gPath]; !has {
+			g, err := gitignore.NewGitIgnore(gPath)
+			if err == nil {
+				m.gitMatchers[gPath] = g
+			}
 		}
 	}
 
