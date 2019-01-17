@@ -93,9 +93,13 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	}
 
 	w := watcher.New()
+	matcher, err := NewMatcher(opts.ExecOpts.Dir, patterns)
+	if err != nil {
+		return err
+	}
 
 	watchFiles := func(dir string) error {
-		list, err := Glob(patterns, &WalkOptions{Dir: dir})
+		list, err := Glob(patterns, &WalkOptions{Dir: dir, Matcher: matcher})
 
 		if err != nil {
 			return err
@@ -121,11 +125,6 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		return err
 	}
 
-	m, err := newMatcher(opts.ExecOpts.Dir, patterns)
-	if err != nil {
-		return err
-	}
-
 	go func() {
 		debounce := opts.Debounce
 		var lastRun time.Time
@@ -147,7 +146,7 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 					continue
 				}
 
-				matched, _, err := m.match(e.Path, e.IsDir())
+				matched, _, err := matcher.match(e.Path, e.IsDir())
 				if err != nil {
 					Err(err)
 				}

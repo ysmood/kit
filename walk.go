@@ -19,6 +19,7 @@ type WalkOptions struct {
 	Sorted               bool
 	FollowSymbolicLinks  bool
 	PostChildrenCallback godirwalk.WalkFunc
+	Matcher              *Matcher
 }
 
 // WalkGitIgnore special pattern to ignore all gitignore rules,
@@ -38,9 +39,13 @@ func Walk(patterns []string, cb godirwalk.WalkFunc, opts *WalkOptions) error {
 		}
 	}
 
-	m, err := newMatcher(opts.Dir, patterns)
-	if err != nil {
-		return err
+	m := opts.Matcher
+	if m == nil {
+		var err error
+		m, err = NewMatcher(opts.Dir, patterns)
+		if err != nil {
+			return err
+		}
 	}
 
 	return godirwalk.Walk(m.dir, &godirwalk.Options{
@@ -94,7 +99,7 @@ func hasWalkGitIgnore(patterns []string) bool {
 }
 
 func genMatchFn(
-	m *matcher,
+	m *Matcher,
 	cb godirwalk.WalkFunc,
 ) godirwalk.WalkFunc {
 	return func(p string, info *godirwalk.Dirent) (resErr error) {
@@ -118,14 +123,16 @@ func genMatchFn(
 	}
 }
 
-type matcher struct {
+// Matcher ...
+type Matcher struct {
 	dir           string
 	gitMatchers   map[string]gitignore.IgnoreMatcher
 	gitSubmodules []string
 	patterns      []string
 }
 
-func newMatcher(dir string, patterns []string) (*matcher, error) {
+// NewMatcher ...
+func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
@@ -148,7 +155,7 @@ func newMatcher(dir string, patterns []string) (*matcher, error) {
 		}
 	}
 
-	return &matcher{
+	return &Matcher{
 		dir:           dir,
 		gitMatchers:   gs,
 		gitSubmodules: submodules,
@@ -175,7 +182,7 @@ func getGitSubmodules() []string {
 	return l
 }
 
-func (m *matcher) gitMatch(p string, isDir bool) bool {
+func (m *Matcher) gitMatch(p string, isDir bool) bool {
 	if isDir {
 		if l := len(p); l > 4 && p[len(p)-4:] == ".git" {
 			return true
@@ -206,7 +213,7 @@ func (m *matcher) gitMatch(p string, isDir bool) bool {
 	return false
 }
 
-func (m *matcher) match(p string, isDir bool) (matched, negative bool, err error) {
+func (m *Matcher) match(p string, isDir bool) (matched, negative bool, err error) {
 	for _, pattern := range m.patterns {
 		if pattern == WalkGitIgnore {
 			if m.gitMatch(p, isDir) {

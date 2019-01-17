@@ -7,7 +7,7 @@ import (
 )
 
 func TestMatch(t *testing.T) {
-	m, _ := newMatcher("/root/a", []string{"**", WalkHidden})
+	m, _ := NewMatcher("/root/a", []string{"**", WalkHidden})
 
 	matched, negative, _ := m.match("/root/a/.git", true)
 	assert.Equal(t, false, matched)
