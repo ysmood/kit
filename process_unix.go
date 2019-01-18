@@ -30,7 +30,11 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
-		for range ch {
+		for {
+			if _, ok := <-ch; !ok {
+				return
+			}
+
 			if err := pty.InheritSize(os.Stdin, p); err != nil {
 				Log("[exec] resize pty:", err)
 			}
@@ -74,6 +78,9 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		}
 		Stdout.Write([]byte(string(r)))
 	}
+
+	signal.Stop(ch)
+	close(ch)
 
 	return cmd.Wait()
 }
