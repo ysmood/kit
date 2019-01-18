@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/hoisie/mustache"
-	"github.com/radovskyb/watcher"
 )
 
 // GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
@@ -48,9 +48,9 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		cmd = opts.Cmd
 	}
 
-	unescapeArgs := func(args []string, e *watcher.Event) []string {
+	unescapeArgs := func(args []string, e *fsnotify.Event) []string {
 		if e == nil {
-			e = &watcher.Event{}
+			e = &fsnotify.Event{}
 		}
 
 		newArgs := []string{}
@@ -60,7 +60,7 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 				Err(err)
 			}
 
-			p, err := filepath.Abs(e.Path)
+			p, err := filepath.Abs(e.Name)
 			if err != nil {
 				Err(err)
 			}
@@ -78,7 +78,7 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		return newArgs
 	}
 
-	run := func(e *watcher.Event) {
+	run := func(e *fsnotify.Event) {
 		eArgs := unescapeArgs(args, e)
 		Log(prefix, "run", C(eArgs, "green"))
 
@@ -92,7 +92,10 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		wait <- struct{}{}
 	}
 
-	w := watcher.New()
+	w, err := NewWatcher()
+	if err != nil {
+		return err
+	}
 	matcher, err := NewMatcher(opts.ExecOpts.Dir, patterns)
 	if err != nil {
 		return err
@@ -129,24 +132,30 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		debounce := opts.Debounce
 		var lastRun time.Time
 		if debounce == nil {
-			t := time.Millisecond * 300
+			t := time.Second
 			debounce = &t
 		}
 
 		for {
 			select {
-			case e := <-w.Event:
+			case e, ok := <-w.Events:
+				if !ok {
+					return
+				}
+
 				if time.Since(lastRun) < *debounce {
 					lastRun = time.Now()
 					continue
 				}
 				lastRun = time.Now()
 
-				if e.Op == watcher.Create {
+				if e.Op&fsnotify.Create == fsnotify.Create {
 					continue
 				}
 
-				matched, _, err := matcher.match(e.Path, e.IsDir())
+				isDir := DirExists(e.Name)
+
+				matched, _, err := matcher.match(e.Name, isDir)
 				if err != nil {
 					Err(err)
 				}
@@ -157,13 +166,13 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 				Log(prefix, e)
 
-				if e.Op == watcher.Create {
-					if e.IsDir() {
-						if err := watchFiles(e.Path); err != nil {
+				if e.Op&fsnotify.Create == fsnotify.Create {
+					if isDir {
+						if err := watchFiles(e.Name); err != nil {
 							Err(err)
 						}
 					} else {
-						w.Add(e.Path)
+						w.Add(e.Name)
 					}
 				}
 
@@ -175,11 +184,12 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 				go run(&e)
 
-			case err := <-w.Error:
-				Log(prefix, err)
+			case err, ok := <-w.Errors:
+				if !ok {
+					return
+				}
 
-			case <-w.Closed:
-				return
+				Log(prefix, err)
 			}
 		}
 	}()

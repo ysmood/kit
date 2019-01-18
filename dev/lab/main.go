@@ -1,9 +1,39 @@
 package main
 
 import (
-	g "github.com/ysmood/gokit"
+	"log"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 func main() {
-	g.Guard([]string{"echo", "ok"}, nil, &g.GuardOptions{})
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	err = watcher.Add("gokit.go")
+	if err != nil {
+		log.Fatal(err)
+	}
+	<-done
 }
