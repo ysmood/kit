@@ -11,8 +11,7 @@ import (
 )
 
 // GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
-// "." is for CREAT and REMOVE event
-var GuardDefaultPatterns = []string{".", "**", WalkGitIgnore}
+var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
 
 // GuardOptions ...
 type GuardOptions struct {
@@ -105,7 +104,20 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 			return err
 		}
 
+		dict := map[string]Nil{}
+
 		for _, p := range list {
+			dict[p] = Nil{}
+		}
+
+		for _, p := range list {
+			dir := filepath.Dir(p)
+			_, has := dict[dir]
+
+			if !has {
+				dict[dir] = Nil{}
+				w.Add(dir)
+			}
 			w.Add(p)
 		}
 
@@ -136,16 +148,6 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 		for {
 			select {
 			case e := <-w.Event:
-				if time.Since(lastRun) < *debounce {
-					lastRun = time.Now()
-					continue
-				}
-				lastRun = time.Now()
-
-				if e.Op == watcher.Create {
-					continue
-				}
-
 				matched, _, err := matcher.match(e.Path, e.IsDir())
 				if err != nil {
 					Err(err)
@@ -154,6 +156,12 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 				if !matched {
 					continue
 				}
+
+				if time.Since(lastRun) < *debounce {
+					lastRun = time.Now()
+					continue
+				}
+				lastRun = time.Now()
 
 				Log(prefix, e)
 
