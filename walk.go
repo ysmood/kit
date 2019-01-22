@@ -3,11 +3,11 @@ package gokit
 import (
 	"os"
 	"os/exec"
-	"os/user"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
 	gitignore "github.com/monochromegane/go-gitignore"
@@ -138,7 +138,7 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 		return nil, err
 	}
 
-	user, err := user.Current()
+	homeDir, err := homedir.Dir()
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	var submodules []string
 	if hasWalkGitIgnore(patterns) {
 		submodules = getGitSubmodules()
-		gPath := path.Join(user.HomeDir, ".gitignore_global")
+		gPath := path.Join(homeDir, ".gitignore_global")
 		g, err := gitignore.NewGitIgnore(gPath, dir)
 		if err == nil {
 

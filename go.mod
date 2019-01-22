@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/mholt/archiver v3.1.1+incompatible
+	github.com/mitchellh/go-homedir v1.0.0
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
