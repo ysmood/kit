@@ -34,10 +34,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 			if _, ok := <-ch; !ok {
 				return
 			}
-
-			if err := pty.InheritSize(os.Stdin, p); err != nil {
-				Log("[exec] resize pty:", err)
-			}
+			pty.InheritSize(os.Stdin, p)
 		}
 	}()
 	ch <- syscall.SIGWINCH // Initial resize.
