@@ -47,7 +47,7 @@ Flags:
       --help             Show context-sensitive help (also try --help-long and --help-man).
   -w, --watch=WATCH ...  the pattern to watch, can set multiple patterns
   -d, --dir=DIR          base dir path
-  -p, --prefix=PREFIX    prefix for command output
+  -p, --prefix="auto"    prefix for command output
   -n, --no-init-run      don't execute the cmd on startup
       --poll=300ms       poll interval
       --debounce=300ms   suppress the frequency of the event

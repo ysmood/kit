@@ -85,7 +85,7 @@ func genOptions(args []string) *options {
 	)
 	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns").Short('w').Strings()
 	opts.dir = app.Flag("dir", "base dir path").Short('d').String()
-	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').String()
+	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').Default("auto").String()
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
@@ -144,14 +144,14 @@ func argsFromConfigFile(args []string) []string {
 }
 
 func genPrefix(prefix string, args []string) string {
-	if prefix != "" {
-		return prefix
+	if prefix == "auto" {
+		h := fnv.New32a()
+		h.Write([]byte(strings.Join(args, "")))
+
+		return g.C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
 	}
 
-	h := fnv.New32a()
-	h.Write([]byte(strings.Join(args, "")))
-
-	return g.C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
+	return ""
 }
 
 func split(args []string, sep string) [][]string {
