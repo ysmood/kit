@@ -13,13 +13,14 @@ import (
 )
 
 type options struct {
-	patterns  *[]string
-	dir       *string
-	cmd       []string
-	prefix    *string
-	noInitRun *bool
-	poll      *time.Duration
-	debounce  *time.Duration
+	patterns    *[]string
+	dir         *string
+	cmd         []string
+	prefix      *string
+	clearScreen *bool
+	noInitRun   *bool
+	poll        *time.Duration
+	debounce    *time.Duration
 }
 
 func main() {
@@ -36,6 +37,11 @@ func main() {
 					ExecOpts: &g.ExecOptions{
 						Dir:    *opts.dir,
 						Prefix: genPrefix(*opts.prefix, opts.cmd),
+						OnStart: func(_ *g.ExecOptions) {
+							if *opts.clearScreen {
+								g.ClearScreen()
+							}
+						},
 					},
 					NoInitRun: *opts.noInitRun,
 					Interval:  opts.poll,
@@ -86,6 +92,7 @@ func genOptions(args []string) *options {
 	opts.patterns = app.Flag("watch", "the pattern to watch, can set multiple patterns").Short('w').Strings()
 	opts.dir = app.Flag("dir", "base dir path").Short('d').String()
 	opts.prefix = app.Flag("prefix", "prefix for command output").Short('p').Default("auto").String()
+	opts.clearScreen = app.Flag("clear-screen", "clear screen before each run").Short('c').Bool()
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()

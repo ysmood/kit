@@ -41,9 +41,17 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 	}
 
 	var cmd *exec.Cmd
+	count := 0
 	wait := make(chan struct{})
 
+	onStart := opts.ExecOpts.OnStart
 	opts.ExecOpts.OnStart = func(opts *ExecOptions) {
+		if onStart != nil {
+			onStart(opts)
+		}
+
+		count++
+		Log(prefix, "run", count, C(opts.Cmd.Args, "green"))
 		cmd = opts.Cmd
 	}
 
@@ -79,14 +87,13 @@ func Guard(args, patterns []string, opts *GuardOptions) error {
 
 	run := func(e *watcher.Event) {
 		eArgs := unescapeArgs(args, e)
-		Log(prefix, "run", C(eArgs, "green"))
 
 		err := Exec(eArgs, opts.ExecOpts)
 		errMsg := ""
 		if err != nil {
 			errMsg = C(err, "red")
 		}
-		Log(prefix, "done", C(args, "green"), errMsg)
+		Log(prefix, "done", count, C(args, "green"), errMsg)
 
 		wait <- struct{}{}
 	}

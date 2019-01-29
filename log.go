@@ -2,11 +2,14 @@ package gokit
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
 	"runtime/debug"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/k0kubun/go-ansi"
+	ansi "github.com/k0kubun/go-ansi"
 )
 
 // Stdout ...
@@ -35,4 +38,17 @@ func Err(v ...interface{}) {
 // Dump spew dump
 func Dump(v ...interface{}) {
 	spew.Dump(v...)
+}
+
+// ClearScreen ...
+func ClearScreen() error {
+	clsCmd := "clear"
+
+	if runtime.GOOS == "windows" {
+		clsCmd = "cls"
+	}
+
+	cmd := exec.Command(clsCmd)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
