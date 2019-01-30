@@ -89,5 +89,5 @@ func KillTree(pid int) error {
 		return err
 	}
 
-	return group.Signal(syscall.SIGINT)
+	return group.Signal(syscall.SIGTERM)
 }

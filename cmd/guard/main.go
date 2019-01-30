@@ -19,6 +19,7 @@ type options struct {
 	prefix      *string
 	clearScreen *bool
 	noInitRun   *bool
+	raw         *bool
 	poll        *time.Duration
 	debounce    *time.Duration
 }
@@ -36,6 +37,7 @@ func main() {
 				g.E(g.Guard(opts.cmd, *opts.patterns, &g.GuardOptions{
 					ExecOpts: &g.ExecOptions{
 						Dir:    *opts.dir,
+						IsRaw:  *opts.raw,
 						Prefix: genPrefix(*opts.prefix, opts.cmd),
 						OnStart: func(_ *g.ExecOptions) {
 							if *opts.clearScreen {
@@ -96,6 +98,7 @@ func genOptions(args []string) *options {
 	opts.noInitRun = app.Flag("no-init-run", "don't execute the cmd on startup").Short('n').Bool()
 	opts.poll = app.Flag("poll", "poll interval").Default("300ms").Duration()
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
+	opts.raw = app.Flag("raw", "when you need to interact with the subprocess").Bool()
 
 	app.Version(g.Version)
 

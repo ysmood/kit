@@ -14,7 +14,7 @@ type ExecOptions struct {
 	// of the prefix and will be removed from the output
 	Prefix string
 
-	IsRaw bool
+	IsRaw bool // Set the terminal to raw mode
 
 	OnStart func(opts *ExecOptions)
 }
