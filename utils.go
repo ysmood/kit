@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mgutz/ansi"
+	"github.com/tidwall/gjson"
 )
 
 // Nil used to create empty channel
@@ -25,6 +26,18 @@ func E(args ...interface{}) []interface{} {
 		}
 	}
 	return args
+}
+
+// JSON parse json for easily access the value from json path
+func JSON(data interface{}) (res gjson.Result) {
+	switch v := data.(type) {
+	case string:
+		res = gjson.Parse(v)
+	case []byte:
+		res = gjson.ParseBytes(v)
+	}
+
+	return res
 }
 
 // All run all actions concurrently

@@ -1,4 +1,4 @@
 package gokit
 
 // Version ...
-const Version = "v0.1.5"
+const Version = "v0.1.6"
