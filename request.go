@@ -189,5 +189,5 @@ func parseReqParams(params []interface{}) (
 		cookie, err = cookiejar.New(nil)
 	}
 
-	return method, reqURL, cookie, header, body, err
+	return
 }
