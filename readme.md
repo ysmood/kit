@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
+[![Coverage Status](https://coveralls.io/repos/github/ysmood/gokit/badge.svg?branch=master)](https://coveralls.io/github/ysmood/gokit?branch=master)
+
 Some of the io related methods that are often used.
 
 This library won't have the best performance, but it will have sane defaults to make coding less verbose.

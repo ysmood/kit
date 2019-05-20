@@ -7,12 +7,15 @@ import (
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
+const covPath = "fixtures/profile.cov"
+
 var (
 	app       = kingpin.New("dev", "dev tool for gokit")
 	cmdTest   = app.Command("test", "run test").Default()
 	cmdLab    = app.Command("lab", "run lab")
 	cmdBuild  = app.Command("build", "cross build project")
 	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').Bool()
+	viewCov   = app.Command("cov", "view html coverage report")
 )
 
 func main() {
@@ -26,6 +29,9 @@ func main() {
 	case cmdBuild.FullCommand():
 		g.E(g.Exec([]string{"go", "test", "./..."}, nil))
 		build(deployTag)
+
+	case viewCov.FullCommand():
+		g.E(g.Exec([]string{"go", "tool", "cover", "-html=" + covPath}, nil))
 	}
 }
 
@@ -34,5 +40,11 @@ func lab() {
 }
 
 func test() {
-	g.Guard([]string{"go", "test", "-v", "./..."}, nil, nil)
+	g.Guard([]string{
+		"go", "test",
+		"-v",
+		"-coverprofile=" + covPath,
+		"-covermode=count",
+		"./...",
+	}, nil, nil)
 }
