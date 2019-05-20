@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"go/build"
 	"os"
+	"reflect"
 	"sync"
 	"time"
 
+	"github.com/kataras/iris/core/errors"
 	"github.com/mgutz/ansi"
 	"github.com/tidwall/gjson"
 )
@@ -126,4 +128,91 @@ func Retry(times int, wait time.Duration, fn func()) (errs []interface{}) {
 		return nil
 	}
 	return errs
+}
+
+// ParamsRest ...
+type ParamsRest struct {
+	Params interface{}
+}
+
+// Params auto assign params by their types
+func Params(values []interface{}, typedParams ...interface{}) error {
+	dict, list, rest := paramsMap(typedParams)
+
+	for _, value := range values {
+		v := reflect.ValueOf(value)
+
+		typeName := v.Type().String()
+
+		arr := dict[typeName]
+		var p *reflect.Value
+		if arr != nil {
+			p, dict[typeName] = dict[typeName][0], dict[typeName][1:]
+		}
+
+		if p == nil {
+			t := v.Type()
+			for _, pp := range list {
+				if pp.Kind() == reflect.Ptr && pp.Elem().Kind() == reflect.Interface {
+					if t.Implements(pp.Type().Elem()) {
+						p = pp
+					}
+				} else if pp.Kind() == reflect.Func && pp.Type().In(0).Kind() == reflect.Interface {
+					if t.Implements(pp.Type().In(0)) {
+						p = pp
+					}
+				}
+			}
+			if p == nil {
+				if rest.IsValid() {
+					rest.Elem().Set(reflect.Append(rest.Elem(), v))
+					continue
+				}
+				return errors.New("params type not supported: " + typeName)
+			}
+		}
+
+		if p.Kind() == reflect.Func {
+			err := p.Call([]reflect.Value{v})
+			if err != nil {
+				e := err[0]
+				if !e.IsNil() {
+					return e.Interface().(error)
+				}
+			}
+		} else {
+			p.Elem().Set(v)
+		}
+	}
+	return nil
+}
+
+func paramsMap(typedParams []interface{}) (map[string][]*reflect.Value, []*reflect.Value, reflect.Value) {
+	dict := map[string][]*reflect.Value{}
+	list := []*reflect.Value{}
+	var rest reflect.Value
+
+	for _, param := range typedParams {
+		r, ok := param.(ParamsRest)
+		if ok {
+			rest = reflect.ValueOf(r.Params)
+			continue
+		}
+
+		v := reflect.ValueOf(param)
+
+		var key string
+		if v.Kind() == reflect.Func {
+			key = v.Type().In(0).String()
+		} else {
+			key = v.Elem().Type().String()
+		}
+		list = append(list, &v)
+		if dict[key] == nil {
+			dict[key] = []*reflect.Value{&v}
+		} else {
+			dict[key] = append(dict[key], &v)
+		}
+	}
+	return dict, list, rest
 }

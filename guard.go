@@ -17,7 +17,7 @@ var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
 type GuardOptions struct {
 	Interval  *time.Duration // default 300ms
 	Stop      chan Nil       // send signal to it to stop the watcher
-	ExecOpts  *ExecOptions
+	ExecOpts  ExecOptions
 	Debounce  *time.Duration // default 300ms, suppress the frequency of the event
 	NoInitRun bool
 }
@@ -26,15 +26,16 @@ type GuardOptions struct {
 // Because it's based on polling, so it's cross-platform and file system.
 // The args supports mustach template, variables {{path}}, {{op}} are available.
 // The default patterns are GuardDefaultPatterns
-func Guard(args, patterns []string, opts *GuardOptions) error {
-	prefix := C("[guard]", "cyan")
+func Guard(params ...interface{}) error {
+	var args, patterns []string
+	var opts GuardOptions
 
-	if opts == nil {
-		opts = &GuardOptions{}
+	err := Params(params, &args, &patterns, &opts)
+	if err != nil {
+		return err
 	}
-	if opts.ExecOpts == nil {
-		opts.ExecOpts = &ExecOptions{}
-	}
+
+	prefix := C("[guard]", "cyan")
 
 	if patterns == nil || len(patterns) == 0 {
 		patterns = GuardDefaultPatterns

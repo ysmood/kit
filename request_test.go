@@ -124,8 +124,8 @@ func (s *RequestSuite) TestPostForm() {
 	})
 
 	_, err := g.Req(
-		g.Method(http.MethodPost),
 		url,
+		g.Method(http.MethodPost),
 		g.FormParams{"a": "val"},
 	)
 	g.E(err)
@@ -158,7 +158,7 @@ func (s *RequestSuite) TestPostJSON() {
 	_, err := g.Req(
 		g.Method(http.MethodPost),
 		url,
-		g.JSONBody(struct{ A string }{"ok"}),
+		g.JSONBody{struct{ A string }{"ok"}},
 	)
 	g.E(err)
 }

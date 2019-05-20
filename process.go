@@ -20,15 +20,16 @@ type ExecOptions struct {
 }
 
 // Exec execute os command and auto pipe stdout and stdin
-func Exec(args []string, opts *ExecOptions) error {
-	cmd := exec.Command(args[0], args[1:]...)
+func Exec(params ...interface{}) error {
+	var args []string
+	var opts ExecOptions
 
-	if opts == nil {
-		opts = &ExecOptions{}
-	} else {
-		clone := *opts
-		opts = &clone
+	err := Params(params, ParamsRest{&args}, &args, &opts)
+	if err != nil {
+		return err
 	}
+
+	cmd := exec.Command(args[0], args[1:]...)
 
 	if opts.Cmd == nil {
 		opts.Cmd = cmd
@@ -44,7 +45,7 @@ func Exec(args []string, opts *ExecOptions) error {
 	opts.Cmd.Args = cmd.Args
 
 	if opts.OnStart != nil {
-		opts.OnStart(opts)
+		opts.OnStart(&opts)
 	}
 
 	return run(formatPrefix(opts.Prefix), opts.IsRaw, opts.Cmd)

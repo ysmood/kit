@@ -40,7 +40,7 @@ func deploy(tag string) {
 	files, err := g.Glob([]string{"dist/*"}, nil)
 	g.E(err)
 
-	g.Exec([]string{"hub", "release", "delete", tag}, &g.ExecOptions{IsRaw: true})
+	g.Exec("hub", "release", "delete", tag, g.ExecOptions{IsRaw: true})
 
 	args := []string{"hub", "release", "create", "-m", tag}
 	for _, f := range files {
@@ -48,7 +48,7 @@ func deploy(tag string) {
 	}
 	args = append(args, tag)
 
-	g.E(g.Exec(args, nil))
+	g.E(g.Exec(args))
 }
 
 func buildForOS(name, osName string) {
@@ -67,16 +67,17 @@ func buildForOS(name, osName string) {
 		oPath = f("dist/", name, "-mac")
 	}
 
-	g.Exec([]string{
+	g.Exec(
 		"go", "build",
 		"-ldflags=-w -s",
 		"-o", oPath,
 		f("./cmd/", name),
-	}, &g.ExecOptions{
-		Cmd: &exec.Cmd{
-			Env: append(os.Environ(), env...),
+		g.ExecOptions{
+			Cmd: &exec.Cmd{
+				Env: append(os.Environ(), env...),
+			},
 		},
-	})
+	)
 
 	compress(oPath, f(oPath, ".zip"), name+extByOS(osName))
 

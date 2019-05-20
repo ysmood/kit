@@ -7,17 +7,17 @@ import (
 )
 
 func TestExec(t *testing.T) {
-	err := Exec([]string{"go", "version"}, nil)
+	err := Exec("go", "version")
 	assert.Equal(t, nil, err)
 }
 func TestExecPrefix(t *testing.T) {
-	err := Exec([]string{"echo", "test"}, &ExecOptions{
+	err := Exec("echo", "test", ExecOptions{
 		Prefix: "[app] ",
 	})
 	assert.Equal(t, nil, err)
 }
 
 func TestExecErr(t *testing.T) {
-	err := Exec([]string{"exitexit"}, nil)
+	err := Exec("exitexit")
 	assert.NotEqual(t, nil, err)
 }

@@ -34,8 +34,8 @@ func main() {
 	for _, opts := range optsList {
 		fns = append(fns, func(opts *options) func() {
 			return func() {
-				g.E(g.Guard(opts.cmd, *opts.patterns, &g.GuardOptions{
-					ExecOpts: &g.ExecOptions{
+				g.E(g.Guard(opts.cmd, opts.patterns, g.GuardOptions{
+					ExecOpts: g.ExecOptions{
 						Dir:    *opts.dir,
 						IsRaw:  *opts.raw,
 						Prefix: genPrefix(*opts.prefix, opts.cmd),

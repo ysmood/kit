@@ -3,7 +3,6 @@ package gokit
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/derekstavis/go-qs"
-	"github.com/kataras/iris/core/errors"
 	"github.com/tidwall/gjson"
 )
 
@@ -24,6 +22,7 @@ type HTTPClient struct {
 // Req send http request
 func Req(params ...interface{}) (*HTTPClient, error) {
 	method, url, cookie, header, reqBody, err := parseReqParams(params)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +119,9 @@ type Header map[string]string
 type FormParams map[string]interface{}
 
 // JSONBody ...
-type JSONBody interface{}
+type JSONBody struct {
+	Data interface{}
+}
 
 // StringBody ...
 type StringBody string
@@ -134,59 +135,57 @@ func parseReqParams(params []interface{}) (
 	body io.Reader,
 	err error,
 ) {
-	for _, param := range params {
-		switch v := param.(type) {
-		case Method:
-			method = v
-		case string:
-			reqURL = v
-
-		case QueryParams:
-			var query string
-			query, err = qs.Marshal(v)
+	err = Params(params,
+		&method,
+		&reqURL,
+		&cookie,
+		&body,
+		func(v QueryParams) error {
+			query, err := qs.Marshal(v)
+			if err != nil {
+				return err
+			}
 			reqURL += "?" + query
-
-		case *cookiejar.Jar:
-			cookie = v
-
-		case Header:
+			return nil
+		},
+		func(v Header) {
 			for key, val := range v {
 				header = append(header, []string{key, val})
 			}
-
-		case FormParams:
-			var query string
-			query, err = qs.Marshal(v)
+		},
+		func(v FormParams) error {
+			query, err := qs.Marshal(v)
+			if err != nil {
+				return err
+			}
 			header = append(header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
 			body = strings.NewReader(query)
-
-		case io.Reader:
-			body = v
-
-		case JSONBody:
-			var b []byte
-			b, err = json.Marshal(v)
+			return nil
+		},
+		func(v JSONBody) error {
+			b, err := json.Marshal(v.Data)
 			if err != nil {
-				continue
+				return err
 			}
 			header = append(header, []string{"Content-Type", "application/json; charset=utf-8"})
 			body = bytes.NewReader(b)
-
-		case StringBody:
+			return nil
+		},
+		func(v StringBody) {
 			body = strings.NewReader(string(v))
-
-		default:
-			err = errors.New(fmt.Sprintf("params type not supported: %T", v))
-			break
-		}
-	}
+		},
+	)
 
 	if method == "" {
 		method = http.MethodGet
 	}
 
 	if cookie == nil {
-		cookie, err = cookiejar.New(nil)
+		var e error
+		cookie, e = cookiejar.New(nil)
+		if e != nil {
+			err = e
+		}
 	}
 
 	return
