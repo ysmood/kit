@@ -2,6 +2,7 @@ package gokit_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,6 +70,13 @@ func TestGlob(t *testing.T) {
 	})
 	g.E(err)
 	assert.Equal(t, 3, len(l))
+}
+
+func TestGlobGit(t *testing.T) {
+	l, err := g.Glob(g.GuardDefaultPatterns, nil)
+	g.E(err)
+	fullPath, _ := filepath.Abs("fs.go")
+	assert.Contains(t, l, fullPath)
 }
 
 func TestRemove(t *testing.T) {

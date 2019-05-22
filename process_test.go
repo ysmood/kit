@@ -10,9 +10,17 @@ func TestExec(t *testing.T) {
 	err := Exec("go", "version")
 	assert.Equal(t, nil, err)
 }
+
 func TestExecPrefix(t *testing.T) {
 	err := Exec("echo", "test", ExecOptions{
 		Prefix: "[app] ",
+	})
+	assert.Equal(t, nil, err)
+}
+
+func TestExecPrefixColor(t *testing.T) {
+	err := Exec("echo", "test", ExecOptions{
+		Prefix: "[app] @green",
 	})
 	assert.Equal(t, nil, err)
 }

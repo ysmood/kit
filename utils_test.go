@@ -179,3 +179,17 @@ func TestParamsFuncErr(t *T) {
 
 	assert.EqualError(t, err, "err")
 }
+
+func TestGoPath(t *T) {
+	s := g.GoPath()
+
+	assert.True(t, g.Exists(s))
+}
+
+func TestTry(t *T) {
+	err := g.Try(func() {
+		panic("err")
+	})
+
+	assert.Equal(t, "err", err)
+}

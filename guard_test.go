@@ -15,21 +15,18 @@ func TestGuard(t *testing.T) {
 	g.OutputFile(p+"/f", "ok", nil)
 
 	stop := make(chan g.Nil)
-	d := 10 * time.Millisecond
+	d := 0 * time.Millisecond
 
-	go g.Guard([]string{"echo", "ok", "{{path}}"}, []string{p}, g.GuardOptions{
+	go g.Guard([]string{"echo", "ok", "{{path}}"}, []string{p + "/**"}, g.GuardOptions{
 		Stop:     stop,
 		Debounce: &d,
 	})
 
 	go func() {
-		for {
-			time.Sleep(300 * time.Millisecond)
-			g.OutputFile(p+"/f", "ok", nil)
-			g.OutputFile(p+"/b", "ok", nil)
-			time.Sleep(300 * time.Millisecond)
-			g.Mkdir(p+"/d", nil)
-		}
+		time.Sleep(100 * time.Millisecond)
+		g.OutputFile(p+"/f", "ok", nil)
+		time.Sleep(100 * time.Millisecond)
+		g.Mkdir(p+"/d", nil)
 	}()
 
 	time.Sleep(1 * time.Second)

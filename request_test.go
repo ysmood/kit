@@ -147,6 +147,22 @@ func (s *RequestSuite) TestPostBytes() {
 	g.E(err)
 }
 
+func (s *RequestSuite) TestPostString() {
+	path, url := s.path()
+
+	s.router.POST(path, func(c *gin.Context) {
+		out, _ := c.GetRawData()
+		s.Equal([]byte("raw"), out)
+	})
+
+	_, err := g.Req(
+		g.Method(http.MethodPost),
+		url,
+		g.StringBody("raw"),
+	)
+	g.E(err)
+}
+
 func (s *RequestSuite) TestPostJSON() {
 	path, url := s.path()
 
@@ -181,15 +197,18 @@ func (s *RequestSuite) TestHeader() {
 func (s *RequestSuite) TestReuseCookie() {
 	path, url := s.path()
 
-	var cookieVal string
+	var cookieA string
+	var header string
 
 	s.router.GET(path, func(c *gin.Context) {
-		cookieVal, _ = c.Cookie("t")
+		cookieA, _ = c.Cookie("t")
+		header = c.GetHeader("a")
 		c.SetCookie("t", "val", 3600, "", "", false, true)
 	})
 
 	client, _ := g.Req(url)
-	client.Req(url)
+	client.Req(url, g.Header{"a": "b"})
 
-	s.Equal("val", cookieVal)
+	s.Equal("val", cookieA)
+	s.Equal("b", header)
 }
