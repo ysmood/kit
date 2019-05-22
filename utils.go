@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/kataras/iris/core/errors"
 	"github.com/mgutz/ansi"
 	"github.com/tidwall/gjson"
@@ -142,12 +143,12 @@ func Params(values []interface{}, typedParams ...interface{}) error {
 	for _, value := range values {
 		v := reflect.ValueOf(value)
 
-		typeName := v.Type().String()
+		typeKey := v.Type()
 
-		arr := dict[typeName]
+		arr := dict[typeKey]
 		var p *reflect.Value
 		if arr != nil {
-			p, dict[typeName] = dict[typeName][0], dict[typeName][1:]
+			p, dict[typeKey] = dict[typeKey][0], dict[typeKey][1:]
 		}
 
 		if p == nil {
@@ -165,10 +166,14 @@ func Params(values []interface{}, typedParams ...interface{}) error {
 			}
 			if p == nil {
 				if rest.IsValid() {
-					rest.Elem().Set(reflect.Append(rest.Elem(), v))
-					continue
+					if rest.Elem().Type().Elem() == v.Type() {
+						rest.Elem().Set(reflect.Append(rest.Elem(), v))
+						continue
+					} else {
+						return errors.New("rest params type error: " + spew.Sdump(value))
+					}
 				}
-				return errors.New("params type not supported: " + typeName)
+				return errors.New("params type error: " + spew.Sdump(value))
 			}
 		}
 
@@ -187,8 +192,8 @@ func Params(values []interface{}, typedParams ...interface{}) error {
 	return nil
 }
 
-func paramsMap(typedParams []interface{}) (map[string][]*reflect.Value, []*reflect.Value, reflect.Value) {
-	dict := map[string][]*reflect.Value{}
+func paramsMap(typedParams []interface{}) (map[reflect.Type][]*reflect.Value, []*reflect.Value, reflect.Value) {
+	dict := map[reflect.Type][]*reflect.Value{}
 	list := []*reflect.Value{}
 	var rest reflect.Value
 
@@ -201,11 +206,11 @@ func paramsMap(typedParams []interface{}) (map[string][]*reflect.Value, []*refle
 
 		v := reflect.ValueOf(param)
 
-		var key string
+		var key reflect.Type
 		if v.Kind() == reflect.Func {
-			key = v.Type().In(0).String()
+			key = v.Type().In(0)
 		} else {
-			key = v.Elem().Type().String()
+			key = v.Elem().Type()
 		}
 		list = append(list, &v)
 		if dict[key] == nil {

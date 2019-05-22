@@ -122,6 +122,17 @@ func TestParamsRest(t *testing.T) {
 	assert.Equal(t, 2, rest[1])
 }
 
+func TestParamsRestErr(t *testing.T) {
+	rest := []int{}
+
+	err := g.Params(
+		[]interface{}{1, "err"},
+		g.ParamsRest{&rest},
+	)
+
+	assert.EqualError(t, err, "rest params type error: (string) (len=3) \"err\"\n")
+}
+
 func TestParamsError(t *testing.T) {
 	var str string
 
@@ -130,7 +141,7 @@ func TestParamsError(t *testing.T) {
 		&str,
 	)
 
-	assert.EqualError(t, err, "params type not supported: int")
+	assert.EqualError(t, err, "params type error: (int) 10\n")
 }
 
 func TestParamsFunc(t *T) {

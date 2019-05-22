@@ -16,6 +16,7 @@ require (
 	github.com/kataras/iris v11.1.1+incompatible
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kr/pty v1.1.4
+	github.com/kyoh86/richgo v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/mholt/archiver v3.1.1+incompatible
