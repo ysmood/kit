@@ -1,4 +1,4 @@
-package gokit
+package req
 
 import (
 	"bytes"
@@ -13,9 +13,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// ReqContext ...
-type ReqContext struct {
+type Context struct {
 	client   *http.Client
+	request  *http.Request
 	response *http.Response
 
 	err    error
@@ -26,53 +26,43 @@ type ReqContext struct {
 }
 
 // Req send http request
-func Req(url string) *ReqContext {
-	return &ReqContext{
+func Req(url string) *Context {
+	return &Context{
 		url: url,
 	}
 }
 
-// Method ...
-func (ctx *ReqContext) Method(m string) *ReqContext {
+func (ctx *Context) Method(m string) *Context {
 	ctx.method = m
 	return ctx
 }
 
-// Req ...
-func (ctx *ReqContext) Req(url string) *ReqContext {
+func (ctx *Context) Req(url string) *Context {
 	ctx.url = url
 	return ctx.Do()
 }
 
-// Post ...
-func (ctx *ReqContext) Post() *ReqContext {
+func (ctx *Context) Post() *Context {
 	return ctx.Method(http.MethodPost)
 }
 
-// Put ...
-func (ctx *ReqContext) Put() *ReqContext {
+func (ctx *Context) Put() *Context {
 	return ctx.Method(http.MethodPut)
 }
 
-// Delete ...
-func (ctx *ReqContext) Delete() *ReqContext {
+func (ctx *Context) Delete() *Context {
 	return ctx.Method(http.MethodDelete)
 }
 
 // Query Query(k, v, k, v ...)
-func (ctx *ReqContext) Query(params ...interface{}) *ReqContext {
-	query, err := qs.Marshal(paramsToForm(params))
-	if err != nil {
-		ctx.err = err
-		return ctx
-	}
+func (ctx *Context) Query(params ...interface{}) *Context {
+	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.url += "?" + query
-
 	return ctx
 }
 
 // Header Header(k, v, k, v ...)
-func (ctx *ReqContext) Header(params ...string) *ReqContext {
+func (ctx *Context) Header(params ...string) *Context {
 	for i := 0; i < len(params); i += 2 {
 		ctx.header = append(ctx.header, []string{params[i], params[i+1]})
 	}
@@ -80,26 +70,25 @@ func (ctx *ReqContext) Header(params ...string) *ReqContext {
 	return ctx
 }
 
-// Form ...
-func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
-	query, err := qs.Marshal(paramsToForm(params))
-	if err != nil {
-		ctx.err = err
-		return ctx
-	}
+// Client set http client
+func (ctx *Context) Client(c *http.Client) *Context {
+	ctx.client = c
+	return ctx
+}
+
+func (ctx *Context) Form(params ...interface{}) *Context {
+	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.header = append(ctx.header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
 	ctx.body = strings.NewReader(query)
 	return ctx
 }
 
-// Body ...
-func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
+func (ctx *Context) Body(b io.Reader) *Context {
 	ctx.body = b
 	return ctx
 }
 
-// JSONBody ...
-func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
+func (ctx *Context) JSONBody(data interface{}) *Context {
 	b, err := json.Marshal(data)
 	if err != nil {
 		ctx.err = err
@@ -111,24 +100,14 @@ func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 	return ctx
 }
 
-// StringBody ...
-func (ctx *ReqContext) StringBody(s string) *ReqContext {
+func (ctx *Context) StringBody(s string) *Context {
 	ctx.body = strings.NewReader(string(s))
 	return ctx
 }
 
-// Do ...
-func (ctx *ReqContext) Do() *ReqContext {
-	if ctx.method == "" {
-		ctx.method = http.MethodGet
-	}
-
+func (ctx *Context) Do() *Context {
 	if ctx.client == nil {
-		cookie, e := cookiejar.New(nil)
-		if e != nil {
-			ctx.err = e
-			return ctx
-		}
+		cookie, _ := cookiejar.New(nil)
 		ctx.client = &http.Client{
 			Jar: cookie,
 		}
@@ -139,6 +118,8 @@ func (ctx *ReqContext) Do() *ReqContext {
 		ctx.err = err
 		return ctx
 	}
+
+	ctx.request = req
 
 	for _, h := range ctx.header {
 		req.Header.Add(h[0], h[1])
@@ -155,17 +136,21 @@ func (ctx *ReqContext) Do() *ReqContext {
 }
 
 // Err get the error
-func (ctx *ReqContext) Err() error {
+func (ctx *Context) Err() error {
 	return ctx.err
 }
 
+// Request get request
+func (ctx *Context) Request() *http.Request {
+	return ctx.request
+}
+
 // Response get response
-func (ctx *ReqContext) Response() *http.Response {
+func (ctx *Context) Response() *http.Response {
 	return ctx.Do().response
 }
 
-// Bytes ...
-func (ctx *ReqContext) Bytes() []byte {
+func (ctx *Context) Bytes() []byte {
 	body, err := ioutil.ReadAll(ctx.Response().Body)
 	if err != nil {
 		ctx.err = err
@@ -182,17 +167,17 @@ func (ctx *ReqContext) Bytes() []byte {
 }
 
 // String get string response
-func (ctx *ReqContext) String() string {
+func (ctx *Context) String() string {
 	return string(ctx.Bytes())
 }
 
 // JSON unmarshal json response to v
-func (ctx *ReqContext) JSON(v interface{}) error {
+func (ctx *Context) JSON(v interface{}) error {
 	return json.Unmarshal(ctx.Bytes(), &v)
 }
 
 // GJSON parse body as json and provide searching for json strings
-func (ctx *ReqContext) GJSON(path string) gjson.Result {
+func (ctx *Context) GJSON(path string) gjson.Result {
 	r := gjson.ParseBytes(ctx.Bytes())
 	return r.Get(path)
 }

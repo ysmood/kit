@@ -1,11 +1,12 @@
 package example
 
 import (
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/guard"
 )
 
 func Example() {
-	g.Guard("go", "run", "./server").ExecCtx(
-		g.Exec().Prefix("server | @yellow"),
+	Guard("go", "run", "./server").ExecCtx(
+		Exec().Prefix("server | @yellow"),
 	).Do()
 }

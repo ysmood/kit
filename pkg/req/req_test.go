@@ -1,4 +1,4 @@
-package gokit_test
+package req_test
 
 import (
 	"net"
@@ -8,7 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/req"
+	. "github.com/ysmood/gokit/pkg/utils"
 )
 
 type RequestSuite struct {
@@ -23,14 +24,14 @@ func TestRequestSuite(t *testing.T) {
 
 func (s *RequestSuite) path() (path, url string) {
 	_, port, _ := net.SplitHostPort(s.listener.Addr().String())
-	r, _ := g.GenerateRandomString(5)
+	r, _ := GenerateRandomString(5)
 	path = "/" + r
 	url = "http://127.0.0.1:" + port + path
 	return path, url
 }
 
 func (s *RequestSuite) SetupSuite() {
-	wait := make(chan g.Nil)
+	wait := make(chan Nil)
 
 	go func() {
 		gin.SetMode(gin.ReleaseMode)
@@ -41,9 +42,9 @@ func (s *RequestSuite) SetupSuite() {
 		s.router = r
 		s.listener = ln
 
-		wait <- g.Nil{}
+		wait <- Nil{}
 
-		http.Serve(ln, r)
+		_ = http.Serve(ln, r)
 	}()
 
 	<-wait
@@ -60,7 +61,17 @@ func (s *RequestSuite) TestGetString() {
 		c.String(200, "ok")
 	})
 
-	s.Equal("ok", g.Req(url).String())
+	s.Equal("ok", Req(url).String())
+}
+
+func (s *RequestSuite) TestMethodErr() {
+	c := Req("").Method("あ").Do()
+	s.EqualError(c.Err(), "net/http: invalid method \"あ\"")
+}
+
+func (s *RequestSuite) TestURLErr() {
+	c := Req("").Do()
+	s.EqualError(c.Err(), "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
@@ -71,7 +82,7 @@ func (s *RequestSuite) TestGetStringWithQuery() {
 		s.Equal("1", v)
 	})
 
-	c := g.Req(url).Query("a", "1")
+	c := Req(url).Query("a", "1")
 
 	s.Nil(c.Err())
 }
@@ -83,14 +94,14 @@ func (s *RequestSuite) TestGetJSON() {
 		c.String(200, `{ "A": "ok" }`)
 	})
 
-	c := g.Req(url)
+	c := Req(url)
 
 	type t struct {
 		A string
 	}
 
 	var data t
-	c.JSON(&data)
+	E(c.JSON(&data))
 
 	s.Equal("ok", data.A)
 }
@@ -102,7 +113,7 @@ func (s *RequestSuite) TestGetGJSON() {
 		c.String(200, `{ "deep": { "path": 1 } }`)
 	})
 
-	c := g.Req(url)
+	c := Req(url)
 
 	s.Equal(int64(1), c.GJSON("deep.path").Int())
 }
@@ -115,7 +126,7 @@ func (s *RequestSuite) TestPostForm() {
 		c.String(200, out)
 	})
 
-	c := g.Req(url).Post().Form("a", "val")
+	c := Req(url).Post().Form("a", "val")
 	s.Equal("val", c.String())
 }
 
@@ -127,7 +138,7 @@ func (s *RequestSuite) TestPostBytes() {
 		c.Data(200, "", out)
 	})
 
-	c := g.Req(url).Post().Body(strings.NewReader("raw"))
+	c := Req(url).Post().Body(strings.NewReader("raw"))
 	s.Equal("raw", c.String())
 }
 
@@ -139,7 +150,7 @@ func (s *RequestSuite) TestPutString() {
 		c.Data(200, "", out)
 	})
 
-	c := g.Req(url).Put().StringBody("raw")
+	c := Req(url).Put().StringBody("raw")
 	s.Equal("raw", c.String())
 }
 
@@ -150,7 +161,7 @@ func (s *RequestSuite) TestDelete() {
 		c.String(200, "ok")
 	})
 
-	c := g.Req(url).Delete()
+	c := Req(url).Delete()
 	s.Equal("ok", c.String())
 }
 
@@ -159,10 +170,10 @@ func (s *RequestSuite) TestPostJSON() {
 
 	s.router.POST(path, func(c *gin.Context) {
 		data, _ := c.GetRawData()
-		c.String(200, g.JSON(data).Get("A").String())
+		c.String(200, JSON(data).Get("A").String())
 	})
 
-	c := g.Req(url).Post().JSONBody(struct{ A string }{"ok"})
+	c := Req(url).Post().JSONBody(struct{ A string }{"ok"})
 	s.Equal("ok", c.String())
 }
 
@@ -174,7 +185,7 @@ func (s *RequestSuite) TestHeader() {
 		c.String(200, h)
 	})
 
-	c := g.Req(url).Header("test", "ok").Do()
+	c := Req(url).Header("test", "ok").Do()
 	s.Equal("ok", c.String())
 }
 
@@ -190,7 +201,7 @@ func (s *RequestSuite) TestReuseCookie() {
 		c.SetCookie("t", "val", 3600, "", "", false, true)
 	})
 
-	c := g.Req(url).Do()
+	c := Req(url).Do()
 	c.Header("a", "b").Req(url)
 
 	s.Equal("val", cookieA)

@@ -1,13 +1,14 @@
-package gokit
+package exec
 
 import (
-	"os/exec"
+	os_exec "os/exec"
 	"strings"
+
+	"github.com/ysmood/gokit/pkg/os"
 )
 
-// ExecContext ...
 type ExecContext struct {
-	cmd *exec.Cmd
+	cmd *os_exec.Cmd
 	dir string
 
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
@@ -26,44 +27,37 @@ func Exec(args ...string) *ExecContext {
 	}
 }
 
-// Args ...
 func (ctx *ExecContext) Args(args []string) *ExecContext {
 	ctx.args = args
 	return ctx
 }
 
-// Cmd ...
-func (ctx *ExecContext) Cmd(cmd *exec.Cmd) *ExecContext {
+func (ctx *ExecContext) Cmd(cmd *os_exec.Cmd) *ExecContext {
 	ctx.cmd = cmd
 	return ctx
 }
 
-// GetCmd ...
-func (ctx *ExecContext) GetCmd() *exec.Cmd {
+func (ctx *ExecContext) GetCmd() *os_exec.Cmd {
 	return ctx.cmd
 }
 
-// Dir ...
 func (ctx *ExecContext) Dir(dir string) *ExecContext {
 	ctx.dir = dir
 	return ctx
 }
 
-// Prefix ...
 func (ctx *ExecContext) Prefix(p string) *ExecContext {
 	ctx.prefix = p
 	return ctx
 }
 
-// Raw ...
 func (ctx *ExecContext) Raw() *ExecContext {
 	ctx.isRaw = true
 	return ctx
 }
 
-// Do ...
 func (ctx *ExecContext) Do() error {
-	cmd := exec.Command(ctx.args[0], ctx.args[1:]...)
+	cmd := os_exec.Command(ctx.args[0], ctx.args[1:]...)
 
 	if ctx.cmd == nil {
 		ctx.cmd = cmd
@@ -89,5 +83,5 @@ func formatPrefix(prefix string) string {
 
 	color := prefix[i+1:]
 
-	return C(prefix[:i], color)
+	return os.C(prefix[:i], color)
 }

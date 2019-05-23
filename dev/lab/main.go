@@ -1,9 +1,9 @@
 package main
 
 import (
-	. "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/guard"
 )
 
 func main() {
-	Guard("echo", "ok").Do()
+	_ = Guard("echo", "ok").Do()
 }

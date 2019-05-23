@@ -1,17 +1,19 @@
 // +build windows
 
-package gokit
+package exec
 
 import (
 	"bufio"
 	"io"
 	"os"
-	"os/exec"
+	os_exec "os/exec"
 	"strconv"
+
+	gos "github.com/ysmood/gokit/pkg/os"
 )
 
 // The pty lib doesn't support Windows, so we just pipe everything
-func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
+func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	cmd.Stdin = os.Stdin
 
 	stderr, err := cmd.StderrPipe()
@@ -33,17 +35,17 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			Stdout.Write([]byte(string(r)))
+			gos.Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			Stdout.Write([]byte(prefix))
+			gos.Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		Stdout.Write([]byte(string(r)))
+		gos.Stdout.Write([]byte(string(r)))
 	}
 
 	return nil
@@ -51,5 +53,5 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 
 // KillTree kill process and all its children process
 func KillTree(pid int) error {
-	return exec.Command("taskkill", "/t", "/f", "/pid", strconv.Itoa(pid)).Run()
+	return os_exec.Command("taskkill", "/t", "/f", "/pid", strconv.Itoa(pid)).Run()
 }

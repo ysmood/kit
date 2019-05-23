@@ -8,7 +8,11 @@ import (
 	"strings"
 	"time"
 
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/guard"
+	. "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -34,16 +38,16 @@ func main() {
 	for _, opts := range optsList {
 		fns = append(fns, func(opts *options) func() {
 			return func() {
-				guard := g.
+				guard :=
 					Guard(opts.cmd...).
-					Debounce(opts.debounce).
-					Interval(opts.poll).
-					ExecCtx(
-						g.Exec().
-							Dir(*opts.dir).
-							Raw().
-							Prefix(genPrefix(*opts.prefix, opts.cmd)),
-					)
+						Debounce(opts.debounce).
+						Interval(opts.poll).
+						ExecCtx(
+							Exec().
+								Dir(*opts.dir).
+								Raw().
+								Prefix(genPrefix(*opts.prefix, opts.cmd)),
+						)
 
 				if *opts.clearScreen {
 					guard.ClearScreen()
@@ -53,11 +57,11 @@ func main() {
 					guard.NoInitRun()
 				}
 
-				g.E(guard.Do())
+				E(guard.Do())
 			}
 		}(opts))
 	}
-	g.All(fns...)
+	All(fns...)
 }
 
 func genOptions(args []string) *options {
@@ -105,7 +109,7 @@ func genOptions(args []string) *options {
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
 	opts.raw = app.Flag("raw", "when you need to interact with the subprocess").Bool()
 
-	app.Version(g.Version)
+	app.Version(Version)
 
 	args, cmdArgs := parseArgs(args)
 
@@ -148,7 +152,7 @@ func indexOf(list []string, str string) int {
 func argsFromConfigFile(args []string) []string {
 	for _, elem := range args {
 		if len(elem) > 1 && elem[0] == '@' {
-			f, err := g.ReadFile(elem[1:])
+			f, err := ReadFile(elem[1:])
 			if err != nil {
 				return args
 			}
@@ -161,9 +165,9 @@ func argsFromConfigFile(args []string) []string {
 func genPrefix(prefix string, args []string) string {
 	if prefix == "auto" {
 		h := fnv.New32a()
-		h.Write([]byte(strings.Join(args, "")))
+		E(h.Write([]byte(strings.Join(args, ""))))
 
-		return g.C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
+		return C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
 	}
 
 	return ""

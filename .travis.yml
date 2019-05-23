@@ -7,3 +7,4 @@ before_install:
   - go get github.com/mattn/goveralls
 script:
   - $GOPATH/bin/goveralls -service=travis-ci
+  - go run ./dev build -n

@@ -1,9 +1,10 @@
-package gokit
+package exec_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	. "github.com/ysmood/gokit/pkg/exec"
 )
 
 func TestExec(t *testing.T) {

@@ -1,17 +1,32 @@
-package gokit
+package os
 
 import (
 	"encoding/json"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"path"
 
 	"github.com/karrick/godirwalk"
+	"github.com/mitchellh/go-homedir"
 )
 
-// MkdirOptions ...
 type MkdirOptions struct {
 	perm os.FileMode
+}
+
+func HomeDir() string {
+	p, _ := homedir.Dir()
+	return p
+}
+
+// GoPath get the current GOPATH properly
+func GoPath() string {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = build.Default.GOPATH
+	}
+	return gopath
 }
 
 // Mkdir make dir recursively
@@ -25,7 +40,6 @@ func Mkdir(path string, options *MkdirOptions) error {
 	return os.MkdirAll(path, options.perm)
 }
 
-// OutputFileOptions ...
 type OutputFileOptions struct {
 	DirPerm    os.FileMode
 	FilePerm   os.FileMode
@@ -65,18 +79,15 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	return ioutil.WriteFile(p, bin, options.FilePerm)
 }
 
-// ReadFile ...
 func ReadFile(p string) ([]byte, error) {
 	return ioutil.ReadFile(p)
 }
 
-// ReadStringFile ...
 func ReadStringFile(p string) (string, error) {
 	bin, err := ioutil.ReadFile(p)
 	return string(bin), err
 }
 
-// ReadJSON ...
 func ReadJSON(p string, data interface{}) error {
 	bin, err := ReadFile(p)
 
@@ -98,7 +109,6 @@ func Move(from, to string, perm *os.FileMode) error {
 	return os.Rename(from, to)
 }
 
-// Remove ...
 func Remove(patterns ...string) error {
 	return Walk(patterns, func(p string, info *godirwalk.Dirent) error {
 		if info.IsDir() {
@@ -115,12 +125,7 @@ func Remove(patterns ...string) error {
 // Exists check if file or dir exists
 func Exists(path string) bool {
 	_, err := os.Stat(path)
-
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 // FileExists check if file exists, only for file, not for dir

@@ -1,4 +1,4 @@
-package gokit
+package os
 
 import (
 	"os"
@@ -7,13 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
 	gitignore "github.com/monochromegane/go-gitignore"
 )
 
-// WalkOptions ...
 type WalkOptions struct {
 	Dir                  string
 	Sorted               bool
@@ -103,7 +101,7 @@ func genMatchFn(
 	cb godirwalk.WalkFunc,
 ) godirwalk.WalkFunc {
 	return func(p string, info *godirwalk.Dirent) (resErr error) {
-		matched, negative, err := m.match(p, info.IsDir())
+		matched, negative, err := m.Match(p, info.IsDir())
 		if err != nil {
 			return err
 		}
@@ -123,7 +121,6 @@ func genMatchFn(
 	}
 }
 
-// Matcher ...
 type Matcher struct {
 	dir           string
 	gitMatchers   map[string]gitignore.IgnoreMatcher
@@ -131,18 +128,13 @@ type Matcher struct {
 	patterns      []string
 }
 
-// NewMatcher ...
 func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	homeDir, err := homedir.Dir()
-	if err != nil {
-		return nil, err
-	}
-
+	homeDir := HomeDir()
 	gs := map[string]gitignore.IgnoreMatcher{}
 	var submodules []string
 	if hasWalkGitIgnore(patterns) {
@@ -213,7 +205,7 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 	return false
 }
 
-func (m *Matcher) match(p string, isDir bool) (matched, negative bool, err error) {
+func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error) {
 	for _, pattern := range m.patterns {
 		if pattern == WalkGitIgnore {
 			if m.gitMatch(p, isDir) {

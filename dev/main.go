@@ -1,20 +1,26 @@
 package main
 
 import (
+	"go/importer"
 	"os"
 
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/guard"
+	. "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
-const covPath = "fixtures/profile.cov"
+const covPath = "profile.cov"
 
 var (
 	app       = kingpin.New("dev", "dev tool for gokit")
 	cmdTest   = app.Command("test", "run test").Default()
 	cmdLab    = app.Command("lab", "run lab")
 	cmdBuild  = app.Command("build", "cross build project")
+	cmdExport = app.Command("export", "export all submodules under gokit namespace")
 	testMatch = cmdTest.Arg("match", "match test name").String()
+	noTest    = cmdBuild.Flag("no-test", "don't run test before build").Short('n').Bool()
 	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').Bool()
 	viewCov   = app.Command("cov", "view html coverage report")
 )
@@ -28,25 +34,37 @@ func main() {
 		test()
 
 	case cmdBuild.FullCommand():
-		g.E(g.Exec("go", "test", "./...").Do())
+		if !*noTest {
+			E(Exec("go", "test", "./...").Do())
+		}
 		build(deployTag)
 
 	case viewCov.FullCommand():
-		g.E(g.Exec("go", "tool", "cover", "-html="+covPath).Do())
+		E(Exec("go", "tool", "cover", "-html="+covPath).Do())
+
+	case cmdExport.FullCommand():
+		export()
 	}
 }
 
 func lab() {
-	g.Guard("go", "run", "./dev/lab").Do()
+	E(Guard("go", "run", "./dev/lab").Do())
 }
 
 func test() {
-	g.Exec("go", "get", "github.com/kyoh86/richgo").Do()
+	EnsureGoTool("github.com/kyoh86/richgo")
 
-	g.Guard(
+	_ = Guard(
 		"richgo", "test",
 		"-coverprofile="+covPath,
 		"-covermode=count",
 		"-run", *testMatch,
+		"./...",
 	).Do()
+}
+
+func export() {
+	pkg, err := importer.Default().Import("github.com/ysmood/gokit/pkg/exec")
+	E(err)
+	Log(pkg.Scope().Names())
 }

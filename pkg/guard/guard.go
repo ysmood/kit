@@ -1,4 +1,4 @@
-package gokit
+package guard
 
 import (
 	"path/filepath"
@@ -7,9 +7,11 @@ import (
 
 	"github.com/hoisie/mustache"
 	"github.com/radovskyb/watcher"
+	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/utils"
 )
 
-// GuardContext ...
 type GuardContext struct {
 	args     []string
 	patterns []string
@@ -81,7 +83,6 @@ func (ctx *GuardContext) Debounce(debounce *time.Duration) *GuardContext {
 	return ctx
 }
 
-// ExecCtx ...
 func (ctx *GuardContext) ExecCtx(c *ExecContext) *GuardContext {
 	ctx.execCtx = c
 	return ctx
@@ -136,7 +137,7 @@ func (ctx *GuardContext) Do() error {
 	var execCtxClone ExecContext
 	run := func(e *watcher.Event) {
 		if ctx.clearScreen {
-			ClearScreen()
+			_ = ClearScreen()
 		}
 
 		ctx.count++
@@ -179,9 +180,9 @@ func (ctx *GuardContext) Do() error {
 
 			if !has {
 				dict[dir] = Nil{}
-				ctx.watcher.Add(dir)
+				_ = ctx.watcher.Add(dir)
 			}
-			ctx.watcher.Add(p)
+			_ = ctx.watcher.Add(p)
 		}
 
 		var watched string
@@ -211,7 +212,7 @@ func (ctx *GuardContext) Do() error {
 		for {
 			select {
 			case e := <-ctx.watcher.Event:
-				matched, _, err := matcher.match(e.Path, e.IsDir())
+				matched, _, err := matcher.Match(e.Path, e.IsDir())
 				logErr(err)
 
 				if !matched {
@@ -231,12 +232,12 @@ func (ctx *GuardContext) Do() error {
 						err := watchFiles(e.Path)
 						logErr(err)
 					} else {
-						ctx.watcher.Add(e.Path)
+						_ = ctx.watcher.Add(e.Path)
 					}
 				}
 
 				if execCtxClone.GetCmd() != nil {
-					KillTree(execCtxClone.GetCmd().Process.Pid)
+					_ = KillTree(execCtxClone.GetCmd().Process.Pid)
 
 					<-ctx.wait
 				}

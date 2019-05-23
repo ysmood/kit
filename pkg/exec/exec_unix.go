@@ -1,23 +1,24 @@
 // +build !windows
 
-package gokit
+package exec
 
 import (
 	"bufio"
 	"io"
 	"os"
-	"os/exec"
+	os_exec "os/exec"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"github.com/kr/pty"
+	gos "github.com/ysmood/gokit/pkg/os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 var rawLock = sync.Mutex{}
 
-func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
+func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	p, err := pty.Start(cmd)
 	if err != nil {
 		return err
@@ -34,7 +35,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 			if _, ok := <-ch; !ok {
 				return
 			}
-			pty.InheritSize(os.Stdin, p)
+			_ = pty.InheritSize(os.Stdin, p)
 		}
 	}()
 	ch <- syscall.SIGWINCH // Initial resize.
@@ -44,18 +45,18 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		rawLock.Lock()
 		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
-			Log("[exec] set stdin to raw mode:", err)
+			gos.Log("[exec] set stdin to raw mode:", err)
 		}
 		defer func() {
 			if oldState != nil {
-				terminal.Restore(int(os.Stdin.Fd()), oldState)
+				_ = terminal.Restore(int(os.Stdin.Fd()), oldState)
 			}
 			rawLock.Unlock()
 		}() // Best effort.
 	}
 
 	go func() {
-		io.Copy(p, os.Stdin)
+		_, _ = io.Copy(p, os.Stdin)
 	}()
 
 	reader := bufio.NewReader(p)
@@ -63,17 +64,17 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			Stdout.Write([]byte(string(r)))
+			_, _ = gos.Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			Stdout.Write([]byte(prefix))
+			_, _ = gos.Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		Stdout.Write([]byte(string(r)))
+		_, _ = gos.Stdout.Write([]byte(string(r)))
 	}
 
 	signal.Stop(ch)

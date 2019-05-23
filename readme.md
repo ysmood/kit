@@ -1,18 +1,51 @@
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
-[![Coverage Status](https://coveralls.io/repos/github/ysmood/gokit/badge.svg?branch=master)](https://coveralls.io/github/ysmood/gokit?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/ysmood/gokit/badge.svg?branch=master&t=1)](https://coveralls.io/github/ysmood/gokit?branch=master)
 
 Some of the io related methods that are often used.
 
 This library won't have the best performance, but it will have sane defaults to make coding less verbose.
 
+This project an example to use Go only for self hosted automation.
+
 # Install CLI Tools
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
 
+## fs
+
+Covers most used fs functions that are missing from the stdlib.
+
+## process
+
+A better `Exec` alternatives for the stdlib one.
+
+## req
+
+The http request lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
+alternative to use with it's fluent api design. You will reduce a lot of your code without sacrificing performance.
+It covers all the functions of the Go's stdlib one, no api is hidden from the origin http lib.
+
+```go
+package main
+
+import (
+	g "github.com/ysmood/gokit"
+)
+
+func main() {
+  val := g.Req("http://test.com").Post().Query(
+    "search", "keyword",
+    "even": ["array", "is", "supported"]
+  ).GJSON("json.path.value")
+
+  g.Log(val)
+}
+```
+
 ## guard
 
 ```bash
-$ guard --help                
+$ guard --help
 usage: guard [<flags>]
 
 run and guard a command, kill and rerun it when watched files are modified

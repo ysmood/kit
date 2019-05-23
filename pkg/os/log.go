@@ -1,4 +1,4 @@
-package gokit
+package os
 
 import (
 	"fmt"
@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	ansi "github.com/k0kubun/go-ansi"
+	"github.com/k0kubun/go-ansi"
+	ansiColor "github.com/mgutz/ansi"
 )
 
-// Stdout ...
 var Stdout = ansi.NewAnsiStdout()
 
-// Stderr ...
 var Stderr = ansi.NewAnsiStderr()
 
 // Log log to stdout with timestamp
@@ -40,7 +39,6 @@ func Dump(v ...interface{}) {
 	spew.Dump(v...)
 }
 
-// ClearScreen ...
 func ClearScreen() error {
 	clsCmd := "clear"
 
@@ -51,4 +49,9 @@ func ClearScreen() error {
 	cmd := exec.Command(clsCmd)
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
+}
+
+// C color terminal string
+func C(str interface{}, color string) string {
+	return ansiColor.Color(fmt.Sprint(str), color)
 }

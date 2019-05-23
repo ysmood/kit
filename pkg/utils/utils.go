@@ -1,15 +1,11 @@
-package gokit
+package utils
 
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
-	"go/build"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/mgutz/ansi"
 	"github.com/tidwall/gjson"
 )
 
@@ -58,7 +54,6 @@ func All(actions ...func()) {
 	wg.Wait()
 }
 
-// GenerateRandomBytes ...
 func GenerateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
@@ -70,24 +65,9 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
-// GenerateRandomString ...
 func GenerateRandomString(s int) (string, error) {
 	b, err := GenerateRandomBytes(s)
 	return base64.URLEncoding.EncodeToString(b), err
-}
-
-// C color terminal string
-func C(str interface{}, color string) string {
-	return ansi.Color(fmt.Sprint(str), color)
-}
-
-// GoPath get the current GOPATH properly
-func GoPath() string {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-	return gopath
 }
 
 // Try try fn with recover, return the panic as value

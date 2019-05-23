@@ -7,17 +7,20 @@ import (
 	"path"
 
 	"github.com/mholt/archiver"
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/utils"
 )
 
 func build(deployTag *bool) {
-	list, err := g.Glob([]string{"cmd/*"}, nil)
+	list, err := Glob([]string{"cmd/*"}, nil)
 
 	if err != nil {
 		panic(err)
 	}
 
-	g.Remove("dist/**")
+	_ = Remove("dist/**")
 
 	tasks := []func(){}
 	for _, name := range list {
@@ -29,18 +32,18 @@ func build(deployTag *bool) {
 			}(name, osName))
 		}
 	}
-	g.All(tasks...)
+	All(tasks...)
 
 	if *deployTag {
-		deploy(g.Version)
+		deploy(Version)
 	}
 }
 
 func deploy(tag string) {
-	files, err := g.Glob([]string{"dist/*"}, nil)
-	g.E(err)
+	files, err := Glob([]string{"dist/*"}, nil)
+	E(err)
 
-	g.Exec("hub", "release", "delete", tag).Raw().Do()
+	_ = Exec("hub", "release", "delete", tag).Raw().Do()
 
 	args := []string{"hub", "release", "create", "-m", tag}
 	for _, f := range files {
@@ -48,11 +51,11 @@ func deploy(tag string) {
 	}
 	args = append(args, tag)
 
-	g.E(g.Exec(args...).Do())
+	E(Exec(args...).Do())
 }
 
 func buildForOS(name, osName string) {
-	g.Log("building:", name, osName)
+	Log("building:", name, osName)
 
 	f := fmt.Sprint
 
@@ -67,20 +70,20 @@ func buildForOS(name, osName string) {
 		oPath = f("dist/", name, "-mac")
 	}
 
-	g.Exec(
+	E(Exec(
 		"go", "build",
 		"-ldflags=-w -s",
 		"-o", oPath,
 		f("./cmd/", name),
 	).Cmd(&exec.Cmd{
 		Env: append(os.Environ(), env...),
-	}).Do()
+	}).Do())
 
 	compress(oPath, f(oPath, ".zip"), name+extByOS(osName))
 
-	g.Remove(oPath)
+	_ = Remove(oPath)
 
-	g.Log("build done:", name, osName)
+	Log("build done:", name, osName)
 }
 
 func extByOS(osName string) string {
@@ -92,23 +95,23 @@ func extByOS(osName string) string {
 
 func compress(from, to, name string) {
 	file, err := os.Open(from)
-	g.E(err)
+	E(err)
 	fileInfo, err := file.Stat()
-	g.E(err)
+	E(err)
 
 	tar := archiver.NewZip()
 	tar.CompressionLevel = 9
 	oFile, err := os.Create(to)
-	tar.Create(oFile)
+	E(err)
+	E(tar.Create(oFile))
 
-	tar.Write(archiver.File{
+	E(tar.Write(archiver.File{
 		FileInfo: archiver.FileInfo{
 			FileInfo:   fileInfo,
 			CustomName: name,
 		},
 		ReadCloser: file,
-	})
+	}))
 
-	g.E(err)
 	tar.Close()
 }
