@@ -10,50 +10,71 @@ import (
 	"github.com/radovskyb/watcher"
 )
 
-// GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
-var GuardDefaultPatterns = []string{"**", WalkGitIgnore}
-
-// GuardOptions ...
-type GuardOptions struct {
+// GuardContext ...
+type GuardContext struct {
 	Interval  *time.Duration // default 300ms
 	Stop      chan Nil       // send signal to it to stop the watcher
 	ExecOpts  ExecOptions
 	Debounce  *time.Duration // default 300ms, suppress the frequency of the event
 	NoInitRun bool
+
+	args     []string
+	patterns []string
+	cmd      *exec.Cmd
+	prefix   string
+	count    int
+	wait     chan Nil
 }
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
 // Because it's based on polling, so it's cross-platform and file system.
 // The args supports mustach template, variables {{path}}, {{op}} are available.
 // The default patterns are GuardDefaultPatterns
-func Guard(params ...interface{}) error {
-	var args, patterns []string
-	var opts GuardOptions
-
-	err := Params(params, &args, &patterns, &opts)
-	if err != nil {
-		return err
+func Guard(args ...string) *GuardContext {
+	return &GuardContext{
+		args:   args,
+		prefix: C("[guard]", "cyan"),
+		count:  0,
+		wait:   make(chan Nil),
 	}
+}
 
-	prefix := C("[guard]", "cyan")
+// GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
+func GuardDefaultPatterns() []string {
+	return []string{"**", WalkGitIgnore}
+}
 
-	if patterns == nil || len(patterns) == 0 {
-		patterns = GuardDefaultPatterns
-	}
+// Patterns set patterns
+func (ctx *GuardContext) Patterns(patterns ...string) *GuardContext {
+	ctx.patterns = patterns
+	return ctx
+}
 
-	var cmd *exec.Cmd
-	count := 0
-	wait := make(chan struct{})
+// Context set context
+func (ctx *GuardContext) Context(src GuardContext) *GuardContext {
+	ctx.Interval = src.Interval
+	ctx.Stop = src.Stop
+	ctx.ExecOpts = src.ExecOpts
+	ctx.Debounce = src.Debounce
+	ctx.NoInitRun = src.NoInitRun
+	return ctx
+}
 
-	onStart := opts.ExecOpts.OnStart
-	opts.ExecOpts.OnStart = func(opts *ExecOptions) {
+// Do run
+func (ctx *GuardContext) Do() error {
+	onStart := ctx.ExecOpts.OnStart
+	ctx.ExecOpts.OnStart = func(opts *ExecOptions) {
 		if onStart != nil {
 			onStart(opts)
 		}
 
-		count++
-		Log(prefix, "run", count, C(opts.Cmd.Args, "green"))
-		cmd = opts.Cmd
+		ctx.count++
+		Log(ctx.prefix, "run", ctx.count, C(opts.Cmd.Args, "green"))
+		ctx.cmd = opts.Cmd
+	}
+
+	if ctx.patterns == nil || len(ctx.patterns) == 0 {
+		ctx.patterns = GuardDefaultPatterns()
 	}
 
 	unescapeArgs := func(args []string, e *watcher.Event) []string {
@@ -63,7 +84,7 @@ func Guard(params ...interface{}) error {
 
 		newArgs := []string{}
 		for _, arg := range args {
-			dir, err := filepath.Abs(opts.ExecOpts.Dir)
+			dir, err := filepath.Abs(ctx.ExecOpts.Dir)
 			if err != nil {
 				Err(err)
 			}
@@ -87,26 +108,26 @@ func Guard(params ...interface{}) error {
 	}
 
 	run := func(e *watcher.Event) {
-		eArgs := unescapeArgs(args, e)
+		eArgs := unescapeArgs(ctx.args, e)
 
-		err := Exec(eArgs, opts.ExecOpts)
+		err := Exec(eArgs, ctx.ExecOpts)
 		errMsg := ""
 		if err != nil {
 			errMsg = C(err, "red")
 		}
-		Log(prefix, "done", count, C(args, "green"), errMsg)
+		Log(ctx.prefix, "done", ctx.count, C(ctx.args, "green"), errMsg)
 
-		wait <- struct{}{}
+		ctx.wait <- struct{}{}
 	}
 
 	w := watcher.New()
-	matcher, err := NewMatcher(opts.ExecOpts.Dir, patterns)
+	matcher, err := NewMatcher(ctx.ExecOpts.Dir, ctx.patterns)
 	if err != nil {
 		return err
 	}
 
 	watchFiles := func(dir string) error {
-		list, err := Glob(patterns, &WalkOptions{Dir: dir, Matcher: matcher})
+		list, err := Glob(ctx.patterns, &WalkOptions{Dir: dir, Matcher: matcher})
 
 		if err != nil {
 			return err
@@ -136,17 +157,17 @@ func Guard(params ...interface{}) error {
 			watched = strings.Join(list, " ")
 		}
 
-		Log(prefix, "watched", len(list), "files:", C(watched, "green"))
+		Log(ctx.prefix, "watched", len(list), "files:", C(watched, "green"))
 
 		return nil
 	}
 
-	if err := watchFiles(opts.ExecOpts.Dir); err != nil {
+	if err := watchFiles(ctx.ExecOpts.Dir); err != nil {
 		return err
 	}
 
 	go func() {
-		debounce := opts.Debounce
+		debounce := ctx.Debounce
 		var lastRun time.Time
 		if debounce == nil {
 			t := time.Millisecond * 300
@@ -171,7 +192,7 @@ func Guard(params ...interface{}) error {
 				}
 				lastRun = time.Now()
 
-				Log(prefix, e)
+				Log(ctx.prefix, e)
 
 				if e.Op == watcher.Create {
 					if e.IsDir() {
@@ -183,16 +204,16 @@ func Guard(params ...interface{}) error {
 					}
 				}
 
-				if cmd != nil {
-					KillTree(cmd.Process.Pid)
+				if ctx.cmd != nil {
+					KillTree(ctx.cmd.Process.Pid)
 
-					<-wait
+					<-ctx.wait
 				}
 
 				go run(&e)
 
 			case err := <-w.Error:
-				Log(prefix, err)
+				Log(ctx.prefix, err)
 
 			case <-w.Closed:
 				return
@@ -201,19 +222,19 @@ func Guard(params ...interface{}) error {
 	}()
 
 	go func() {
-		if opts.Stop == nil {
+		if ctx.Stop == nil {
 			return
 		}
 
-		<-opts.Stop
+		<-ctx.Stop
 		w.Close()
 	}()
 
-	if !opts.NoInitRun {
+	if !ctx.NoInitRun {
 		go run(nil)
 	}
 
-	interval := opts.Interval
+	interval := ctx.Interval
 	if interval == nil {
 		t := time.Millisecond * 300
 		interval = &t

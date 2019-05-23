@@ -34,7 +34,7 @@ func main() {
 	for _, opts := range optsList {
 		fns = append(fns, func(opts *options) func() {
 			return func() {
-				g.E(g.Guard(opts.cmd, *opts.patterns, g.GuardOptions{
+				g.E(g.Guard(opts.cmd...).Patterns(*opts.patterns...).Context(g.GuardContext{
 					ExecOpts: g.ExecOptions{
 						Dir:    *opts.dir,
 						IsRaw:  *opts.raw,
@@ -48,7 +48,7 @@ func main() {
 					NoInitRun: *opts.noInitRun,
 					Interval:  opts.poll,
 					Debounce:  opts.debounce,
-				}))
+				}).Do())
 			}
 		}(opts))
 	}

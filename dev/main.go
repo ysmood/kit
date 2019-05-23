@@ -37,16 +37,16 @@ func main() {
 }
 
 func lab() {
-	g.Guard([]string{"go", "run", "./dev/lab"})
+	g.Guard("go", "run", "./dev/lab").Do()
 }
 
 func test() {
 	g.Exec("go", "get", "github.com/kyoh86/richgo")
 
-	g.Guard([]string{
+	g.Guard(
 		"richgo", "test",
-		"-coverprofile=" + covPath,
+		"-coverprofile="+covPath,
 		"-covermode=count",
 		"-run", *testMatch,
-	})
+	).Do()
 }

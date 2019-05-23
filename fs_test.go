@@ -73,7 +73,7 @@ func TestGlob(t *testing.T) {
 }
 
 func TestGlobGit(t *testing.T) {
-	l, err := g.Glob(g.GuardDefaultPatterns, nil)
+	l, err := g.Glob(g.GuardDefaultPatterns(), nil)
 	g.E(err)
 	fullPath, _ := filepath.Abs("fs.go")
 	assert.Contains(t, l, fullPath)

@@ -17,10 +17,10 @@ func TestGuard(t *testing.T) {
 	stop := make(chan g.Nil)
 	d := 0 * time.Millisecond
 
-	go g.Guard([]string{"echo", "ok", "{{path}}"}, []string{p + "/**"}, g.GuardOptions{
+	go g.Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Context(g.GuardContext{
 		Stop:     stop,
 		Debounce: &d,
-	})
+	}).Do()
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)

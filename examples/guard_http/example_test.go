@@ -5,12 +5,11 @@ import (
 )
 
 func Example() {
-	g.Guard(
-		[]string{"go", "run", "./server"},
-		g.GuardOptions{
+	g.Guard("go", "run", "./server").Context(
+		g.GuardContext{
 			ExecOpts: g.ExecOptions{
 				Prefix: "server | @yellow",
 			},
 		},
-	)
+	).Do()
 }
