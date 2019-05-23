@@ -13,180 +13,195 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// HTTPClient ...
-type HTTPClient struct {
-	Client   *http.Client
-	Response *http.Response
+// ReqContext ...
+type ReqContext struct {
+	client   *http.Client
+	response *http.Response
+
+	err    error
+	method string
+	url    string
+	header [][]string
+	body   io.Reader
 }
 
 // Req send http request
-func Req(params ...interface{}) (*HTTPClient, error) {
-	method, url, cookie, header, reqBody, err := parseReqParams(params)
+func Req(url string) *ReqContext {
+	return &ReqContext{
+		url: url,
+	}
+}
 
+// Method ...
+func (ctx *ReqContext) Method(m string) *ReqContext {
+	ctx.method = m
+	return ctx
+}
+
+// Req ...
+func (ctx *ReqContext) Req(url string) *ReqContext {
+	ctx.url = url
+	return ctx.Do()
+}
+
+// Post ...
+func (ctx *ReqContext) Post() *ReqContext {
+	return ctx.Method(http.MethodPost)
+}
+
+// Put ...
+func (ctx *ReqContext) Put() *ReqContext {
+	return ctx.Method(http.MethodPut)
+}
+
+// Delete ...
+func (ctx *ReqContext) Delete() *ReqContext {
+	return ctx.Method(http.MethodDelete)
+}
+
+// Query Query(k, v, k, v ...)
+func (ctx *ReqContext) Query(params ...interface{}) *ReqContext {
+	query, err := qs.Marshal(paramsToForm(params))
 	if err != nil {
-		return nil, err
+		ctx.err = err
+		return ctx
+	}
+	ctx.url += "?" + query
+
+	return ctx
+}
+
+// Header Header(k, v, k, v ...)
+func (ctx *ReqContext) Header(params ...string) *ReqContext {
+	for i := 0; i < len(params); i += 2 {
+		ctx.header = append(ctx.header, []string{params[i], params[i+1]})
 	}
 
-	client := &http.Client{
-		Jar: cookie,
-	}
+	return ctx
+}
 
-	req, err := http.NewRequest(string(method), url, reqBody)
+// Form ...
+func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
+	query, err := qs.Marshal(paramsToForm(params))
 	if err != nil {
-		return nil, err
+		ctx.err = err
+		return ctx
+	}
+	ctx.header = append(ctx.header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
+	ctx.body = strings.NewReader(query)
+	return ctx
+}
+
+// Body ...
+func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
+	ctx.body = b
+	return ctx
+}
+
+// JSONBody ...
+func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
+	b, err := json.Marshal(data)
+	if err != nil {
+		ctx.err = err
+		return ctx
+	}
+	ctx.header = append(ctx.header, []string{"Content-Type", "application/json; charset=utf-8"})
+	ctx.body = bytes.NewReader(b)
+
+	return ctx
+}
+
+// StringBody ...
+func (ctx *ReqContext) StringBody(s string) *ReqContext {
+	ctx.body = strings.NewReader(string(s))
+	return ctx
+}
+
+// Do ...
+func (ctx *ReqContext) Do() *ReqContext {
+	if ctx.method == "" {
+		ctx.method = http.MethodGet
 	}
 
-	for _, h := range header {
+	if ctx.client == nil {
+		cookie, e := cookiejar.New(nil)
+		if e != nil {
+			ctx.err = e
+			return ctx
+		}
+		ctx.client = &http.Client{
+			Jar: cookie,
+		}
+	}
+
+	req, err := http.NewRequest(ctx.method, ctx.url, ctx.body)
+	if err != nil {
+		ctx.err = err
+		return ctx
+	}
+
+	for _, h := range ctx.header {
 		req.Header.Add(h[0], h[1])
 	}
 
-	res, err := client.Do(req)
+	res, err := ctx.client.Do(req)
 	if err != nil {
-		return nil, err
+		ctx.err = err
+		return ctx
 	}
+	ctx.response = res
 
-	return &HTTPClient{
-		Client:   client,
-		Response: res,
-	}, nil
+	return ctx
 }
 
-// Req reuse the cookie
-func (req *HTTPClient) Req(params ...interface{}) (*HTTPClient, error) {
-	method, url, _, header, reqBody, err := parseReqParams(params)
-	if err != nil {
-		return nil, err
-	}
+// Err get the error
+func (ctx *ReqContext) Err() error {
+	return ctx.err
+}
 
-	r, err := http.NewRequest(string(method), url, reqBody)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, h := range header {
-		r.Header.Add(h[0], h[1])
-	}
-
-	res, err := req.Client.Do(r)
-	if err != nil {
-		return nil, err
-	}
-	req.Response = res
-
-	return req, nil
+// Response get response
+func (ctx *ReqContext) Response() *http.Response {
+	return ctx.Do().response
 }
 
 // Bytes ...
-func (req *HTTPClient) Bytes() []byte {
-	body, err := ioutil.ReadAll(req.Response.Body)
+func (ctx *ReqContext) Bytes() []byte {
+	body, err := ioutil.ReadAll(ctx.Response().Body)
 	if err != nil {
-		return []byte(err.Error())
+		ctx.err = err
+		return nil
 	}
 
-	err = req.Response.Body.Close()
+	err = ctx.response.Body.Close()
 	if err != nil {
-		return []byte(err.Error())
+		ctx.err = err
+		return nil
 	}
 
 	return body
 }
 
-func (req *HTTPClient) String() string {
-	return string(req.Bytes())
+// String get string response
+func (ctx *ReqContext) String() string {
+	return string(ctx.Bytes())
 }
 
-// JSON ...
-func (req *HTTPClient) JSON(v interface{}) error {
-	return json.Unmarshal(req.Bytes(), &v)
+// JSON unmarshal json response to v
+func (ctx *ReqContext) JSON(v interface{}) error {
+	return json.Unmarshal(ctx.Bytes(), &v)
 }
 
 // GJSON parse body as json and provide searching for json strings
-func (req *HTTPClient) GJSON() *gjson.Result {
-	r := gjson.ParseBytes(req.Bytes())
-	return &r
+func (ctx *ReqContext) GJSON(path string) gjson.Result {
+	r := gjson.ParseBytes(ctx.Bytes())
+	return r.Get(path)
 }
 
-// Method ...
-type Method string
-
-// QueryParams ...
-type QueryParams map[string]interface{}
-
-// Header ...
-type Header map[string]string
-
-// FormParams ...
-type FormParams map[string]interface{}
-
-// JSONBody ...
-type JSONBody struct {
-	Data interface{}
-}
-
-// StringBody ...
-type StringBody string
-
-// Infer the params from their type, the order doesn't matter
-func parseReqParams(params []interface{}) (
-	method Method,
-	reqURL string,
-	cookie *cookiejar.Jar,
-	header [][]string,
-	body io.Reader,
-	err error,
-) {
-	err = Params(params,
-		&method,
-		&reqURL,
-		&cookie,
-		&body,
-		func(v QueryParams) error {
-			query, err := qs.Marshal(v)
-			if err != nil {
-				return err
-			}
-			reqURL += "?" + query
-			return nil
-		},
-		func(v Header) {
-			for key, val := range v {
-				header = append(header, []string{key, val})
-			}
-		},
-		func(v FormParams) error {
-			query, err := qs.Marshal(v)
-			if err != nil {
-				return err
-			}
-			header = append(header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
-			body = strings.NewReader(query)
-			return nil
-		},
-		func(v JSONBody) error {
-			b, err := json.Marshal(v.Data)
-			if err != nil {
-				return err
-			}
-			header = append(header, []string{"Content-Type", "application/json; charset=utf-8"})
-			body = bytes.NewReader(b)
-			return nil
-		},
-		func(v StringBody) {
-			body = strings.NewReader(string(v))
-		},
-	)
-
-	if method == "" {
-		method = http.MethodGet
+func paramsToForm(params []interface{}) map[string]interface{} {
+	f := map[string]interface{}{}
+	l := len(params) - 1
+	for i := 0; i < l; i += 2 {
+		f[params[i].(string)] = params[i+1]
 	}
-
-	if cookie == nil {
-		var e error
-		cookie, e = cookiejar.New(nil)
-		if e != nil {
-			err = e
-		}
-	}
-
-	return
+	return f
 }

@@ -60,11 +60,7 @@ func (s *RequestSuite) TestGetString() {
 		c.String(200, "ok")
 	})
 
-	client, err := g.Req(url)
-
-	g.E(err)
-
-	s.Equal("ok", client.String())
+	s.Equal("ok", g.Req(url).String())
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
@@ -75,9 +71,9 @@ func (s *RequestSuite) TestGetStringWithQuery() {
 		s.Equal("1", v)
 	})
 
-	_, err := g.Req(url, g.QueryParams{"a": "1"})
+	c := g.Req(url).Query("a", "1")
 
-	g.E(err)
+	s.Nil(c.Err())
 }
 
 func (s *RequestSuite) TestGetJSON() {
@@ -87,16 +83,14 @@ func (s *RequestSuite) TestGetJSON() {
 		c.String(200, `{ "A": "ok" }`)
 	})
 
-	client, err := g.Req(url)
-
-	g.E(err)
+	c := g.Req(url)
 
 	type t struct {
 		A string
 	}
 
 	var data t
-	client.JSON(&data)
+	c.JSON(&data)
 
 	s.Equal("ok", data.A)
 }
@@ -108,11 +102,9 @@ func (s *RequestSuite) TestGetGJSON() {
 		c.String(200, `{ "deep": { "path": 1 } }`)
 	})
 
-	client, err := g.Req(url)
+	c := g.Req(url)
 
-	g.E(err)
-
-	s.Equal(int64(1), client.GJSON().Get("deep.path").Int())
+	s.Equal(int64(1), c.GJSON("deep.path").Int())
 }
 
 func (s *RequestSuite) TestPostForm() {
@@ -120,15 +112,11 @@ func (s *RequestSuite) TestPostForm() {
 
 	s.router.POST(path, func(c *gin.Context) {
 		out, _ := c.GetPostForm("a")
-		s.Equal("val", out)
+		c.String(200, out)
 	})
 
-	_, err := g.Req(
-		url,
-		g.Method(http.MethodPost),
-		g.FormParams{"a": "val"},
-	)
-	g.E(err)
+	c := g.Req(url).Post().Form("a", "val")
+	s.Equal("val", c.String())
 }
 
 func (s *RequestSuite) TestPostBytes() {
@@ -136,31 +124,34 @@ func (s *RequestSuite) TestPostBytes() {
 
 	s.router.POST(path, func(c *gin.Context) {
 		out, _ := c.GetRawData()
-		s.Equal([]byte("raw"), out)
+		c.Data(200, "", out)
 	})
 
-	_, err := g.Req(
-		g.Method(http.MethodPost),
-		url,
-		strings.NewReader("raw"),
-	)
-	g.E(err)
+	c := g.Req(url).Post().Body(strings.NewReader("raw"))
+	s.Equal("raw", c.String())
 }
 
-func (s *RequestSuite) TestPostString() {
+func (s *RequestSuite) TestPutString() {
 	path, url := s.path()
 
-	s.router.POST(path, func(c *gin.Context) {
+	s.router.PUT(path, func(c *gin.Context) {
 		out, _ := c.GetRawData()
-		s.Equal([]byte("raw"), out)
+		c.Data(200, "", out)
 	})
 
-	_, err := g.Req(
-		g.Method(http.MethodPost),
-		url,
-		g.StringBody("raw"),
-	)
-	g.E(err)
+	c := g.Req(url).Put().StringBody("raw")
+	s.Equal("raw", c.String())
+}
+
+func (s *RequestSuite) TestDelete() {
+	path, url := s.path()
+
+	s.router.DELETE(path, func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	c := g.Req(url).Delete()
+	s.Equal("ok", c.String())
 }
 
 func (s *RequestSuite) TestPostJSON() {
@@ -168,15 +159,11 @@ func (s *RequestSuite) TestPostJSON() {
 
 	s.router.POST(path, func(c *gin.Context) {
 		data, _ := c.GetRawData()
-		s.Equal("ok", g.JSON(data).Get("A").String())
+		c.String(200, g.JSON(data).Get("A").String())
 	})
 
-	_, err := g.Req(
-		g.Method(http.MethodPost),
-		url,
-		g.JSONBody{struct{ A string }{"ok"}},
-	)
-	g.E(err)
+	c := g.Req(url).Post().JSONBody(struct{ A string }{"ok"})
+	s.Equal("ok", c.String())
 }
 
 func (s *RequestSuite) TestHeader() {
@@ -184,14 +171,11 @@ func (s *RequestSuite) TestHeader() {
 
 	s.router.GET(path, func(c *gin.Context) {
 		h := c.GetHeader("test")
-		s.Equal("ok", h)
+		c.String(200, h)
 	})
 
-	_, err := g.Req(
-		url,
-		g.Header{"test": "ok"},
-	)
-	g.E(err)
+	c := g.Req(url).Header("test", "ok").Do()
+	s.Equal("ok", c.String())
 }
 
 func (s *RequestSuite) TestReuseCookie() {
@@ -206,8 +190,8 @@ func (s *RequestSuite) TestReuseCookie() {
 		c.SetCookie("t", "val", 3600, "", "", false, true)
 	})
 
-	client, _ := g.Req(url)
-	client.Req(url, g.Header{"a": "b"})
+	c := g.Req(url).Do()
+	c.Header("a", "b").Req(url)
 
 	s.Equal("val", cookieA)
 	s.Equal("b", header)
