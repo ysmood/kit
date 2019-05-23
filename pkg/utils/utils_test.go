@@ -1,6 +1,7 @@
 package utils_test
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 	"time"
@@ -71,4 +72,17 @@ func TestTry(t *T) {
 	})
 
 	assert.Equal(t, "err", err)
+}
+
+func TestJSON(t *T) {
+	a := JSON("10")
+	b := JSON([]byte("10"))
+
+	assert.Equal(t, a.Int(), b.Int())
+}
+
+func TestGenerateRandomString(t *T) {
+	v, _ := GenerateRandomString(10)
+	raw, _ := base64.URLEncoding.DecodeString(v)
+	assert.Len(t, raw, 10)
 }

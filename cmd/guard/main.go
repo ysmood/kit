@@ -9,10 +9,6 @@ import (
 	"time"
 
 	. "github.com/ysmood/gokit"
-	. "github.com/ysmood/gokit/pkg/exec"
-	. "github.com/ysmood/gokit/pkg/guard"
-	. "github.com/ysmood/gokit/pkg/os"
-	. "github.com/ysmood/gokit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 

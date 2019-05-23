@@ -11,9 +11,9 @@ This project an example to use Go only for self hosted automation.
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
 
-## fs
+## os
 
-Covers most used fs functions that are missing from the stdlib.
+Covers most used os related functions that are missing from the stdlib.
 
 ## process
 
@@ -29,16 +29,16 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 package main
 
 import (
-	g "github.com/ysmood/gokit"
+	. "github.com/ysmood/gokit"
 )
 
 func main() {
-  val := g.Req("http://test.com").Post().Query(
+  val := Req("http://test.com").Post().Query(
     "search", "keyword",
     "even": ["array", "is", "supported"]
   ).GJSON("json.path.value")
 
-  g.Log(val)
+  Log(val)
 }
 ```
 
@@ -96,6 +96,7 @@ Flags:
 ## Build Project
 
 ```bash
+go run ./dev --help
 go run ./dev build
 ```
 

@@ -7,7 +7,7 @@ import (
 	"path"
 
 	"github.com/mholt/archiver"
-	. "github.com/ysmood/gokit"
+	"github.com/ysmood/gokit"
 	. "github.com/ysmood/gokit/pkg/exec"
 	. "github.com/ysmood/gokit/pkg/os"
 	. "github.com/ysmood/gokit/pkg/utils"
@@ -35,7 +35,7 @@ func build(deployTag *bool) {
 	All(tasks...)
 
 	if *deployTag {
-		deploy(Version)
+		deploy(gokit.Version)
 	}
 }
 
