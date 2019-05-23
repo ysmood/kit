@@ -7,21 +7,17 @@ import (
 )
 
 func TestExec(t *testing.T) {
-	err := Exec("go", "version")
+	err := Exec("go", "version").Do()
 	assert.Equal(t, nil, err)
 }
 
 func TestExecPrefix(t *testing.T) {
-	err := Exec("echo", "test", ExecOptions{
-		Prefix: "[app] ",
-	})
+	err := Exec("echo", "test").Prefix("[app] ").Do()
 	assert.Equal(t, nil, err)
 }
 
 func TestExecPrefixColor(t *testing.T) {
-	err := Exec("echo", "test", ExecOptions{
-		Prefix: "[app] @green",
-	})
+	err := Exec("echo", "test").Prefix("[app] @green").Do()
 	assert.Equal(t, nil, err)
 }
 

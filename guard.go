@@ -1,7 +1,6 @@
 package gokit
 
 import (
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,18 +11,20 @@ import (
 
 // GuardContext ...
 type GuardContext struct {
-	Interval  *time.Duration // default 300ms
-	Stop      chan Nil       // send signal to it to stop the watcher
-	ExecOpts  ExecOptions
-	Debounce  *time.Duration // default 300ms, suppress the frequency of the event
-	NoInitRun bool
-
 	args     []string
 	patterns []string
-	cmd      *exec.Cmd
-	prefix   string
-	count    int
-	wait     chan Nil
+	dir      string
+
+	clearScreen bool
+	interval    *time.Duration // default 300ms
+	execCtx     *ExecContext
+	debounce    *time.Duration // default 300ms, suppress the frequency of the event
+	noInitRun   bool
+
+	prefix  string
+	count   int
+	wait    chan Nil
+	watcher *watcher.Watcher
 }
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
@@ -44,39 +45,64 @@ func GuardDefaultPatterns() []string {
 	return []string{"**", WalkGitIgnore}
 }
 
+// Dir set dir
+func (ctx *GuardContext) Dir(d string) *GuardContext {
+	ctx.dir = d
+	return ctx
+}
+
 // Patterns set patterns
 func (ctx *GuardContext) Patterns(patterns ...string) *GuardContext {
 	ctx.patterns = patterns
 	return ctx
 }
 
-// Context set context
-func (ctx *GuardContext) Context(src GuardContext) *GuardContext {
-	ctx.Interval = src.Interval
-	ctx.Stop = src.Stop
-	ctx.ExecOpts = src.ExecOpts
-	ctx.Debounce = src.Debounce
-	ctx.NoInitRun = src.NoInitRun
+// NoInitRun don't execute the cmd on startup
+func (ctx *GuardContext) NoInitRun() *GuardContext {
+	ctx.noInitRun = true
 	return ctx
+}
+
+// ClearScreen clear screen before each run
+func (ctx *GuardContext) ClearScreen() *GuardContext {
+	ctx.clearScreen = true
+	return ctx
+}
+
+// Interval ...
+func (ctx *GuardContext) Interval(interval *time.Duration) *GuardContext {
+	ctx.interval = interval
+	return ctx
+}
+
+// Debounce ...
+func (ctx *GuardContext) Debounce(debounce *time.Duration) *GuardContext {
+	ctx.debounce = debounce
+	return ctx
+}
+
+// ExecCtx ...
+func (ctx *GuardContext) ExecCtx(c *ExecContext) *GuardContext {
+	ctx.execCtx = c
+	return ctx
+}
+
+// Stop stop watching
+func (ctx *GuardContext) Stop() {
+	ctx.watcher.Close()
 }
 
 // Do run
 func (ctx *GuardContext) Do() error {
-	onStart := ctx.ExecOpts.OnStart
-	ctx.ExecOpts.OnStart = func(opts *ExecOptions) {
-		if onStart != nil {
-			onStart(opts)
-		}
-
-		ctx.count++
-		Log(ctx.prefix, "run", ctx.count, C(opts.Cmd.Args, "green"))
-		ctx.cmd = opts.Cmd
-	}
-
 	if ctx.patterns == nil || len(ctx.patterns) == 0 {
 		ctx.patterns = GuardDefaultPatterns()
 	}
 
+	if ctx.execCtx == nil {
+		ctx.execCtx = Exec()
+	}
+
+	// unescape the {{path}} {{op}} placeholders
 	unescapeArgs := func(args []string, e *watcher.Event) []string {
 		if e == nil {
 			e = &watcher.Event{}
@@ -84,7 +110,7 @@ func (ctx *GuardContext) Do() error {
 
 		newArgs := []string{}
 		for _, arg := range args {
-			dir, err := filepath.Abs(ctx.ExecOpts.Dir)
+			dir, err := filepath.Abs(ctx.dir)
 			if err != nil {
 				Err(err)
 			}
@@ -107,21 +133,29 @@ func (ctx *GuardContext) Do() error {
 		return newArgs
 	}
 
+	var execCtxClone ExecContext
 	run := func(e *watcher.Event) {
-		eArgs := unescapeArgs(ctx.args, e)
+		if ctx.clearScreen {
+			ClearScreen()
+		}
 
-		err := Exec(eArgs, ctx.ExecOpts)
+		ctx.count++
+		Log(ctx.prefix, "run", ctx.count, C(ctx.args, "green"))
+
+		execCtxClone = *ctx.execCtx
+		err := execCtxClone.Dir(ctx.dir).Args(unescapeArgs(ctx.args, e)).Do()
+
 		errMsg := ""
 		if err != nil {
 			errMsg = C(err, "red")
 		}
 		Log(ctx.prefix, "done", ctx.count, C(ctx.args, "green"), errMsg)
 
-		ctx.wait <- struct{}{}
+		ctx.wait <- Nil{}
 	}
 
-	w := watcher.New()
-	matcher, err := NewMatcher(ctx.ExecOpts.Dir, ctx.patterns)
+	ctx.watcher = watcher.New()
+	matcher, err := NewMatcher(ctx.dir, ctx.patterns)
 	if err != nil {
 		return err
 	}
@@ -145,9 +179,9 @@ func (ctx *GuardContext) Do() error {
 
 			if !has {
 				dict[dir] = Nil{}
-				w.Add(dir)
+				ctx.watcher.Add(dir)
 			}
-			w.Add(p)
+			ctx.watcher.Add(p)
 		}
 
 		var watched string
@@ -162,12 +196,12 @@ func (ctx *GuardContext) Do() error {
 		return nil
 	}
 
-	if err := watchFiles(ctx.ExecOpts.Dir); err != nil {
+	if err := watchFiles(ctx.dir); err != nil {
 		return err
 	}
 
 	go func() {
-		debounce := ctx.Debounce
+		debounce := ctx.debounce
 		var lastRun time.Time
 		if debounce == nil {
 			t := time.Millisecond * 300
@@ -176,7 +210,7 @@ func (ctx *GuardContext) Do() error {
 
 		for {
 			select {
-			case e := <-w.Event:
+			case e := <-ctx.watcher.Event:
 				matched, _, err := matcher.match(e.Path, e.IsDir())
 				if err != nil {
 					Err(err)
@@ -200,45 +234,36 @@ func (ctx *GuardContext) Do() error {
 							Err(err)
 						}
 					} else {
-						w.Add(e.Path)
+						ctx.watcher.Add(e.Path)
 					}
 				}
 
-				if ctx.cmd != nil {
-					KillTree(ctx.cmd.Process.Pid)
+				if execCtxClone.GetCmd() != nil {
+					KillTree(execCtxClone.GetCmd().Process.Pid)
 
 					<-ctx.wait
 				}
 
 				go run(&e)
 
-			case err := <-w.Error:
+			case err := <-ctx.watcher.Error:
 				Log(ctx.prefix, err)
 
-			case <-w.Closed:
+			case <-ctx.watcher.Closed:
 				return
 			}
 		}
 	}()
 
-	go func() {
-		if ctx.Stop == nil {
-			return
-		}
-
-		<-ctx.Stop
-		w.Close()
-	}()
-
-	if !ctx.NoInitRun {
+	if !ctx.noInitRun {
 		go run(nil)
 	}
 
-	interval := ctx.Interval
+	interval := ctx.interval
 	if interval == nil {
 		t := time.Millisecond * 300
 		interval = &t
 	}
 
-	return w.Start(*interval)
+	return ctx.watcher.Start(*interval)
 }

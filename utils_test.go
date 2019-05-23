@@ -28,7 +28,7 @@ func TestE(t *testing.T) {
 		assert.Equal(t, "exec: \"exitexit\": executable file not found in $PATH", r.(error).Error())
 	}()
 
-	g.E(g.Exec("exitexit"))
+	g.E(g.Exec("exitexit").Do())
 }
 
 func TestRetry(t *testing.T) {

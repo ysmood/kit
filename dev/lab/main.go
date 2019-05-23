@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	Log("OK")
+	Guard("echo", "ok").Do()
 }

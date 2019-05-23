@@ -5,50 +5,80 @@ import (
 	"strings"
 )
 
-// ExecOptions ...
-type ExecOptions struct {
-	Cmd *exec.Cmd
-	Dir string
+// ExecContext ...
+type ExecContext struct {
+	cmd *exec.Cmd
+	dir string
 
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
 	// of the prefix and will be removed from the output
-	Prefix string
+	prefix string
 
-	IsRaw bool // Set the terminal to raw mode
+	isRaw bool // Set the terminal to raw mode
 
-	OnStart func(opts *ExecOptions)
+	args []string
 }
 
 // Exec execute os command and auto pipe stdout and stdin
-func Exec(params ...interface{}) error {
-	var args []string
-	var opts ExecOptions
-
-	err := Params(params, ParamsRest{&args}, &args, &opts)
-	if err != nil {
-		return err
+func Exec(args ...string) *ExecContext {
+	return &ExecContext{
+		args: args,
 	}
+}
 
-	cmd := exec.Command(args[0], args[1:]...)
+// Args ...
+func (ctx *ExecContext) Args(args []string) *ExecContext {
+	ctx.args = args
+	return ctx
+}
 
-	if opts.Cmd == nil {
-		opts.Cmd = cmd
+// Cmd ...
+func (ctx *ExecContext) Cmd(cmd *exec.Cmd) *ExecContext {
+	ctx.cmd = cmd
+	return ctx
+}
+
+// GetCmd ...
+func (ctx *ExecContext) GetCmd() *exec.Cmd {
+	return ctx.cmd
+}
+
+// Dir ...
+func (ctx *ExecContext) Dir(dir string) *ExecContext {
+	ctx.dir = dir
+	return ctx
+}
+
+// Prefix ...
+func (ctx *ExecContext) Prefix(p string) *ExecContext {
+	ctx.prefix = p
+	return ctx
+}
+
+// Raw ...
+func (ctx *ExecContext) Raw() *ExecContext {
+	ctx.isRaw = true
+	return ctx
+}
+
+// Do ...
+func (ctx *ExecContext) Do() error {
+	cmd := exec.Command(ctx.args[0], ctx.args[1:]...)
+
+	if ctx.cmd == nil {
+		ctx.cmd = cmd
 	} else {
-		clone := *opts.Cmd
-		opts.Cmd = &clone
+		clone := *ctx.cmd
+		ctx.cmd = &clone
 	}
-	if opts.Dir != "" {
-		opts.Cmd.Dir = opts.Dir
-	}
-
-	opts.Cmd.Path = cmd.Path
-	opts.Cmd.Args = cmd.Args
-
-	if opts.OnStart != nil {
-		opts.OnStart(&opts)
+	if ctx.dir != "" {
+		ctx.cmd.Dir = ctx.dir
 	}
 
-	return run(formatPrefix(opts.Prefix), opts.IsRaw, opts.Cmd)
+	ctx.cmd.Path = cmd.Path
+	ctx.cmd.Args = cmd.Args
+
+	return run(formatPrefix(ctx.prefix), ctx.isRaw, ctx.cmd)
 }
 
 func formatPrefix(prefix string) string {

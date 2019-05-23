@@ -34,21 +34,26 @@ func main() {
 	for _, opts := range optsList {
 		fns = append(fns, func(opts *options) func() {
 			return func() {
-				g.E(g.Guard(opts.cmd...).Patterns(*opts.patterns...).Context(g.GuardContext{
-					ExecOpts: g.ExecOptions{
-						Dir:    *opts.dir,
-						IsRaw:  *opts.raw,
-						Prefix: genPrefix(*opts.prefix, opts.cmd),
-						OnStart: func(_ *g.ExecOptions) {
-							if *opts.clearScreen {
-								g.ClearScreen()
-							}
-						},
-					},
-					NoInitRun: *opts.noInitRun,
-					Interval:  opts.poll,
-					Debounce:  opts.debounce,
-				}).Do())
+				guard := g.
+					Guard(opts.cmd...).
+					Debounce(opts.debounce).
+					Interval(opts.poll).
+					ExecCtx(
+						g.Exec().
+							Dir(*opts.dir).
+							Raw().
+							Prefix(genPrefix(*opts.prefix, opts.cmd)),
+					)
+
+				if *opts.clearScreen {
+					guard.ClearScreen()
+				}
+
+				if *opts.noInitRun {
+					guard.NoInitRun()
+				}
+
+				g.E(guard.Do())
 			}
 		}(opts))
 	}

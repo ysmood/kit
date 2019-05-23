@@ -28,11 +28,11 @@ func main() {
 		test()
 
 	case cmdBuild.FullCommand():
-		g.E(g.Exec("go", "test", "./..."))
+		g.E(g.Exec("go", "test", "./...").Do())
 		build(deployTag)
 
 	case viewCov.FullCommand():
-		g.E(g.Exec("go", "tool", "cover", "-html="+covPath))
+		g.E(g.Exec("go", "tool", "cover", "-html="+covPath).Do())
 	}
 }
 
@@ -41,7 +41,7 @@ func lab() {
 }
 
 func test() {
-	g.Exec("go", "get", "github.com/kyoh86/richgo")
+	g.Exec("go", "get", "github.com/kyoh86/richgo").Do()
 
 	g.Guard(
 		"richgo", "test",

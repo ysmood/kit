@@ -14,13 +14,10 @@ func TestGuard(t *testing.T) {
 
 	g.OutputFile(p+"/f", "ok", nil)
 
-	stop := make(chan g.Nil)
 	d := 0 * time.Millisecond
 
-	go g.Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Context(g.GuardContext{
-		Stop:     stop,
-		Debounce: &d,
-	}).Do()
+	guard := g.Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Debounce(&d)
+	go guard.Do()
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -31,5 +28,5 @@ func TestGuard(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	stop <- g.Nil{}
+	guard.Stop()
 }
