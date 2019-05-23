@@ -29,6 +29,7 @@ func TestOutputString(t *testing.T) {
 
 	assert.Equal(t, c, str)
 }
+
 func TestOutputJSON(t *testing.T) {
 	str, err := g.GenerateRandomString(10)
 	p := fmt.Sprintf("fixtures/deep/%s", str)
@@ -101,4 +102,17 @@ func TestRemoveSingleFile(t *testing.T) {
 	g.Remove(p)
 
 	assert.Equal(t, false, g.FileExists(p))
+}
+
+func TestMove(t *testing.T) {
+	str, _ := g.GenerateRandomString(10)
+	p := fmt.Sprintf("fixtures/%s", str)
+
+	g.OutputFile(p+"/a/b", "", nil)
+	g.OutputFile(p+"/a/c", "", nil)
+
+	g.Move(p+"/a", p+"/d", nil)
+
+	assert.True(t, g.Exists(p+"/d/b"))
+	assert.True(t, g.DirExists(p+"/d"))
 }

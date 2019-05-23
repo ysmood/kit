@@ -18,7 +18,7 @@ type GuardContext struct {
 	clearScreen bool
 	interval    *time.Duration // default 300ms
 	execCtx     *ExecContext
-	debounce    *time.Duration // default 300ms, suppress the frequency of the event
+	debounce    *time.Duration // default 300ms
 	noInitRun   bool
 
 	prefix  string
@@ -69,13 +69,13 @@ func (ctx *GuardContext) ClearScreen() *GuardContext {
 	return ctx
 }
 
-// Interval ...
+// Interval poll interval
 func (ctx *GuardContext) Interval(interval *time.Duration) *GuardContext {
 	ctx.interval = interval
 	return ctx
 }
 
-// Debounce ...
+// Debounce suppress the frequency of the event
 func (ctx *GuardContext) Debounce(debounce *time.Duration) *GuardContext {
 	ctx.debounce = debounce
 	return ctx
@@ -102,6 +102,12 @@ func (ctx *GuardContext) Do() error {
 		ctx.execCtx = Exec()
 	}
 
+	logErr := func(err error) {
+		if err != nil {
+			Err(err)
+		}
+	}
+
 	// unescape the {{path}} {{op}} placeholders
 	unescapeArgs := func(args []string, e *watcher.Event) []string {
 		if e == nil {
@@ -111,19 +117,13 @@ func (ctx *GuardContext) Do() error {
 		newArgs := []string{}
 		for _, arg := range args {
 			dir, err := filepath.Abs(ctx.dir)
-			if err != nil {
-				Err(err)
-			}
+			logErr(err)
 
 			p, err := filepath.Abs(e.Path)
-			if err != nil {
-				Err(err)
-			}
+			logErr(err)
 
 			p, err = filepath.Rel(dir, p)
-			if err != nil {
-				Err(err)
-			}
+			logErr(err)
 
 			newArgs = append(
 				newArgs,
@@ -212,9 +212,7 @@ func (ctx *GuardContext) Do() error {
 			select {
 			case e := <-ctx.watcher.Event:
 				matched, _, err := matcher.match(e.Path, e.IsDir())
-				if err != nil {
-					Err(err)
-				}
+				logErr(err)
 
 				if !matched {
 					continue
@@ -230,9 +228,8 @@ func (ctx *GuardContext) Do() error {
 
 				if e.Op == watcher.Create {
 					if e.IsDir() {
-						if err := watchFiles(e.Path); err != nil {
-							Err(err)
-						}
+						err := watchFiles(e.Path)
+						logErr(err)
 					} else {
 						ctx.watcher.Add(e.Path)
 					}
