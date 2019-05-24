@@ -80,11 +80,11 @@ func genOptions(args []string) *options {
 		 # the below is the default patterns guard will use
 		 guard -w '**' -w '!g' -- echo changed
 
-		 # support mustache template
-		 guard -- echo {{op}} {{path}}
+		 # support go template
+		 guard -- echo {{.op}} {{.path}}
 
 		 # watch and sync current dir to remote dir with rsync
-		 guard -n -- rsync {{path}} root@host:/home/me/app/{{path}}
+		 guard -n -- rsync {{.path}} root@host:/home/me/app/{{.path}}
 
 		 # the patterns must be quoted
 		 guard -w '*.go' -w 'lib/**/*.go' -- go run main.go

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hoisie/mustache"
 	"github.com/radovskyb/watcher"
 	. "github.com/ysmood/gokit/pkg/exec"
 	. "github.com/ysmood/gokit/pkg/os"
@@ -31,7 +30,7 @@ type GuardContext struct {
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
 // Because it's based on polling, so it's cross-platform and file system.
-// The args supports mustach template, variables {{path}}, {{op}} are available.
+// The args supports go template, variables {{.path}}, {{.op}} are available.
 // The default patterns are GuardDefaultPatterns
 func Guard(args ...string) *GuardContext {
 	return &GuardContext{
@@ -109,7 +108,7 @@ func (ctx *GuardContext) Do() error {
 		}
 	}
 
-	// unescape the {{path}} {{op}} placeholders
+	// unescape the {{.path}} {{.op}} placeholders
 	unescapeArgs := func(args []string, e *watcher.Event) []string {
 		if e == nil {
 			e = &watcher.Event{}
@@ -128,7 +127,7 @@ func (ctx *GuardContext) Do() error {
 
 			newArgs = append(
 				newArgs,
-				mustache.Render(arg, map[string]string{"path": p, "op": e.Op.String()}),
+				S(arg, "path", p, "op", e.Op.String()),
 			)
 		}
 		return newArgs

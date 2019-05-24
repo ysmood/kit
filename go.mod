@@ -9,7 +9,6 @@ require (
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/karrick/godirwalk v1.10.3
 	github.com/kr/pretty v0.1.0 // indirect

@@ -1,7 +1,6 @@
 package guard_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -12,12 +11,11 @@ import (
 )
 
 func TestGuardDefaults(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/%s", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
-	guard := Guard("echo", "ok", "{{path}}")
+	guard := Guard("echo", "ok", "{{.path}}")
 	go guard.Do() // nolint:errcheck
 
 	time.Sleep(300 * time.Millisecond)
@@ -26,15 +24,14 @@ func TestGuardDefaults(t *testing.T) {
 }
 
 func TestGuard(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/%s", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
 	d := 0 * time.Millisecond
 	i := 1 * time.Millisecond
 
-	guard := Guard("echo", "ok", "{{path}}").
+	guard := Guard("echo", "ok", "{{.path}}").
 		ExecCtx(Exec()).
 		Dir("").
 		Patterns(p + "/**").
@@ -60,14 +57,13 @@ func TestGuard(t *testing.T) {
 }
 
 func TestGuardDebounce(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/%s", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
 	i := 1 * time.Millisecond
 
-	guard := Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Interval(&i)
+	guard := Guard("echo", "ok", "{{.path}}").Patterns(p + "/**").Interval(&i)
 	go guard.Do() // nolint:errcheck
 
 	go func() {

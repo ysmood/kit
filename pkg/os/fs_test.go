@@ -1,7 +1,6 @@
 package os_test
 
 import (
-	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -12,10 +11,9 @@ import (
 )
 
 func TestOutputString(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/deep/path/%s/output_file", str)
+	p := "tmp/" + GenerateRandomString(10)
 
-	_ = OutputFile(p, str, nil)
+	_ = OutputFile(p, p, nil)
 
 	c, err := ReadStringFile(p)
 
@@ -23,12 +21,11 @@ func TestOutputString(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equal(t, c, str)
+	assert.Equal(t, c, p)
 }
 
 func TestOutputBytes(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/deep/path/%s/output_file", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p, []byte("test"), nil)
 
@@ -53,11 +50,10 @@ func TestOutputStringErr2(t *testing.T) {
 }
 
 func TestOutputJSON(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/deep/%s", str)
+	p := "tmp/deep/" + GenerateRandomString(10)
 
 	data := map[string]interface{}{
-		"A": str,
+		"A": p,
 		"B": 10.0,
 	}
 
@@ -121,8 +117,7 @@ func TestRemoveSingleFile(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/%s", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p+"/a/b", "", nil)
 	_ = OutputFile(p+"/a/c", "", nil)

@@ -10,8 +10,7 @@ import (
 )
 
 func TestCopy(t *testing.T) {
-	str := GenerateRandomString(10)
-	p := fmt.Sprintf("tmp/deep/path/%s", str)
+	p := "tmp/" + GenerateRandomString(10)
 
 	_ = OutputFile(p+"/a/b", "ok", nil)
 	_ = OutputFile(p+"/a/c/c", "ok", nil)
@@ -20,4 +19,30 @@ func TestCopy(t *testing.T) {
 
 	assert.True(t, Exists(p+"/d/b"))
 	assert.True(t, Exists(p+"/d/c/c"))
+}
+
+func TestCopyFile(t *testing.T) {
+	p := "tmp/" + GenerateRandomString(10)
+
+	_ = OutputFile(p+"/a", "ok", nil)
+
+	_ = Copy(p+"/a", p+"/b")
+
+	assert.True(t, Exists(p+"/b"))
+}
+
+func TestCopyErr(t *testing.T) {
+	p := "tmp/" + GenerateRandomString(10)
+
+	assert.EqualError(t, Copy(p, p), fmt.Sprintf("stat %s: no such file or directory", p))
+}
+
+func TestCopyDirErr(t *testing.T) {
+	p := "tmp/" + GenerateRandomString(10)
+
+	_ = OutputFile(p+"/a", "ok", nil)
+
+	err := Copy(p+"/a", "/")
+
+	assert.EqualError(t, err, "open /: is a directory")
 }
