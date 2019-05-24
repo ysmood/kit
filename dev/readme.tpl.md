@@ -37,8 +37,6 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 
 {{.ExampleReq}}
 
-## Tools
-
 ### guard
 
 {{.ExampleGuard}}

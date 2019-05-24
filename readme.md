@@ -71,8 +71,6 @@ func main() {
 
 ```
 
-## Tools
-
 ### guard
 
 ```go
