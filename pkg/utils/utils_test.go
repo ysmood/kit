@@ -82,7 +82,13 @@ func TestJSON(t *T) {
 }
 
 func TestGenerateRandomString(t *T) {
-	v, _ := GenerateRandomString(10)
+	v := GenerateRandomString(10)
 	raw, _ := base64.URLEncoding.DecodeString(v)
 	assert.Len(t, raw, 10)
+}
+
+func TestSTemplate(t *T) {
+	out := S("{{.key}}", "key", "value")
+
+	assert.Equal(t, "value", out)
 }

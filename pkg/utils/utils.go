@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"html/template"
 	"sync"
 	"time"
 
@@ -54,20 +56,15 @@ func All(actions ...func()) {
 	wg.Wait()
 }
 
-func GenerateRandomBytes(n int) ([]byte, error) {
+func GenerateRandomBytes(n int) []byte {
 	b := make([]byte, n)
-	_, err := rand.Read(b)
-	// Note that err == nil only if we read len(b) bytes.
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
+	_, _ = rand.Read(b)
+	return b
 }
 
-func GenerateRandomString(s int) (string, error) {
-	b, err := GenerateRandomBytes(s)
-	return base64.URLEncoding.EncodeToString(b), err
+func GenerateRandomString(s int) string {
+	b := GenerateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b)
 }
 
 // Try try fn with recover, return the panic as value
@@ -106,4 +103,21 @@ func Retry(times int, wait time.Duration, fn func()) (errs []interface{}) {
 		return nil
 	}
 	return errs
+}
+
+// S Template render, the params is key-value pairs
+func S(tpl string, params ...interface{}) string {
+	var out bytes.Buffer
+
+	t := template.Must(template.New("").Parse(tpl))
+
+	dict := map[interface{}]interface{}{}
+	l := len(params)
+	for i := 0; i < l-1; i += 2 {
+		dict[params[i]] = params[i+1]
+	}
+
+	E(t.Execute(&out, dict))
+
+	return out.String()
 }

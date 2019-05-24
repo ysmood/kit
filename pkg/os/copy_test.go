@@ -10,8 +10,8 @@ import (
 )
 
 func TestCopy(t *testing.T) {
-	str, _ := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/deep/path/%s", str)
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/deep/path/%s", str)
 
 	_ = OutputFile(p+"/a/b", "ok", nil)
 	_ = OutputFile(p+"/a/c/c", "ok", nil)

@@ -150,20 +150,25 @@ func (ctx *Context) Response() *http.Response {
 	return ctx.Do().response
 }
 
+// Bytes get response body as bytes
 func (ctx *Context) Bytes() []byte {
-	body, err := ioutil.ReadAll(ctx.Response().Body)
-	if err != nil {
-		ctx.err = err
-		return nil
-	}
-
-	err = ctx.response.Body.Close()
-	if err != nil {
-		ctx.err = err
-		return nil
-	}
-
+	body, err := readBody(ctx.Response().Body)
+	ctx.err = err
 	return body
+}
+
+func readBody(b io.ReadCloser) ([]byte, error) {
+	body, err := ioutil.ReadAll(b)
+	if err != nil {
+		return nil, err
+	}
+
+	err = b.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
 
 // String get string response

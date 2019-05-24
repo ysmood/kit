@@ -1,0 +1,2 @@
+[submodule "pkg/os/fixtures/git-submodule"]
+	path = pkg/os/fixtures/git-submodule

@@ -12,8 +12,8 @@ import (
 )
 
 func TestGuardDefaults(t *testing.T) {
-	str, _ := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/%s", str)
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/%s", str)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
@@ -26,8 +26,8 @@ func TestGuardDefaults(t *testing.T) {
 }
 
 func TestGuard(t *testing.T) {
-	str, _ := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/%s", str)
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/%s", str)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
@@ -60,8 +60,8 @@ func TestGuard(t *testing.T) {
 }
 
 func TestGuardDebounce(t *testing.T) {
-	str, _ := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/%s", str)
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/%s", str)
 
 	_ = OutputFile(p+"/f", "ok", nil)
 

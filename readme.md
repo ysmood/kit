@@ -1,5 +1,7 @@
+# Gokit
+
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
-[![Coverage Status](https://coveralls.io/repos/github/ysmood/gokit/badge.svg?branch=master&t=1)](https://coveralls.io/github/ysmood/gokit?branch=master)
+[![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
 
 Some of the io related methods that are often used.
 
@@ -7,11 +9,13 @@ This library won't have the best performance, but it will have sane defaults to 
 
 This project an example to use Go only for self hosted automation.
 
-# Install CLI Tools
+## Install CLI Tools
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
 
-## os
+## Modules
+
+### os
 
 Covers most used os related functions that are missing from the stdlib.
 
@@ -30,11 +34,11 @@ func main() {
 }
 ```
 
-## process
+### process
 
 A better `Exec` alternatives for the stdlib one.
 
-## req
+### req
 
 The http request lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
 alternative to use with it's fluent api design. You will reduce a lot of your code without sacrificing performance.
@@ -58,7 +62,9 @@ func main() {
 }
 ```
 
-## guard
+## Tools
+
+### guard
 
 ```bash
 $ guard --help
@@ -90,7 +96,7 @@ run and guard a command, kill and rerun it when watched files are modified
 
      # the output will be prefix with red 'my-app | '
      guard -p 'my-app | @red' -- python test.py
-     
+
      # use "---" as separator to guard multiple commands
      guard -w 'a/*' -- ls a --- -w 'b/*' -- ls b
 
@@ -106,10 +112,9 @@ Flags:
             --version          Show application version.
 ```
 
+## Development
 
-# Development
-
-## Build Project
+### Build Project
 
 ```bash
 go run ./dev --help

@@ -85,10 +85,7 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 
 // KillTree kill process and all its children process
 func KillTree(pid int) error {
-	group, err := os.FindProcess(-1 * pid)
-	if err != nil {
-		return err
-	}
+	group, _ := os.FindProcess(-1 * pid)
 
 	return group.Signal(syscall.SIGTERM)
 }

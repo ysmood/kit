@@ -24,7 +24,7 @@ func TestRequestSuite(t *testing.T) {
 
 func (s *RequestSuite) path() (path, url string) {
 	_, port, _ := net.SplitHostPort(s.listener.Addr().String())
-	r, _ := GenerateRandomString(5)
+	r := GenerateRandomString(5)
 	path = "/" + r
 	url = "http://127.0.0.1:" + port + path
 	return path, url
@@ -61,7 +61,22 @@ func (s *RequestSuite) TestGetString() {
 		c.String(200, "ok")
 	})
 
-	s.Equal("ok", Req(url).String())
+	c := Req(url)
+
+	s.Equal("ok", c.String())
+	s.Equal(url, c.Request().URL.String())
+}
+
+func (s *RequestSuite) TestSetClient() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c *gin.Context) {
+		c.String(200, "ok")
+	})
+
+	c := Req(url).Client(&http.Client{})
+
+	s.Equal("ok", c.String())
 }
 
 func (s *RequestSuite) TestMethodErr() {
@@ -175,6 +190,12 @@ func (s *RequestSuite) TestPostJSON() {
 
 	c := Req(url).Post().JSONBody(struct{ A string }{"ok"})
 	s.Equal("ok", c.String())
+}
+
+func (s *RequestSuite) TestJSONBodyError() {
+	v := make(chan Nil)
+	c := Req("").JSONBody(v)
+	s.EqualError(c.Err(), "json: unsupported type: chan utils.Nil")
 }
 
 func (s *RequestSuite) TestHeader() {

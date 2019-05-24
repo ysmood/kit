@@ -1,4 +1,3 @@
-fixtures/
-/tmp
+tmp/
 /dist
-/profile.cov
+/coverage.txt

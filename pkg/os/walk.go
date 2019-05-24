@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/bmatcuk/doublestar"
@@ -195,23 +196,25 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	}, nil
 }
 
+var submoduleReg = regexp.MustCompile(`\A [a-f0-9]+ (.+) \(.+\)\z`)
+
 func getGitSubmodules() []string {
-	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	out, err := exec.Command("git", "submodule").Output()
 	if err != nil {
 		return nil
 	}
 
-	root := strings.TrimSpace(string(out))
+	list := []string{}
+	for _, l := range strings.Split(string(out), "\n") {
+		m := submoduleReg.FindStringSubmatch(l)
 
-	p := filepath.Join(root, filepath.Join(".git", "modules", "*"))
-
-	l, _ := filepath.Glob(p)
-
-	for i, p := range l {
-		l[i] = strings.Replace(p, filepath.Join(root, ".git", "modules"), root, 1)
+		if len(m) > 1 {
+			p, _ := filepath.Abs(m[1])
+			list = append(list, p)
+		}
 	}
 
-	return l
+	return list
 }
 
 func (m *Matcher) gitMatch(p string, isDir bool) bool {

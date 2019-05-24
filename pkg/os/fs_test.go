@@ -12,17 +12,12 @@ import (
 )
 
 func TestOutputString(t *testing.T) {
-	str, err := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/deep/path/%s/output_file", str)
-
-	if err != nil {
-		panic(err)
-	}
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/deep/path/%s/output_file", str)
 
 	_ = OutputFile(p, str, nil)
 
-	var c string
-	c, err = ReadStringFile(p)
+	c, err := ReadStringFile(p)
 
 	if err != nil {
 		panic(err)
@@ -32,17 +27,12 @@ func TestOutputString(t *testing.T) {
 }
 
 func TestOutputBytes(t *testing.T) {
-	str, err := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/deep/path/%s/output_file", str)
-
-	if err != nil {
-		panic(err)
-	}
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/deep/path/%s/output_file", str)
 
 	_ = OutputFile(p, []byte("test"), nil)
 
-	var c string
-	c, err = ReadStringFile(p)
+	c, err := ReadStringFile(p)
 
 	if err != nil {
 		panic(err)
@@ -52,9 +42,9 @@ func TestOutputBytes(t *testing.T) {
 }
 
 func TestOutputStringErr(t *testing.T) {
-	err := OutputFile("fixtures", "", nil)
+	err := OutputFile(".", "", nil)
 
-	assert.EqualError(t, err, "open fixtures: is a directory")
+	assert.EqualError(t, err, "open .: is a directory")
 }
 
 func TestOutputStringErr2(t *testing.T) {
@@ -63,12 +53,8 @@ func TestOutputStringErr2(t *testing.T) {
 }
 
 func TestOutputJSON(t *testing.T) {
-	str, err := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/deep/%s", str)
-
-	if err != nil {
-		panic(err)
-	}
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/deep/%s", str)
 
 	data := map[string]interface{}{
 		"A": str,
@@ -78,7 +64,7 @@ func TestOutputJSON(t *testing.T) {
 	_ = OutputFile(p, data, nil)
 
 	var ret interface{}
-	err = ReadJSON(p, &ret)
+	err := ReadJSON(p, &ret)
 
 	if err != nil {
 		panic(err)
@@ -88,17 +74,17 @@ func TestOutputJSON(t *testing.T) {
 }
 
 func TestMkdir(t *testing.T) {
-	p := "fixtures/deep/a/b/c"
+	p := "tmp/deep/a/b/c"
 	_ = Mkdir(p, nil)
 
 	assert.Equal(t, true, DirExists(p))
 }
 
 func TestGlob(t *testing.T) {
-	_ = OutputFile("fixtures/glob/a/b", "", nil)
-	_ = OutputFile("fixtures/glob/a/c", "", nil)
+	_ = OutputFile("tmp/glob/a/b", "", nil)
+	_ = OutputFile("tmp/glob/a/c", "", nil)
 
-	l, err := Walk("glob/**").Dir("fixtures").List()
+	l, err := Walk("glob/**").Dir("tmp").List()
 	E(err)
 	assert.Equal(t, 3, len(l))
 }
@@ -111,20 +97,20 @@ func TestGlobGit(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	_ = OutputFile("fixtures/remove/a", "", nil)
-	_ = OutputFile("fixtures/remove/b/c", "", nil)
-	_ = OutputFile("fixtures/remove/b/d", "", nil)
-	_ = OutputFile("fixtures/remove/e/f/g", "", nil)
+	_ = OutputFile("tmp/remove/a", "", nil)
+	_ = OutputFile("tmp/remove/b/c", "", nil)
+	_ = OutputFile("tmp/remove/b/d", "", nil)
+	_ = OutputFile("tmp/remove/e/f/g", "", nil)
 
-	E(Remove("fixtures/remove/**"))
+	E(Remove("tmp/remove/**"))
 
-	l, err := Walk("fixtures/remove/**").List()
+	l, err := Walk("tmp/remove/**").List()
 	E(err)
 	assert.Equal(t, 0, len(l))
 }
 
 func TestRemoveSingleFile(t *testing.T) {
-	p := "fixtures/remove-single/a"
+	p := "tmp/remove-single/a"
 	_ = OutputFile(p, "", nil)
 
 	assert.Equal(t, true, FileExists(p))
@@ -135,8 +121,8 @@ func TestRemoveSingleFile(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
-	str, _ := GenerateRandomString(10)
-	p := fmt.Sprintf("fixtures/%s", str)
+	str := GenerateRandomString(10)
+	p := fmt.Sprintf("tmp/%s", str)
 
 	_ = OutputFile(p+"/a/b", "", nil)
 	_ = OutputFile(p+"/a/c", "", nil)
