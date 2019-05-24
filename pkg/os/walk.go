@@ -12,45 +12,85 @@ import (
 	gitignore "github.com/monochromegane/go-gitignore"
 )
 
-type WalkOptions struct {
-	Dir                  string
-	Sorted               bool
-	FollowSymbolicLinks  bool
-	PostChildrenCallback godirwalk.WalkFunc
-	Matcher              *Matcher
+type WalkContext struct {
+	dir                  string
+	sort                 bool
+	followSymbolicLinks  bool
+	postChildrenCallback godirwalk.WalkFunc
+	matcher              *Matcher
+
+	callback godirwalk.WalkFunc
+	patterns []string
 }
 
 // WalkGitIgnore special pattern to ignore all gitignore rules,
 // including the ".gitignore" and ".gitignore_global"
 const WalkGitIgnore = "!g"
 
-// WalkHidden special pattern to match all hidden files
-const WalkHidden = "!**" + string(os.PathSeparator) + ".[^.]*"
+// WalkIgnoreHidden special pattern to ignore all hidden files
+const WalkIgnoreHidden = "!**" + string(os.PathSeparator) + ".[^.]*"
 
 // Walk If the pattern begins with "!", it will become a negative filter pattern.
 // Each path will be tested against all pattern, each pattern will override the previous
 // pattern's match result.
-func Walk(patterns []string, cb godirwalk.WalkFunc, opts *WalkOptions) error {
-	if opts == nil {
-		opts = &WalkOptions{
-			Dir: ".",
-		}
+func Walk(patterns ...string) *WalkContext {
+	return &WalkContext{
+		dir:      ".",
+		patterns: patterns,
 	}
+}
 
-	m := opts.Matcher
+func (ctx *WalkContext) Dir(d string) *WalkContext {
+	ctx.dir = d
+	return ctx
+}
+
+func (ctx *WalkContext) Sort() *WalkContext {
+	ctx.sort = true
+	return ctx
+}
+
+func (ctx *WalkContext) FollowSymbolicLinks() *WalkContext {
+	ctx.followSymbolicLinks = true
+	return ctx
+}
+
+func (ctx *WalkContext) PostChildrenCallback(cb godirwalk.WalkFunc) *WalkContext {
+	ctx.postChildrenCallback = cb
+	return ctx
+}
+
+func (ctx *WalkContext) Matcher(m *Matcher) *WalkContext {
+	ctx.matcher = m
+	return ctx
+}
+
+func (ctx *WalkContext) Do(cb godirwalk.WalkFunc) error {
+	ctx.callback = cb
+
+	m := ctx.matcher
 	if m == nil {
 		var err error
-		m, err = NewMatcher(opts.Dir, patterns)
+		m, err = NewMatcher(ctx.dir, ctx.patterns)
 		if err != nil {
 			return err
 		}
 	}
 
 	return godirwalk.Walk(m.dir, &godirwalk.Options{
-		Unsorted:             !opts.Sorted,
-		FollowSymbolicLinks:  opts.FollowSymbolicLinks,
-		Callback:             genMatchFn(m, cb),
-		PostChildrenCallback: genMatchFn(m, opts.PostChildrenCallback),
+		Unsorted:             !ctx.sort,
+		FollowSymbolicLinks:  ctx.followSymbolicLinks,
+		Callback:             genMatchFn(m, ctx.callback),
+		PostChildrenCallback: genMatchFn(m, ctx.postChildrenCallback),
+	})
+}
+
+// List walk and get list of the paths
+func (ctx *WalkContext) List() ([]string, error) {
+	list := []string{}
+	return list, ctx.Do(func(p string, info *godirwalk.Dirent) error {
+		list = append(list, p)
+		return nil
 	})
 }
 

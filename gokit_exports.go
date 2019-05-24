@@ -2,12 +2,12 @@
 
 package gokit
 
-import(
-    "github.com/ysmood/gokit/pkg/utils"
-    "github.com/ysmood/gokit/pkg/req"
-    "github.com/ysmood/gokit/pkg/os"
-    "github.com/ysmood/gokit/pkg/exec"
-    "github.com/ysmood/gokit/pkg/guard"
+import (
+	"github.com/ysmood/gokit/pkg/exec"
+	"github.com/ysmood/gokit/pkg/guard"
+	"github.com/ysmood/gokit/pkg/os"
+	"github.com/ysmood/gokit/pkg/req"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 var All = utils.All
@@ -15,10 +15,14 @@ var E = utils.E
 var GenerateRandomBytes = utils.GenerateRandomBytes
 var GenerateRandomString = utils.GenerateRandomString
 var JSON = utils.JSON
+
 type Nil = utils.Nil
+
 var Retry = utils.Retry
 var Try = utils.Try
+
 type Context = req.Context
+
 var Req = req.Req
 var C = os.C
 var ClearScreen = os.ClearScreen
@@ -28,17 +32,22 @@ var Dump = os.Dump
 var Err = os.Err
 var Exists = os.Exists
 var FileExists = os.FileExists
-var Glob = os.Glob
 var GoPath = os.GoPath
 var HomeDir = os.HomeDir
 var Log = os.Log
+
 type Matcher = os.Matcher
+
 var Mkdir = os.Mkdir
+
 type MkdirOptions = os.MkdirOptions
+
 var Move = os.Move
 var NewMatcher = os.NewMatcher
 var OutputFile = os.OutputFile
+
 type OutputFileOptions = os.OutputFileOptions
+
 var ReadFile = os.ReadFile
 var ReadJSON = os.ReadJSON
 var ReadStringFile = os.ReadStringFile
@@ -46,13 +55,19 @@ var Remove = os.Remove
 var Stderr = os.Stderr
 var Stdout = os.Stdout
 var Walk = os.Walk
+
+type WalkContext = os.WalkContext
+
 var WalkGitIgnore = os.WalkGitIgnore
-var WalkHidden = os.WalkHidden
-type WalkOptions = os.WalkOptions
+var WalkIgnoreHidden = os.WalkIgnoreHidden
 var EnsureGoTool = exec.EnsureGoTool
 var Exec = exec.Exec
+
 type ExecContext = exec.ExecContext
+
 var KillTree = exec.KillTree
 var Guard = guard.Guard
+
 type GuardContext = guard.GuardContext
+
 var GuardDefaultPatterns = guard.GuardDefaultPatterns

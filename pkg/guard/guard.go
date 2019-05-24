@@ -162,7 +162,7 @@ func (ctx *GuardContext) Do() error {
 	}
 
 	watchFiles := func(dir string) error {
-		list, err := Glob(ctx.patterns, &WalkOptions{Dir: dir, Matcher: matcher})
+		list, err := Walk(ctx.patterns...).Dir(dir).Matcher(matcher).List()
 
 		if err != nil {
 			return err

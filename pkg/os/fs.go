@@ -110,15 +110,13 @@ func Move(from, to string, perm *os.FileMode) error {
 }
 
 func Remove(patterns ...string) error {
-	return Walk(patterns, func(p string, info *godirwalk.Dirent) error {
+	return Walk(patterns...).PostChildrenCallback(func(p string, info *godirwalk.Dirent) error {
+		return os.Remove(p)
+	}).Do(func(p string, info *godirwalk.Dirent) error {
 		if info.IsDir() {
 			return nil
 		}
 		return os.Remove(p)
-	}, &WalkOptions{
-		PostChildrenCallback: func(p string, info *godirwalk.Dirent) error {
-			return os.Remove(p)
-		},
 	})
 }
 
@@ -156,14 +154,4 @@ func DirExists(path string) bool {
 	}
 
 	return true
-}
-
-// Glob patterns' doc is same as gokit.Walk
-func Glob(patterns []string, opts *WalkOptions) ([]string, error) {
-	list := []string{}
-	err := Walk(patterns, func(p string, info *godirwalk.Dirent) error {
-		list = append(list, p)
-		return nil
-	}, opts)
-	return list, err
 }

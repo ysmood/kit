@@ -98,15 +98,13 @@ func TestGlob(t *testing.T) {
 	_ = OutputFile("fixtures/glob/a/b", "", nil)
 	_ = OutputFile("fixtures/glob/a/c", "", nil)
 
-	l, err := Glob([]string{"glob/**"}, &WalkOptions{
-		Dir: "fixtures",
-	})
+	l, err := Walk("glob/**").Dir("fixtures").List()
 	E(err)
 	assert.Equal(t, 3, len(l))
 }
 
 func TestGlobGit(t *testing.T) {
-	l, err := Glob([]string{"**", WalkGitIgnore}, nil)
+	l, err := Walk("**", WalkGitIgnore).List()
 	E(err)
 	fullPath, _ := filepath.Abs("fs.go")
 	assert.Contains(t, l, fullPath)
@@ -120,7 +118,7 @@ func TestRemove(t *testing.T) {
 
 	E(Remove("fixtures/remove/**"))
 
-	l, err := Glob([]string{"fixtures/remove/**"}, nil)
+	l, err := Walk("fixtures/remove/**").List()
 	E(err)
 	assert.Equal(t, 0, len(l))
 }

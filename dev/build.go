@@ -14,7 +14,7 @@ import (
 )
 
 func build(deployTag *bool) {
-	list, err := Glob([]string{"cmd/*"}, nil)
+	list, err := Walk("cmd/*").List()
 
 	if err != nil {
 		panic(err)
@@ -40,7 +40,7 @@ func build(deployTag *bool) {
 }
 
 func deploy(tag string) {
-	files, err := Glob([]string{"dist/*"}, nil)
+	files, err := Walk("dist/*").List()
 	E(err)
 
 	_ = Exec("hub", "release", "delete", tag).Raw().Do()
