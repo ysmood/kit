@@ -4,7 +4,7 @@ require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/bmatcuk/doublestar v1.1.1
-	github.com/davecgh/go-spew v1.1.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/derekstavis/go-qs v0.0.0-20180720192143-9eef69e6c4e7
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/gin-gonic/gin v1.4.0
@@ -21,6 +21,7 @@ require (
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.6
+	github.com/sanity-io/litter v1.1.0
 	github.com/stretchr/testify v1.3.0
 	github.com/tidwall/gjson v1.2.1
 	github.com/tidwall/match v1.0.1 // indirect

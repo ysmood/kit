@@ -49,7 +49,7 @@ package main
 
 import (
     . "github.com/ysmood/gokit"
-    // "github.com/ysmood/gokit/pkg/req" you don't have to import all sub modules
+    // "github.com/ysmood/gokit/pkg/http" you don't have to import all sub modules
 )
 
 func main() {

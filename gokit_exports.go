@@ -61,6 +61,7 @@ var ReadFile = os.ReadFile
 var ReadJSON = os.ReadJSON
 var ReadStringFile = os.ReadStringFile
 var Remove = os.Remove
+var Sdump = os.Sdump
 var Stderr = os.Stderr
 var Stdout = os.Stdout
 var Walk = os.Walk

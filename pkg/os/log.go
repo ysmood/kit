@@ -8,14 +8,17 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/k0kubun/go-ansi"
 	ansiColor "github.com/mgutz/ansi"
+	"github.com/sanity-io/litter"
 )
 
 var Stdout = ansi.NewAnsiStdout()
 
 var Stderr = ansi.NewAnsiStderr()
+
+var Dump = litter.Dump
+var Sdump = litter.Sdump
 
 // Log log to stdout with timestamp
 func Log(v ...interface{}) {
@@ -32,11 +35,6 @@ func Err(v ...interface{}) {
 	v = append([]interface{}{C(t, "7")}, v...)
 
 	fmt.Fprintln(Stderr, v...)
-}
-
-// Dump spew dump
-func Dump(v ...interface{}) {
-	spew.Dump(v...)
 }
 
 func ClearScreen() error {
