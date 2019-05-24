@@ -5,8 +5,8 @@ package gokit
 import (
 	"github.com/ysmood/gokit/pkg/exec"
 	"github.com/ysmood/gokit/pkg/guard"
+	"github.com/ysmood/gokit/pkg/http"
 	"github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/req"
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
@@ -19,11 +19,20 @@ var JSON = utils.JSON
 type Nil = utils.Nil
 
 var Retry = utils.Retry
+var S = utils.S
 var Try = utils.Try
+var WaitSignal = utils.WaitSignal
 
-type Context = req.Context
+type GinContext = http.GinContext
 
-var Req = req.Req
+var Req = http.Req
+
+type ReqContext = http.ReqContext
+
+var Server = http.Server
+
+type ServerContext = http.ServerContext
+
 var C = os.C
 var ClearScreen = os.ClearScreen
 var Copy = os.Copy

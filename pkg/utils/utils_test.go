@@ -92,3 +92,7 @@ func TestSTemplate(t *T) {
 
 	assert.Equal(t, "value", out)
 }
+
+func TestWaitSignal(t *T) {
+	go WaitSignal(nil)
+}

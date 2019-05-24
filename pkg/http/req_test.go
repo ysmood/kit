@@ -1,4 +1,4 @@
-package req_test
+package http_test
 
 import (
 	"net"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	. "github.com/ysmood/gokit/pkg/req"
+	. "github.com/ysmood/gokit/pkg/http"
 	. "github.com/ysmood/gokit/pkg/utils"
 )
 
@@ -31,23 +31,11 @@ func (s *RequestSuite) path() (path, url string) {
 }
 
 func (s *RequestSuite) SetupSuite() {
-	wait := make(chan Nil)
+	server := Server(":0")
+	s.listener = server.Listener
+	s.router = server.Handler
 
-	go func() {
-		gin.SetMode(gin.ReleaseMode)
-		r := gin.New()
-
-		ln, _ := net.Listen("tcp", ":0")
-
-		s.router = r
-		s.listener = ln
-
-		wait <- Nil{}
-
-		_ = http.Serve(ln, r)
-	}()
-
-	<-wait
+	go server.Do()
 }
 
 func (s *RequestSuite) TearDownSuite() {
@@ -57,7 +45,7 @@ func (s *RequestSuite) TearDownSuite() {
 func (s *RequestSuite) TestGetString() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		c.String(200, "ok")
 	})
 
@@ -70,7 +58,7 @@ func (s *RequestSuite) TestGetString() {
 func (s *RequestSuite) TestSetClient() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		c.String(200, "ok")
 	})
 
@@ -81,31 +69,31 @@ func (s *RequestSuite) TestSetClient() {
 
 func (s *RequestSuite) TestMethodErr() {
 	c := Req("").Method("あ").Do()
-	s.EqualError(c.Err(), "net/http: invalid method \"あ\"")
+	s.EqualError(c.Error, "net/http: invalid method \"あ\"")
 }
 
 func (s *RequestSuite) TestURLErr() {
 	c := Req("").Do()
-	s.EqualError(c.Err(), "Get : unsupported protocol scheme \"\"")
+	s.EqualError(c.Error, "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		v, _ := c.GetQuery("a")
 		s.Equal("1", v)
 	})
 
 	c := Req(url).Query("a", "1")
 
-	s.Nil(c.Err())
+	s.Nil(c.Error)
 }
 
 func (s *RequestSuite) TestGetJSON() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		c.String(200, `{ "A": "ok" }`)
 	})
 
@@ -124,7 +112,7 @@ func (s *RequestSuite) TestGetJSON() {
 func (s *RequestSuite) TestGetGJSON() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		c.String(200, `{ "deep": { "path": 1 } }`)
 	})
 
@@ -136,7 +124,7 @@ func (s *RequestSuite) TestGetGJSON() {
 func (s *RequestSuite) TestPostForm() {
 	path, url := s.path()
 
-	s.router.POST(path, func(c *gin.Context) {
+	s.router.POST(path, func(c GinContext) {
 		out, _ := c.GetPostForm("a")
 		c.String(200, out)
 	})
@@ -148,7 +136,7 @@ func (s *RequestSuite) TestPostForm() {
 func (s *RequestSuite) TestPostBytes() {
 	path, url := s.path()
 
-	s.router.POST(path, func(c *gin.Context) {
+	s.router.POST(path, func(c GinContext) {
 		out, _ := c.GetRawData()
 		c.Data(200, "", out)
 	})
@@ -160,7 +148,7 @@ func (s *RequestSuite) TestPostBytes() {
 func (s *RequestSuite) TestPutString() {
 	path, url := s.path()
 
-	s.router.PUT(path, func(c *gin.Context) {
+	s.router.PUT(path, func(c GinContext) {
 		out, _ := c.GetRawData()
 		c.Data(200, "", out)
 	})
@@ -172,7 +160,7 @@ func (s *RequestSuite) TestPutString() {
 func (s *RequestSuite) TestDelete() {
 	path, url := s.path()
 
-	s.router.DELETE(path, func(c *gin.Context) {
+	s.router.DELETE(path, func(c GinContext) {
 		c.String(200, "ok")
 	})
 
@@ -183,7 +171,7 @@ func (s *RequestSuite) TestDelete() {
 func (s *RequestSuite) TestPostJSON() {
 	path, url := s.path()
 
-	s.router.POST(path, func(c *gin.Context) {
+	s.router.POST(path, func(c GinContext) {
 		data, _ := c.GetRawData()
 		c.String(200, JSON(data).Get("A").String())
 	})
@@ -195,13 +183,13 @@ func (s *RequestSuite) TestPostJSON() {
 func (s *RequestSuite) TestJSONBodyError() {
 	v := make(chan Nil)
 	c := Req("").JSONBody(v)
-	s.EqualError(c.Err(), "json: unsupported type: chan utils.Nil")
+	s.EqualError(c.Error, "json: unsupported type: chan utils.Nil")
 }
 
 func (s *RequestSuite) TestHeader() {
 	path, url := s.path()
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		h := c.GetHeader("test")
 		c.String(200, h)
 	})
@@ -216,7 +204,7 @@ func (s *RequestSuite) TestReuseCookie() {
 	var cookieA string
 	var header string
 
-	s.router.GET(path, func(c *gin.Context) {
+	s.router.GET(path, func(c GinContext) {
 		cookieA, _ = c.Cookie("t")
 		header = c.GetHeader("a")
 		c.SetCookie("t", "val", 3600, "", "", false, true)

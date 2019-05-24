@@ -1,4 +1,4 @@
-package req
+package http
 
 import (
 	"errors"

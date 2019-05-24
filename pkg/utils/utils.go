@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"html/template"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 
@@ -120,4 +122,14 @@ func S(tpl string, params ...interface{}) string {
 	E(t.Execute(&out, dict))
 
 	return out.String()
+}
+
+func WaitSignal(sig os.Signal) {
+	c := make(chan os.Signal, 1)
+	if sig == nil {
+		sig = os.Interrupt
+	}
+	signal.Notify(c, sig)
+	<-c
+	close(c)
 }
