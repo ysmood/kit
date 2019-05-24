@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
-	"html/template"
 	"os"
 	"os/signal"
 	"sync"
+	"text/template"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -113,10 +113,10 @@ func S(tpl string, params ...interface{}) string {
 
 	t := template.Must(template.New("").Parse(tpl))
 
-	dict := map[interface{}]interface{}{}
+	dict := map[string]interface{}{}
 	l := len(params)
 	for i := 0; i < l-1; i += 2 {
-		dict[params[i]] = params[i+1]
+		dict[params[i].(string)] = params[i+1]
 	}
 
 	E(t.Execute(&out, dict))

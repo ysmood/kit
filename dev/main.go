@@ -34,6 +34,7 @@ func main() {
 	case cmdBuild.FullCommand():
 		E(Exec("go", "test", "-coverprofile="+covPath, "-covermode=count", "./...").Do())
 		export()
+		genReadme()
 		build(deployTag)
 
 	case viewCov.FullCommand():

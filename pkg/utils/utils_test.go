@@ -88,9 +88,13 @@ func TestGenerateRandomString(t *T) {
 }
 
 func TestSTemplate(t *T) {
-	out := S("{{.key}}", "key", "value")
-
-	assert.Equal(t, "value", out)
+	out := S(
+		"{{.a}} {{.b}} {{.c.A}}",
+		"a", "<value>",
+		"b", 10,
+		"c", struct{ A string }{"ok"},
+	)
+	assert.Equal(t, "<value> 10 ok", out)
 }
 
 func TestWaitSignal(t *T) {
