@@ -3,15 +3,15 @@
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
 [![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
 
-Some of the io related methods that are often used.
+This project is a collection of often used io related methods.
 
-This library won't have the best performance, but it will have sane defaults to make coding less verbose.
+- Sane defaults to make coding less verbose.
 
-This project an example to use Go only for self hosted automation.
+- Focus on performance.
 
-## Install CLI Tools
+- Won't produce error, all errors are come from its dependencies.
 
-Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+- Won't use any other lanuage for the development of this project. So it's a good example to show how to use Go only for automation.
 
 ## Modules
 
@@ -43,11 +43,17 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 
 #### CLI tool
 
+## Install CLI Tools
+
+Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+
 ```bash
 {{.GuardHelp}}
 ```
 
 ## Development
+
+To write testable code, I try to isolate all error related dependencies.
 
 ### Build Project
 

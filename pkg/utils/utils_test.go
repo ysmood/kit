@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -23,12 +24,23 @@ func TestAll(t *testing.T) {
 
 func TestE(t *testing.T) {
 	defer func() {
-		r := recover()
+		r := ErrArg(recover())
 
-		assert.Equal(t, "exec: \"exitexit\": executable file not found in $PATH", r.(error).Error())
+		assert.EqualError(t, r, "exec: \"exitexit\": executable file not found in $PATH")
 	}()
 
 	E(Exec("exitexit").Do())
+}
+
+func TestE1(t *testing.T) {
+	defer func() {
+		r := ErrArg(recover())
+
+		assert.EqualError(t, r, "err")
+	}()
+
+	E1("ok", nil)
+	E1("ok", errors.New("err"))
 }
 
 func TestRetry(t *testing.T) {

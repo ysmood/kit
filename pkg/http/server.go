@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 type ServerContext struct {
 	Handler  *gin.Engine
 	Listener net.Listener
-	Error    error
 }
 
 type GinContext = *gin.Context
 
-func Server(address string) *ServerContext {
+func Server(address string) (*ServerContext, error) {
 	s := &ServerContext{}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -24,16 +24,23 @@ func Server(address string) *ServerContext {
 	ln, err := net.Listen("tcp", address)
 
 	if err != nil {
-		s.Error = err
-		return s
+		return nil, err
 	}
 
 	s.Handler = r
 	s.Listener = ln
 
-	return s
+	return s, nil
 }
 
-func (ctx *ServerContext) Do() {
-	ctx.Error = http.Serve(ctx.Listener, ctx.Handler)
+func MustServer(address string) *ServerContext {
+	return utils.E(Server(address))[0].(*ServerContext)
+}
+
+func (ctx *ServerContext) Do() error {
+	return http.Serve(ctx.Listener, ctx.Handler)
+}
+
+func (ctx *ServerContext) MustDo() {
+	utils.E(ctx.Do())
 }

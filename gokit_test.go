@@ -9,28 +9,28 @@ import (
 func TestLintWholeProject(_ *testing.T) {
 	// lint first
 	EnsureGoTool("github.com/golangci/golangci-lint/cmd/golangci-lint")
-	E(Exec("golangci-lint", "run").Do())
+	Exec("golangci-lint", "run").MustDo()
 }
 
 func ExampleExec() {
-	E(Exec("echo", "ok").Do())
+	Exec("echo", "ok").MustDo()
 }
 
 func ExampleReq() {
 	val := Req("http://test.com").Post().Query(
 		"search", "keyword",
 		"even", []string{"array", "is", "supported"},
-	).GJSON("json.path.value")
+	).MustGJSON("json.path.value")
 
 	Log(val)
 }
 
 func ExampleWalk() {
-	Log(Walk("**/*.go", "**/*.md", WalkGitIgnore).List())
+	Log(Walk("**/*.go", "**/*.md", WalkGitIgnore).MustList())
 }
 
 func ExampleGuard() {
-	_ = Guard("go", "run", "./server").ExecCtx(
+	Guard("go", "run", "./server").ExecCtx(
 		Exec().Prefix("server | @yellow"),
-	).Do()
+	).MustDo()
 }

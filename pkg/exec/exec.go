@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ysmood/gokit/pkg/os"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 type ExecContext struct {
@@ -56,7 +57,7 @@ func (ctx *ExecContext) Raw() *ExecContext {
 	return ctx
 }
 
-func (ctx *ExecContext) Do() error {
+func (ctx *ExecContext) do() {
 	cmd := os_exec.Command(ctx.args[0], ctx.args[1:]...)
 
 	if ctx.cmd == nil {
@@ -71,8 +72,28 @@ func (ctx *ExecContext) Do() error {
 
 	ctx.cmd.Path = cmd.Path
 	ctx.cmd.Args = cmd.Args
+}
+
+func (ctx *ExecContext) Do() error {
+	ctx.do()
 
 	return run(formatPrefix(ctx.prefix), ctx.isRaw, ctx.cmd)
+}
+
+func (ctx *ExecContext) MustDo() {
+	utils.E(ctx.Do())
+}
+
+func (ctx *ExecContext) String() (string, error) {
+	ctx.do()
+
+	b, err := ctx.cmd.Output()
+
+	return string(b), err
+}
+
+func (ctx *ExecContext) MustString() string {
+	return utils.E1(ctx.String()).(string)
 }
 
 func formatPrefix(prefix string) string {

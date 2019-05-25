@@ -12,12 +12,15 @@ import (
 
 var All = utils.All
 var E = utils.E
+var E1 = utils.E1
+var ErrArg = utils.ErrArg
 var GenerateRandomBytes = utils.GenerateRandomBytes
 var GenerateRandomString = utils.GenerateRandomString
 var JSON = utils.JSON
 
 type Nil = utils.Nil
 
+var Noop = utils.Noop
 var Retry = utils.Retry
 var S = utils.S
 var Try = utils.Try
@@ -25,6 +28,7 @@ var WaitSignal = utils.WaitSignal
 
 type GinContext = http.GinContext
 
+var MustServer = http.MustServer
 var Req = http.Req
 
 type ReqContext = http.ReqContext

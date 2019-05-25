@@ -12,6 +12,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// Export all the public members of each package under pkg folfer into gokit_exports.go
 func export() {
 	paths, err := Walk("pkg/*").List()
 	E(err)

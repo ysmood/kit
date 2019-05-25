@@ -1,6 +1,7 @@
 package os
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path"
@@ -11,6 +12,7 @@ import (
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
 	gitignore "github.com/monochromegane/go-gitignore"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 type WalkContext struct {
@@ -93,6 +95,10 @@ func (ctx *WalkContext) List() ([]string, error) {
 		list = append(list, p)
 		return nil
 	})
+}
+
+func (ctx *WalkContext) MustList() []string {
+	return utils.E(ctx.List())[0].([]string)
 }
 
 func pathMatch(pattern, name string) (bool, bool, error) {
@@ -179,12 +185,30 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	gs := map[string]gitignore.IgnoreMatcher{}
 	var submodules []string
 	if hasWalkGitIgnore(patterns) {
+		out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+		gitRoot := strings.TrimSpace(string(out))
+		if err != nil {
+			return nil, err
+		}
+		if strings.HasPrefix(gitRoot, "fatal") {
+			return nil, errors.New(gitRoot)
+		}
+
 		submodules = getGitSubmodules()
 		gPath := path.Join(homeDir, ".gitignore_global")
 		g, err := gitignore.NewGitIgnore(gPath, dir)
 		if err == nil {
-
 			gs[gPath] = g
+		}
+
+		// check all parents
+		p := dir
+		for {
+			addIgnoreFile(p, gs)
+			if p == gitRoot || p == "/" {
+				break
+			}
+			p = filepath.Dir(p)
 		}
 	}
 
@@ -231,13 +255,7 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 			}
 		}
 
-		gPath := path.Join(p, ".gitignore")
-		if _, has := m.gitMatchers[gPath]; !has {
-			g, err := gitignore.NewGitIgnore(gPath)
-			if err == nil {
-				m.gitMatchers[gPath] = g
-			}
-		}
+		addIgnoreFile(p, m.gitMatchers)
 	}
 
 	for _, g := range m.gitMatchers {
@@ -246,6 +264,16 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 		}
 	}
 	return false
+}
+
+func addIgnoreFile(p string, gs map[string]gitignore.IgnoreMatcher) {
+	gPath := path.Join(p, ".gitignore")
+	if _, has := gs[gPath]; !has {
+		g, err := gitignore.NewGitIgnore(gPath)
+		if err == nil {
+			gs[gPath] = g
+		}
+	}
 }
 
 func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error) {
@@ -258,10 +286,11 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 			continue
 		}
 
-		mm, neg, err := pathMatch(pattern, p)
+		mm, neg, e := pathMatch(pattern, p)
 
-		if err != nil {
-			return matched, neg, err
+		if e != nil {
+			err = e
+			return
 		}
 
 		if mm {
@@ -274,5 +303,5 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 		}
 	}
 
-	return matched, negative, nil
+	return
 }

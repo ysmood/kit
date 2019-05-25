@@ -15,10 +15,19 @@ func TestGuardDefaults(t *testing.T) {
 
 	_ = OutputFile(p+"/f", "ok", nil)
 
-	guard := Guard("echo", "ok", "{{.path}}")
-	go guard.Do() // nolint:errcheck
+	guard := Guard("echo", "ok", "{{.path}}").Dir("..").Patterns("*/*.go")
+	go guard.MustDo()
 
 	time.Sleep(300 * time.Millisecond)
+
+	guard.Stop()
+}
+
+func TestGuardErr(t *testing.T) {
+	guard := Guard("exitexit").Patterns("a").NoInitRun()
+	go guard.MustDo()
+
+	time.Sleep(100 * time.Millisecond)
 
 	guard.Stop()
 }

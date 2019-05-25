@@ -11,19 +11,19 @@ import (
 
 	"github.com/derekstavis/go-qs"
 	"github.com/tidwall/gjson"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 type ReqContext struct {
-	Error error
-
 	client   *http.Client
 	request  *http.Request
 	response *http.Response
 
-	method string
-	url    string
-	header [][]string
-	body   io.Reader
+	method   string
+	url      string
+	header   [][]string
+	jsonBody interface{}
+	body     io.Reader
 }
 
 // Req send http request
@@ -38,9 +38,9 @@ func (ctx *ReqContext) Method(m string) *ReqContext {
 	return ctx
 }
 
-func (ctx *ReqContext) Req(url string) *ReqContext {
+func (ctx *ReqContext) URL(url string) *ReqContext {
 	ctx.url = url
-	return ctx.Do()
+	return ctx
 }
 
 func (ctx *ReqContext) Post() *ReqContext {
@@ -89,14 +89,10 @@ func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
 	return ctx
 }
 
+// JSONBody set request body as json
 func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
-	b, err := json.Marshal(data)
-	if err != nil {
-		ctx.Error = err
-		return ctx
-	}
 	ctx.header = append(ctx.header, []string{"Content-Type", "application/json; charset=utf-8"})
-	ctx.body = bytes.NewReader(b)
+	ctx.jsonBody = data
 
 	return ctx
 }
@@ -106,7 +102,7 @@ func (ctx *ReqContext) StringBody(s string) *ReqContext {
 	return ctx
 }
 
-func (ctx *ReqContext) Do() *ReqContext {
+func (ctx *ReqContext) Do() error {
 	if ctx.client == nil {
 		cookie, _ := cookiejar.New(nil)
 		ctx.client = &http.Client{
@@ -114,10 +110,17 @@ func (ctx *ReqContext) Do() *ReqContext {
 		}
 	}
 
+	if ctx.jsonBody != nil {
+		body, err := json.Marshal(ctx.jsonBody)
+		if err != nil {
+			return err
+		}
+		ctx.body = bytes.NewReader(body)
+	}
+
 	req, err := http.NewRequest(ctx.method, ctx.url, ctx.body)
 	if err != nil {
-		ctx.Error = err
-		return ctx
+		return err
 	}
 
 	ctx.request = req
@@ -128,12 +131,15 @@ func (ctx *ReqContext) Do() *ReqContext {
 
 	res, err := ctx.client.Do(req)
 	if err != nil {
-		ctx.Error = err
-		return ctx
+		return err
 	}
 	ctx.response = res
 
-	return ctx
+	return nil
+}
+
+func (ctx *ReqContext) MustDo() {
+	utils.E(ctx.Do())
 }
 
 // Request get request
@@ -142,15 +148,30 @@ func (ctx *ReqContext) Request() *http.Request {
 }
 
 // Response get response
-func (ctx *ReqContext) Response() *http.Response {
-	return ctx.Do().response
+func (ctx *ReqContext) Response() (*http.Response, error) {
+	err := ctx.Do()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.response, nil
+}
+
+// Response get response
+func (ctx *ReqContext) MustResponse() *http.Response {
+	return utils.E(ctx.Response())[0].(*http.Response)
 }
 
 // Bytes get response body as bytes
-func (ctx *ReqContext) Bytes() []byte {
-	body, err := readBody(ctx.Response().Body)
-	ctx.Error = err
-	return body
+func (ctx *ReqContext) Bytes() ([]byte, error) {
+	res, err := ctx.Response()
+	if err != nil {
+		return nil, err
+	}
+	return readBody(res.Body)
+}
+
+func (ctx *ReqContext) MustBytes() []byte {
+	return utils.E(ctx.Bytes())[0].([]byte)
 }
 
 func readBody(b io.ReadCloser) ([]byte, error) {
@@ -168,19 +189,38 @@ func readBody(b io.ReadCloser) ([]byte, error) {
 }
 
 // String get string response
-func (ctx *ReqContext) String() string {
-	return string(ctx.Bytes())
+func (ctx *ReqContext) String() (string, error) {
+	s, err := ctx.Bytes()
+	return string(s), err
+}
+
+func (ctx *ReqContext) MustString() string {
+	return string(ctx.MustBytes())
 }
 
 // JSON unmarshal json response to v
 func (ctx *ReqContext) JSON(v interface{}) error {
-	return json.Unmarshal(ctx.Bytes(), &v)
+	b, err := ctx.Bytes()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, &v)
 }
 
 // GJSON parse body as json and provide searching for json strings
-func (ctx *ReqContext) GJSON(path string) gjson.Result {
-	r := gjson.ParseBytes(ctx.Bytes())
-	return r.Get(path)
+func (ctx *ReqContext) GJSON(path string) (*gjson.Result, error) {
+	b, err := ctx.Bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	r := gjson.ParseBytes(b)
+	g := r.Get(path)
+	return &g, nil
+}
+
+func (ctx *ReqContext) MustGJSON(path string) gjson.Result {
+	return *utils.E(ctx.GJSON(path))[0].(*gjson.Result)
 }
 
 func paramsToForm(params []interface{}) map[string]interface{} {

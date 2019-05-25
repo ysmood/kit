@@ -264,3 +264,7 @@ func (ctx *GuardContext) Do() error {
 
 	return ctx.watcher.Start(*interval)
 }
+
+func (ctx *GuardContext) MustDo() {
+	E(ctx.Do())
+}

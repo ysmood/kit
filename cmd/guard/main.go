@@ -36,6 +36,7 @@ func main() {
 			return func() {
 				guard :=
 					Guard(opts.cmd...).
+						Patterns(*opts.patterns...).
 						Debounce(opts.debounce).
 						Interval(opts.poll).
 						ExecCtx(

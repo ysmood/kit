@@ -16,16 +16,29 @@ import (
 // Nil used to create empty channel
 type Nil struct{}
 
-// E if find an error in args, panic it
-func E(args ...interface{}) []interface{} {
-	for _, arg := range args {
-		err, ok := arg.(error)
+// Noop swallow all args and do nothing
+func Noop(_ ...interface{}) {}
 
-		if ok {
-			panic(err)
-		}
+// ErrArg get the last arg as error
+func ErrArg(args ...interface{}) error {
+	return args[len(args)-1].(error)
+}
+
+// E the last arg is error, panic it
+func E(args ...interface{}) []interface{} {
+	err, ok := args[len(args)-1].(error)
+	if ok {
+		panic(err)
 	}
 	return args
+}
+
+// E1 if the second arg is error panic it, or return the first arg
+func E1(arg interface{}, err error) interface{} {
+	if err != nil {
+		panic(err)
+	}
+	return arg
 }
 
 // JSON parse json for easily access the value from json path

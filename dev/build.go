@@ -47,9 +47,8 @@ func deploy(tag string) {
 	files, err := Walk("dist/*").List()
 	E(err)
 
-	_ = Exec("hub", "release", "delete", tag).Raw().Do()
-	_ = Exec("git", "push", "--delete", "origin", tag).Do()
-	_ = Exec("git", "tag", "--delete", "origin", tag).Do()
+	Exec("git", "tag", tag).MustDo()
+	Exec("git", "push", "origin", tag).MustDo()
 
 	args := []string{"hub", "release", "create", "-m", tag}
 	for _, f := range files {
@@ -57,9 +56,7 @@ func deploy(tag string) {
 	}
 	args = append(args, tag)
 
-	E(Exec(args...).Do())
-
-	_ = Exec("git", "fetch", "--all", "--prune").Do()
+	Exec(args...).MustDo()
 }
 
 func buildForOS(name, osName string) {

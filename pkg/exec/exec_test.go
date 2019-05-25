@@ -10,13 +10,16 @@ import (
 )
 
 func TestExec(t *testing.T) {
-	err := Exec("go", "version").Do()
-	assert.Nil(t, err)
+	Exec("go", "version").MustDo()
 }
 
 func TestExecPrefix(t *testing.T) {
 	err := Exec("echo", "test").Prefix("[app] ").Do()
 	assert.Nil(t, err)
+}
+
+func TestExecMustString(t *testing.T) {
+	assert.Equal(t, "ok\n", Exec("echo", "ok").MustString())
 }
 
 func TestExecPrefixColor(t *testing.T) {

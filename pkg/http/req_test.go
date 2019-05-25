@@ -31,15 +31,34 @@ func (s *RequestSuite) path() (path, url string) {
 }
 
 func (s *RequestSuite) SetupSuite() {
-	server := Server(":0")
+	server := MustServer(":0")
 	s.listener = server.Listener
 	s.router = server.Handler
 
-	go server.Do()
+	go server.MustDo()
 }
 
-func (s *RequestSuite) TearDownSuite() {
-	s.listener.Close()
+func (s *RequestSuite) TestGetMustString() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c GinContext) {
+		c.String(200, "ok")
+	})
+
+	c := Req(url)
+
+	s.Equal("ok", c.MustString())
+	s.Equal(url, c.Request().URL.String())
+}
+
+func (s *RequestSuite) TestGetMustResponse() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c GinContext) {
+		c.String(200, "ok")
+	})
+
+	s.Equal(200, Req(url).MustResponse().StatusCode)
 }
 
 func (s *RequestSuite) TestGetString() {
@@ -51,8 +70,13 @@ func (s *RequestSuite) TestGetString() {
 
 	c := Req(url)
 
-	s.Equal("ok", c.String())
+	s.Equal("ok", E(c.String())[0].(string))
 	s.Equal(url, c.Request().URL.String())
+}
+
+func (s *RequestSuite) TestGetStringErr() {
+	_, err := Req("").String()
+	s.EqualError(err, "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestSetClient() {
@@ -64,30 +88,29 @@ func (s *RequestSuite) TestSetClient() {
 
 	c := Req(url).Client(&http.Client{})
 
-	s.Equal("ok", c.String())
+	s.Equal("ok", c.MustString())
 }
 
 func (s *RequestSuite) TestMethodErr() {
-	c := Req("").Method("あ").Do()
-	s.EqualError(c.Error, "net/http: invalid method \"あ\"")
+	err := Req("").Method("あ").Do()
+	s.EqualError(err, "net/http: invalid method \"あ\"")
 }
 
 func (s *RequestSuite) TestURLErr() {
-	c := Req("").Do()
-	s.EqualError(c.Error, "Get : unsupported protocol scheme \"\"")
+	s.EqualError(ErrArg(Req("").Do()), "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
 	path, url := s.path()
+	var v string
 
 	s.router.GET(path, func(c GinContext) {
-		v, _ := c.GetQuery("a")
-		s.Equal("1", v)
+		v, _ = c.GetQuery("a")
 	})
 
-	c := Req(url).Query("a", "1")
+	Req(url).Query("a", "1").MustDo()
 
-	s.Nil(c.Error)
+	s.Equal("1", v)
 }
 
 func (s *RequestSuite) TestGetJSON() {
@@ -108,6 +131,10 @@ func (s *RequestSuite) TestGetJSON() {
 
 	s.Equal("ok", data.A)
 }
+func (s *RequestSuite) TestGetJSONErr() {
+	var v interface{}
+	s.EqualError(ErrArg(Req("").JSON(v)), "Get : unsupported protocol scheme \"\"")
+}
 
 func (s *RequestSuite) TestGetGJSON() {
 	path, url := s.path()
@@ -118,7 +145,11 @@ func (s *RequestSuite) TestGetGJSON() {
 
 	c := Req(url)
 
-	s.Equal(int64(1), c.GJSON("deep.path").Int())
+	s.Equal(int64(1), c.MustGJSON("deep.path").Int())
+}
+
+func (s *RequestSuite) TestGetGJSONErr() {
+	s.EqualError(ErrArg(Req("").GJSON("deep.path")), "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestPostForm() {
@@ -130,7 +161,7 @@ func (s *RequestSuite) TestPostForm() {
 	})
 
 	c := Req(url).Post().Form("a", "val")
-	s.Equal("val", c.String())
+	s.Equal("val", c.MustString())
 }
 
 func (s *RequestSuite) TestPostBytes() {
@@ -142,7 +173,7 @@ func (s *RequestSuite) TestPostBytes() {
 	})
 
 	c := Req(url).Post().Body(strings.NewReader("raw"))
-	s.Equal("raw", c.String())
+	s.Equal("raw", c.MustString())
 }
 
 func (s *RequestSuite) TestPutString() {
@@ -154,7 +185,7 @@ func (s *RequestSuite) TestPutString() {
 	})
 
 	c := Req(url).Put().StringBody("raw")
-	s.Equal("raw", c.String())
+	s.Equal("raw", c.MustString())
 }
 
 func (s *RequestSuite) TestDelete() {
@@ -165,7 +196,7 @@ func (s *RequestSuite) TestDelete() {
 	})
 
 	c := Req(url).Delete()
-	s.Equal("ok", c.String())
+	s.Equal("ok", c.MustString())
 }
 
 func (s *RequestSuite) TestPostJSON() {
@@ -177,13 +208,13 @@ func (s *RequestSuite) TestPostJSON() {
 	})
 
 	c := Req(url).Post().JSONBody(struct{ A string }{"ok"})
-	s.Equal("ok", c.String())
+	s.Equal("ok", c.MustString())
 }
 
 func (s *RequestSuite) TestJSONBodyError() {
 	v := make(chan Nil)
-	c := Req("").JSONBody(v)
-	s.EqualError(c.Error, "json: unsupported type: chan utils.Nil")
+	err := Req("").JSONBody(v).Do()
+	s.EqualError(err, "json: unsupported type: chan utils.Nil")
 }
 
 func (s *RequestSuite) TestHeader() {
@@ -194,8 +225,8 @@ func (s *RequestSuite) TestHeader() {
 		c.String(200, h)
 	})
 
-	c := Req(url).Header("test", "ok").Do()
-	s.Equal("ok", c.String())
+	c := Req(url).Header("test", "ok")
+	s.Equal("ok", c.MustString())
 }
 
 func (s *RequestSuite) TestReuseCookie() {
@@ -210,8 +241,9 @@ func (s *RequestSuite) TestReuseCookie() {
 		c.SetCookie("t", "val", 3600, "", "", false, true)
 	})
 
-	c := Req(url).Do()
-	c.Header("a", "b").Req(url)
+	c := Req(url)
+	c.MustDo()
+	c.URL(url).Header("a", "b").MustDo()
 
 	s.Equal("val", cookieA)
 	s.Equal("b", header)

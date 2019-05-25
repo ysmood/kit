@@ -25,7 +25,7 @@ func (r ErrReader) Close() error {
 	return r.closeErr
 }
 
-func TestReadBodyReadErro(t *testing.T) {
+func TestReadBodyReadErr(t *testing.T) {
 	obj := ErrReader{
 		readErr: errors.New("err"),
 	}
@@ -35,7 +35,7 @@ func TestReadBodyReadErro(t *testing.T) {
 	assert.EqualError(t, err, "err")
 }
 
-func TestReadBodyCloseErro(t *testing.T) {
+func TestReadBodyCloseErr(t *testing.T) {
 	obj := ErrReader{
 		closeErr: errors.New("err"),
 	}

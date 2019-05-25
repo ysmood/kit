@@ -29,8 +29,8 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
-	golang.org/x/sys v0.0.0-20190523142557-0e01d883c5c5 // indirect
-	golang.org/x/tools v0.0.0-20190523174634-38d8bcfa38af
+	golang.org/x/sys v0.0.0-20190526052359-791d8a0f4d09 // indirect
+	golang.org/x/tools v0.0.0-20190525145741-7be61e1b0e51
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

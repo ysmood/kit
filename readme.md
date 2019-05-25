@@ -5,15 +5,15 @@
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
 [![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
 
-Some of the io related methods that are often used.
+This project is a collection of often used io related methods.
 
-This library won't have the best performance, but it will have sane defaults to make coding less verbose.
+- Sane defaults to make coding less verbose.
 
-This project an example to use Go only for self hosted automation.
+- Focus on performance.
 
-## Install CLI Tools
+- Won't produce error, all errors are come from its dependencies.
 
-Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+- Won't use any other lanuage for the development of this project. So it's a good example to show how to use Go only for automation.
 
 ## Modules
 
@@ -29,7 +29,7 @@ package main
 import . "github.com/ysmood/gokit"
 
 func main() {
-	Log(Walk("**/*.go", "**/*.md", WalkGitIgnore).List())
+	Log(Walk("**/*.go", "**/*.md", WalkGitIgnore).MustList())
 }
 
 ```
@@ -44,7 +44,7 @@ package main
 import . "github.com/ysmood/gokit"
 
 func main() {
-	E(Exec("echo", "ok").Do())
+	Exec("echo", "ok").MustDo()
 }
 
 ```
@@ -64,7 +64,7 @@ func main() {
 	val := Req("http://test.com").Post().Query(
 		"search", "keyword",
 		"even", []string{"array", "is", "supported"},
-	).GJSON("json.path.value")
+	).MustGJSON("json.path.value")
 
 	Log(val)
 }
@@ -79,14 +79,18 @@ package main
 import . "github.com/ysmood/gokit"
 
 func main() {
-	_ = Guard("go", "run", "./server").ExecCtx(
+	Guard("go", "run", "./server").ExecCtx(
 		Exec().Prefix("server | @yellow"),
-	).Do()
+	).MustDo()
 }
 
 ```
 
 #### CLI tool
+
+## Install CLI Tools
+
+Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
 
 ```bash
 usage: guard [<flags>]
@@ -139,6 +143,8 @@ Flags:
 ```
 
 ## Development
+
+To write testable code, I try to isolate all error related dependencies.
 
 ### Build Project
 
