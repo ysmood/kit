@@ -45,6 +45,9 @@ import . "github.com/ysmood/gokit"
 
 func main() {
 	Exec("echo", "ok").MustDo()
+
+	str := Exec("echo", "ok").MustString()
+	Log(str)
 }
 
 ```

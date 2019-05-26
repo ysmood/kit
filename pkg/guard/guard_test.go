@@ -24,7 +24,7 @@ func TestGuardDefaults(t *testing.T) {
 }
 
 func TestGuardErr(t *testing.T) {
-	guard := Guard("exitexit").Patterns("a").NoInitRun()
+	guard := Guard("exitexit").NoInitRun()
 	go guard.MustDo()
 
 	time.Sleep(100 * time.Millisecond)

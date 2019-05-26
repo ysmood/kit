@@ -7,13 +7,15 @@ import (
 )
 
 func TestLintWholeProject(_ *testing.T) {
-	// lint first
 	EnsureGoTool("github.com/golangci/golangci-lint/cmd/golangci-lint")
 	Exec("golangci-lint", "run").MustDo()
 }
 
 func ExampleExec() {
 	Exec("echo", "ok").MustDo()
+
+	str := Exec("echo", "ok").MustString()
+	Log(str)
 }
 
 func ExampleReq() {
