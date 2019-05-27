@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	"github.com/kr/pty"
-	gos "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -45,7 +45,7 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 		rawLock.Lock()
 		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
-			gos.Log("[exec] set stdin to raw mode:", err)
+			Log("[exec] set stdin to raw mode:", err)
 		}
 		defer func() {
 			if oldState != nil {
@@ -64,17 +64,17 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			_, _ = gos.Stdout.Write([]byte(string(r)))
+			_, _ = Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			_, _ = gos.Stdout.Write([]byte(prefix))
+			_, _ = Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		_, _ = gos.Stdout.Write([]byte(string(r)))
+		_, _ = Stdout.Write([]byte(string(r)))
 	}
 
 	signal.Stop(ch)

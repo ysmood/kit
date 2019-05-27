@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "github.com/ysmood/gokit/pkg/guard"
+	. "github.com/ysmood/gokit"
 )
 
 func main() {

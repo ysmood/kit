@@ -49,7 +49,7 @@ func TestGuard(t *testing.T) {
 		ClearScreen().
 		Interval(&i)
 
-	go guard.Do() // nolint:errcheck
+	go guard.MustDo()
 
 	go func() {
 		time.Sleep(50 * time.Millisecond)
@@ -73,7 +73,7 @@ func TestGuardDebounce(t *testing.T) {
 	i := 1 * time.Millisecond
 
 	guard := Guard("echo", "ok", "{{.path}}").Patterns(p + "/**").Interval(&i)
-	go guard.Do() // nolint:errcheck
+	go guard.MustDo()
 
 	go func() {
 		time.Sleep(50 * time.Millisecond)

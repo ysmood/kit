@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	. "github.com/ysmood/gokit/pkg/exec"
+	. "github.com/ysmood/gokit/pkg/utils"
 )
 
 func TestExec(t *testing.T) {
@@ -39,7 +40,7 @@ func TestExecRaw(t *testing.T) {
 
 func TestExecKillTree(t *testing.T) {
 	exe := Exec("go", "run", "./fixtures/sleep")
-	go exe.Do() // nolint:errcheck
+	go func() { Noop(exe.Do()) }()
 
 	time.Sleep(100 * time.Millisecond)
 

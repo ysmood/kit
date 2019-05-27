@@ -87,7 +87,7 @@ func (ctx *ExecContext) MustDo() {
 func (ctx *ExecContext) String() (string, error) {
 	ctx.do()
 
-	b, err := ctx.cmd.Output()
+	b, err := ctx.cmd.CombinedOutput()
 
 	return string(b), err
 }

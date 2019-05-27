@@ -9,7 +9,7 @@ import (
 	os_exec "os/exec"
 	"strconv"
 
-	gos "github.com/ysmood/gokit/pkg/os"
+	. "github.com/ysmood/gokit/pkg/os"
 )
 
 // The pty lib doesn't support Windows, so we just pipe everything
@@ -35,17 +35,17 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			gos.Stdout.Write([]byte(string(r)))
+			Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			gos.Stdout.Write([]byte(prefix))
+			Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		gos.Stdout.Write([]byte(string(r)))
+		Stdout.Write([]byte(string(r)))
 	}
 
 	return nil
