@@ -1,4 +1,4 @@
-package guard
+package run
 
 import (
 	"path/filepath"
@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/radovskyb/watcher"
-	. "github.com/ysmood/gokit/pkg/exec"
-	. "github.com/ysmood/gokit/pkg/os"
-	. "github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/gokit/pkg/os"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 // GuardContext ...
@@ -26,9 +25,9 @@ type GuardContext struct {
 
 	prefix  string
 	count   int
-	wait    chan Nil
+	wait    chan utils.Nil
 	watcher *watcher.Watcher
-	matcher *Matcher
+	matcher *os.Matcher
 }
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
@@ -38,15 +37,15 @@ type GuardContext struct {
 func Guard(args ...string) *GuardContext {
 	return &GuardContext{
 		args:   args,
-		prefix: C("[guard]", "cyan"),
+		prefix: os.C("[guard]", "cyan"),
 		count:  0,
-		wait:   make(chan Nil),
+		wait:   make(chan utils.Nil),
 	}
 }
 
 // GuardDefaultPatterns match all, then ignore all gitignore rules and all submodules
 func GuardDefaultPatterns() []string {
-	return []string{"**", WalkGitIgnore}
+	return []string{"**", os.WalkGitIgnore}
 }
 
 // Dir set dir
@@ -107,15 +106,13 @@ func (ctx *GuardContext) Do() error {
 	}
 
 	ctx.watcher = watcher.New()
-	matcher, err := NewMatcher(ctx.dir, ctx.patterns)
+	matcher, err := os.NewMatcher(ctx.dir, ctx.patterns)
 	if err != nil {
 		return err
 	}
 	ctx.matcher = matcher
 
-	if err := ctx.watchFiles(ctx.dir); err != nil {
-		return err
-	}
+	ctx.addWatchFiles(ctx.dir)
 
 	go ctx.watch()
 
@@ -151,7 +148,7 @@ func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string 
 
 		newArgs = append(
 			newArgs,
-			S(arg, "path", p, "op", e.Op.String()),
+			utils.S(arg, "path", p, "op", e.Op.String()),
 		)
 	}
 	return newArgs
@@ -159,41 +156,37 @@ func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string 
 
 func (ctx *GuardContext) logErr(err error) {
 	if err != nil {
-		Err(err)
+		os.Log(ctx.prefix, err)
 	}
 }
 
 func (ctx *GuardContext) run(e *watcher.Event) {
 	if ctx.clearScreen {
-		_ = ClearScreen()
+		_ = os.ClearScreen()
 	}
 
 	ctx.count++
-	Log(ctx.prefix, "run", ctx.count, C(ctx.args, "green"))
+	os.Log(ctx.prefix, "run", ctx.count, os.C(ctx.args, "green"))
 
 	ctx.execCtxClone = *ctx.execCtx
 	err := ctx.execCtxClone.Dir(ctx.dir).Args(ctx.unescapeArgs(ctx.args, e)).Do()
 
 	errMsg := ""
 	if err != nil {
-		errMsg = C(err, "red")
+		errMsg = os.C(err, "red")
 	}
-	Log(ctx.prefix, "done", ctx.count, C(ctx.args, "green"), errMsg)
+	os.Log(ctx.prefix, "done", ctx.count, os.C(ctx.args, "green"), errMsg)
 
-	ctx.wait <- Nil{}
+	ctx.wait <- utils.Nil{}
 }
 
-func (ctx *GuardContext) watchFiles(dir string) error {
-	list, err := Walk(ctx.patterns...).Dir(dir).Matcher(ctx.matcher).List()
+func (ctx *GuardContext) addWatchFiles(dir string) {
+	list, _ := os.Walk().Dir(dir).Matcher(ctx.matcher).List()
 
-	if err != nil {
-		return err
-	}
-
-	dict := map[string]Nil{}
+	dict := map[string]utils.Nil{}
 
 	for _, p := range list {
-		dict[p] = Nil{}
+		dict[p] = utils.Nil{}
 	}
 
 	for _, p := range list {
@@ -201,7 +194,7 @@ func (ctx *GuardContext) watchFiles(dir string) error {
 		_, has := dict[dir]
 
 		if !has {
-			dict[dir] = Nil{}
+			dict[dir] = utils.Nil{}
 			_ = ctx.watcher.Add(dir)
 		}
 		_ = ctx.watcher.Add(p)
@@ -214,9 +207,7 @@ func (ctx *GuardContext) watchFiles(dir string) error {
 		watched = strings.Join(list, " ")
 	}
 
-	Log(ctx.prefix, "watched", len(list), "files:", C(watched, "green"))
-
-	return nil
+	os.Log(ctx.prefix, "watched", len(list), "files:", os.C(watched, "green"))
 }
 
 func (ctx *GuardContext) watch() {
@@ -243,11 +234,11 @@ func (ctx *GuardContext) watch() {
 			}
 			lastRun = time.Now()
 
-			Log(ctx.prefix, e)
+			os.Log(ctx.prefix, e)
 
 			if e.Op == watcher.Create {
 				if e.IsDir() {
-					err := ctx.watchFiles(e.Path)
+					ctx.addWatchFiles(e.Path)
 					ctx.logErr(err)
 				} else {
 					_ = ctx.watcher.Add(e.Path)
@@ -263,7 +254,7 @@ func (ctx *GuardContext) watch() {
 			go ctx.run(&e)
 
 		case err := <-ctx.watcher.Error:
-			Log(ctx.prefix, err)
+			ctx.logErr(err)
 
 		case <-ctx.watcher.Closed:
 			return
@@ -273,5 +264,5 @@ func (ctx *GuardContext) watch() {
 
 // MustDo ...
 func (ctx *GuardContext) MustDo() {
-	E(ctx.Do())
+	utils.E(ctx.Do())
 }

@@ -4,8 +4,6 @@ import (
 	"errors"
 	"io"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type ErrReader struct {
@@ -32,7 +30,9 @@ func TestReadBodyReadErr(t *testing.T) {
 
 	_, err := readBody(obj)
 
-	assert.EqualError(t, err, "err")
+	if err.Error() != "err" {
+		panic(err)
+	}
 }
 
 func TestReadBodyCloseErr(t *testing.T) {
@@ -42,5 +42,7 @@ func TestReadBodyCloseErr(t *testing.T) {
 
 	_, err := readBody(obj)
 
-	assert.EqualError(t, err, "err")
+	if err.Error() != "err" {
+		panic(err)
+	}
 }

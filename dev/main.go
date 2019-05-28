@@ -3,10 +3,7 @@ package main
 import (
 	"os"
 
-	. "github.com/ysmood/gokit/pkg/exec"
-	. "github.com/ysmood/gokit/pkg/guard"
-
-	. "github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/gokit/pkg/run"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -29,16 +26,17 @@ func main() {
 		lab()
 
 	case cmdTest.FullCommand():
-		test()
+		test(true)
 
 	case cmdBuild.FullCommand():
-		E(Exec("go", "test", "-coverprofile="+covPath, "-covermode=count", "./...").Do())
 		export()
+		lint()
+		test(false)
 		genReadme()
 		build(deployTag)
 
 	case viewCov.FullCommand():
-		E(Exec("go", "tool", "cover", "-html="+covPath).Do())
+		run.Exec("go", "tool", "cover", "-html="+covPath).MustDo()
 
 	case cmdExport.FullCommand():
 		export()
@@ -46,17 +44,30 @@ func main() {
 }
 
 func lab() {
-	E(Guard("go", "run", "./dev/lab").Do())
+	run.Guard("go", "run", "./dev/lab").MustDo()
 }
 
-func test() {
-	EnsureGoTool("github.com/kyoh86/richgo")
+func lint() {
+	run.MustGoTool("golang.org/x/lint/golint")
+	run.Exec("golint", "-set_exit_status", "./...").MustDo()
+}
 
-	_ = Guard(
-		"richgo", "test",
-		"-coverprofile="+covPath,
+func test(dev bool) {
+	conf := []string{
+		"go",
+		"test",
+		"-coverprofile=" + covPath,
 		"-covermode=count",
 		"-run", *testMatch,
 		"./...",
-	).Do()
+	}
+
+	if dev {
+		run.MustGoTool("github.com/kyoh86/richgo")
+		conf[0] = "richgo"
+		run.Guard(conf...).MustDo()
+		return
+	}
+
+	run.Exec(conf...).MustDo()
 }

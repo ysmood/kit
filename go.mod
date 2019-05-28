@@ -19,6 +19,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
 	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/otiai10/copy v1.0.1
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.6
 	github.com/sanity-io/litter v1.1.0
@@ -29,8 +30,8 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
-	golang.org/x/sys v0.0.0-20190526052359-791d8a0f4d09 // indirect
-	golang.org/x/tools v0.0.0-20190525145741-7be61e1b0e51
+	golang.org/x/sys v0.0.0-20190529164535-6a60838ec259 // indirect
+	golang.org/x/tools v0.0.0-20190529203303-fb6c8ffd2207
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

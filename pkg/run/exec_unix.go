@@ -1,24 +1,24 @@
 // +build !windows
 
-package exec
+package run
 
 import (
 	"bufio"
 	"io"
 	"os"
-	os_exec "os/exec"
+	"os/exec"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"github.com/kr/pty"
-	. "github.com/ysmood/gokit/pkg/os"
+	gos "github.com/ysmood/gokit/pkg/os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 var rawLock = sync.Mutex{}
 
-func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
+func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	p, err := pty.Start(cmd)
 	if err != nil {
 		return err
@@ -41,18 +41,15 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	ch <- syscall.SIGWINCH // Initial resize.
 
 	if isRaw {
-		// Set stdin in raw mode.
 		rawLock.Lock()
+		defer rawLock.Unlock()
+		// Set stdin in raw mode.
 		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
-			Log("[exec] set stdin to raw mode:", err)
+			gos.Log("[exec] set stdin to raw mode:", err)
 		}
-		defer func() {
-			if oldState != nil {
-				_ = terminal.Restore(int(os.Stdin.Fd()), oldState)
-			}
-			rawLock.Unlock()
-		}() // Best effort.
+		// Best effort
+		defer restoreState(oldState)
 	}
 
 	go func() {
@@ -64,23 +61,29 @@ func run(prefix string, isRaw bool, cmd *os_exec.Cmd) error {
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			_, _ = Stdout.Write([]byte(string(r)))
+			_, _ = gos.Stdout.Write([]byte(string(r)))
 			break
 		}
 		if newline {
-			_, _ = Stdout.Write([]byte(prefix))
+			_, _ = gos.Stdout.Write([]byte(prefix))
 			newline = false
 		}
 		if r == '\n' {
 			newline = true
 		}
-		_, _ = Stdout.Write([]byte(string(r)))
+		_, _ = gos.Stdout.Write([]byte(string(r)))
 	}
 
 	signal.Stop(ch)
 	close(ch)
 
 	return cmd.Wait()
+}
+
+func restoreState(oldState *terminal.State) {
+	if oldState != nil {
+		_ = terminal.Restore(int(os.Stdin.Fd()), oldState)
+	}
 }
 
 // KillTree kill process and all its children process

@@ -8,44 +8,47 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	. "github.com/ysmood/gokit/pkg/exec"
-	. "github.com/ysmood/gokit/pkg/utils"
+	kit "github.com/ysmood/gokit"
 )
 
 type T = testing.T
 
-func TestAll(t *testing.T) {
-	All(func() {
+func TestNoop(t *T) {
+	kit.Noop()
+}
+
+func TestAll(t *T) {
+	kit.All(func() {
 		fmt.Println("one")
 	}, func() {
 		fmt.Println("two")
 	})
 }
 
-func TestE(t *testing.T) {
+func TestE(t *T) {
 	defer func() {
-		r := ErrArg(recover())
+		r := kit.ErrArg(recover())
 
 		assert.EqualError(t, r, "exec: \"exitexit\": executable file not found in $PATH")
 	}()
 
-	E(Exec("exitexit").Do())
+	kit.E(kit.Exec("exitexit").Do())
 }
 
-func TestE1(t *testing.T) {
+func TestE1(t *T) {
 	defer func() {
-		r := ErrArg(recover())
+		r := kit.ErrArg(recover())
 
 		assert.EqualError(t, r, "err")
 	}()
 
-	E1("ok", nil)
-	E1("ok", errors.New("err"))
+	kit.E1("ok", nil)
+	kit.E1("ok", errors.New("err"))
 }
 
-func TestRetry(t *testing.T) {
+func TestRetry(t *T) {
 	count := 0
-	errs := Retry(3, 30*time.Millisecond, func() {
+	errs := kit.Retry(3, time.Nanosecond, func() {
 		count = count + 1
 	})
 
@@ -53,9 +56,9 @@ func TestRetry(t *testing.T) {
 	assert.Equal(t, 1, count)
 }
 
-func TestRetryHalf(t *testing.T) {
+func TestRetryHalf(t *T) {
 	count := 0
-	errs := Retry(5, 30*time.Millisecond, func() {
+	errs := kit.Retry(5, time.Nanosecond, func() {
 		count = count + 1
 
 		if count < 3 {
@@ -67,9 +70,9 @@ func TestRetryHalf(t *testing.T) {
 	assert.Equal(t, 3, count)
 }
 
-func TestRetry3Times(t *testing.T) {
+func TestRetry3Times(t *T) {
 	count := 0
-	errs := Retry(3, 30*time.Millisecond, func() {
+	errs := kit.Retry(3, time.Nanosecond, func() {
 		count = count + 1
 		panic(count)
 	})
@@ -79,7 +82,7 @@ func TestRetry3Times(t *testing.T) {
 }
 
 func TestTry(t *T) {
-	err := Try(func() {
+	err := kit.Try(func() {
 		panic("err")
 	})
 
@@ -87,20 +90,20 @@ func TestTry(t *T) {
 }
 
 func TestJSON(t *T) {
-	a := JSON("10")
-	b := JSON([]byte("10"))
+	a := kit.JSON("10")
+	b := kit.JSON([]byte("10"))
 
 	assert.Equal(t, a.Int(), b.Int())
 }
 
 func TestGenerateRandomString(t *T) {
-	v := GenerateRandomString(10)
+	v := kit.GenerateRandomString(10)
 	raw, _ := base64.URLEncoding.DecodeString(v)
 	assert.Len(t, raw, 10)
 }
 
 func TestSTemplate(t *T) {
-	out := S(
+	out := kit.S(
 		"{{.a}} {{.b}} {{.c.A}}",
 		"a", "<value>",
 		"b", 10,
@@ -110,5 +113,5 @@ func TestSTemplate(t *T) {
 }
 
 func TestWaitSignal(t *T) {
-	go WaitSignal(nil)
+	go kit.WaitSignal(nil)
 }

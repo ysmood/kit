@@ -3,13 +3,12 @@ package os_test
 import (
 	"testing"
 
-	. "github.com/ysmood/gokit/pkg/os"
-	. "github.com/ysmood/gokit/pkg/utils"
+	kit "github.com/ysmood/gokit"
 )
 
 func TestLog(t *testing.T) {
-	Log("ok")
-	Err("err")
-	Dump(10)
-	E(ClearScreen())
+	kit.Log("ok")
+	kit.Err("err")
+	kit.Dump(10)
+	kit.E(kit.ClearScreen())
 }

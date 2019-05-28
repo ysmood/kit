@@ -17,7 +17,7 @@ type ServerContext struct {
 // GinContext ...
 type GinContext = *gin.Context
 
-// Server ...
+// Server listen to a port then create a gin server
 func Server(address string) (*ServerContext, error) {
 	s := &ServerContext{}
 
@@ -41,7 +41,7 @@ func MustServer(address string) *ServerContext {
 	return utils.E(Server(address))[0].(*ServerContext)
 }
 
-// Do ...
+// Do start the handler loop
 func (ctx *ServerContext) Do() error {
 	return http.Serve(ctx.Listener, ctx.Handler)
 }

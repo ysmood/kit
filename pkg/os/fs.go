@@ -9,7 +9,11 @@ import (
 
 	"github.com/karrick/godirwalk"
 	"github.com/mitchellh/go-homedir"
+	"github.com/otiai10/copy"
 )
+
+// Copy copy file or dir recursively
+var Copy = copy.Copy
 
 // MkdirOptions ...
 type MkdirOptions struct {

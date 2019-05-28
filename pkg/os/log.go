@@ -25,6 +25,8 @@ var Dump = litter.Dump
 // Sdump ...
 var Sdump = litter.Sdump
 
+var goos = runtime.GOOS
+
 // Log log to stdout with timestamp
 func Log(v ...interface{}) {
 	t := time.Now().Format("[2006-01-02 15:04:05]")
@@ -46,7 +48,7 @@ func Err(v ...interface{}) {
 func ClearScreen() error {
 	clsCmd := "clear"
 
-	if runtime.GOOS == "windows" {
+	if goos == "windows" {
 		clsCmd = "cls"
 	}
 

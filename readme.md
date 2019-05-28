@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
 [![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
+[![goreport](https://goreportcard.com/badge/github.com/ysmood/gokit)](https://goreportcard.com/report/github.com/ysmood/gokit)
 
 This project is a collection of often used io related methods.
 
@@ -14,6 +15,8 @@ This project is a collection of often used io related methods.
 - Won't produce error, all errors are come from its dependencies.
 
 - Won't use any other lanuage for the development of this project. So it's a good example to show how to use Go only for automation.
+
+- 100% test coverage and goreportcard
 
 ## Modules
 
@@ -67,7 +70,7 @@ func main() {
 	val := Req("http://test.com").Post().Query(
 		"search", "keyword",
 		"even", []string{"array", "is", "supported"},
-	).MustGJSON("json.path.value")
+	).MustJSON("json.path.value")
 
 	Log(val)
 }

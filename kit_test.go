@@ -1,15 +1,4 @@
-package gokit_test
-
-import (
-	"testing"
-
-	. "github.com/ysmood/gokit"
-)
-
-func TestLintWholeProject(_ *testing.T) {
-	EnsureGoTool("github.com/golangci/golangci-lint/cmd/golangci-lint")
-	Exec("golangci-lint", "run").MustDo()
-}
+package kit
 
 func ExampleExec() {
 	Exec("echo", "ok").MustDo()
@@ -22,7 +11,7 @@ func ExampleReq() {
 	val := Req("http://test.com").Post().Query(
 		"search", "keyword",
 		"even", []string{"array", "is", "supported"},
-	).MustGJSON("json.path.value")
+	).MustJSON("json.path.value")
 
 	Log(val)
 }

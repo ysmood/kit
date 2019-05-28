@@ -20,10 +20,10 @@ type WalkContext struct {
 	dir                  string
 	sort                 bool
 	followSymbolicLinks  bool
-	postChildrenCallback godirwalk.WalkFunc
+	postChildrenCallback WalkFunc
 	matcher              *Matcher
 
-	callback godirwalk.WalkFunc
+	callback WalkFunc
 	patterns []string
 }
 
@@ -33,6 +33,12 @@ const WalkGitIgnore = "!g"
 
 // WalkIgnoreHidden special pattern to ignore all hidden files
 const WalkIgnoreHidden = "!**" + string(os.PathSeparator) + ".[^.]*"
+
+// WalkFunc ...
+type WalkFunc = godirwalk.WalkFunc
+
+// WalkDirent ...
+type WalkDirent = *godirwalk.Dirent
 
 // Walk If the pattern begins with "!", it will become a negative filter pattern.
 // Each path will be tested against all pattern, each pattern will override the previous
@@ -63,7 +69,7 @@ func (ctx *WalkContext) FollowSymbolicLinks() *WalkContext {
 }
 
 // PostChildrenCallback ...
-func (ctx *WalkContext) PostChildrenCallback(cb godirwalk.WalkFunc) *WalkContext {
+func (ctx *WalkContext) PostChildrenCallback(cb WalkFunc) *WalkContext {
 	ctx.postChildrenCallback = cb
 	return ctx
 }
@@ -75,7 +81,7 @@ func (ctx *WalkContext) Matcher(m *Matcher) *WalkContext {
 }
 
 // Do ...
-func (ctx *WalkContext) Do(cb godirwalk.WalkFunc) error {
+func (ctx *WalkContext) Do(cb WalkFunc) error {
 	ctx.callback = cb
 
 	m := ctx.matcher
@@ -153,8 +159,8 @@ func hasWalkGitIgnore(patterns []string) bool {
 
 func genMatchFn(
 	m *Matcher,
-	cb godirwalk.WalkFunc,
-) godirwalk.WalkFunc {
+	cb WalkFunc,
+) WalkFunc {
 	return func(p string, info *godirwalk.Dirent) (resErr error) {
 		matched, negative, err := m.Match(p, info.IsDir())
 		if err != nil {
@@ -187,24 +193,21 @@ type Matcher struct {
 // NewMatcher ...
 func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	dir, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, err
-	}
+	utils.E(err)
 
 	homeDir := HomeDir()
 	gs := map[string]gitignore.IgnoreMatcher{}
 	var submodules []string
 	if hasWalkGitIgnore(patterns) {
-		out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
-		gitRoot := strings.TrimSpace(string(out))
+		cmd := exec.Command("git", "rev-parse", "--show-toplevel")
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return nil, err
+			return nil, errors.New(string(out) + err.Error())
 		}
-		if strings.HasPrefix(gitRoot, "fatal") {
-			return nil, errors.New(gitRoot)
-		}
+		gitRoot := strings.TrimSpace(string(out))
 
-		submodules = getGitSubmodules()
+		submodules = getGitSubmodules(dir)
 		gPath := path.Join(homeDir, ".gitignore_global")
 		g, err := gitignore.NewGitIgnore(gPath, dir)
 		if err == nil {
@@ -232,8 +235,10 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 
 var submoduleReg = regexp.MustCompile(`\A [a-f0-9]+ (.+) \(.+\)\z`)
 
-func getGitSubmodules() []string {
-	out, err := exec.Command("git", "submodule").Output()
+func getGitSubmodules(dir string) []string {
+	cmd := exec.Command("git", "submodule")
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil
 	}
@@ -243,7 +248,7 @@ func getGitSubmodules() []string {
 		m := submoduleReg.FindStringSubmatch(l)
 
 		if len(m) > 1 {
-			p, _ := filepath.Abs(m[1])
+			p := filepath.Join(dir, m[1])
 			list = append(list, p)
 		}
 	}

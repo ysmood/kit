@@ -167,7 +167,7 @@ func (ctx *ReqContext) Response() (*http.Response, error) {
 	return ctx.response, nil
 }
 
-// Response get response
+// MustResponse get response
 func (ctx *ReqContext) MustResponse() *http.Response {
 	return utils.E(ctx.Response())[0].(*http.Response)
 }
@@ -211,17 +211,8 @@ func (ctx *ReqContext) MustString() string {
 	return string(ctx.MustBytes())
 }
 
-// JSON unmarshal json response to v
-func (ctx *ReqContext) JSON(v interface{}) error {
-	b, err := ctx.Bytes()
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, &v)
-}
-
-// GJSON parse body as json and provide searching for json strings
-func (ctx *ReqContext) GJSON(path string) (*gjson.Result, error) {
+// JSON parse body as json and provide searching for json strings
+func (ctx *ReqContext) JSON(path string) (*gjson.Result, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
 		return nil, err
@@ -232,9 +223,9 @@ func (ctx *ReqContext) GJSON(path string) (*gjson.Result, error) {
 	return &g, nil
 }
 
-// MustGJSON ...
-func (ctx *ReqContext) MustGJSON(path string) gjson.Result {
-	return *utils.E(ctx.GJSON(path))[0].(*gjson.Result)
+// MustJSON ...
+func (ctx *ReqContext) MustJSON(path string) gjson.Result {
+	return *utils.E(ctx.JSON(path))[0].(*gjson.Result)
 }
 
 func paramsToForm(params []interface{}) map[string]interface{} {

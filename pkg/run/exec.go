@@ -1,7 +1,7 @@
-package exec
+package run
 
 import (
-	os_exec "os/exec"
+	"os/exec"
 	"strings"
 
 	"github.com/ysmood/gokit/pkg/os"
@@ -10,7 +10,7 @@ import (
 
 // ExecContext ...
 type ExecContext struct {
-	cmd *os_exec.Cmd
+	cmd *exec.Cmd
 	dir string
 
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
@@ -36,13 +36,13 @@ func (ctx *ExecContext) Args(args []string) *ExecContext {
 }
 
 // Cmd ...
-func (ctx *ExecContext) Cmd(cmd *os_exec.Cmd) *ExecContext {
+func (ctx *ExecContext) Cmd(cmd *exec.Cmd) *ExecContext {
 	ctx.cmd = cmd
 	return ctx
 }
 
 // GetCmd ...
-func (ctx *ExecContext) GetCmd() *os_exec.Cmd {
+func (ctx *ExecContext) GetCmd() *exec.Cmd {
 	return ctx.cmd
 }
 
@@ -65,7 +65,7 @@ func (ctx *ExecContext) Raw() *ExecContext {
 }
 
 func (ctx *ExecContext) do() {
-	cmd := os_exec.Command(ctx.args[0], ctx.args[1:]...)
+	cmd := exec.Command(ctx.args[0], ctx.args[1:]...)
 
 	if ctx.cmd == nil {
 		ctx.cmd = cmd

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/ysmood/gokit"
+	kit "github.com/ysmood/gokit"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -35,12 +35,12 @@ func main() {
 		fns = append(fns, func(opts *options) func() {
 			return func() {
 				guard :=
-					Guard(opts.cmd...).
+					kit.Guard(opts.cmd...).
 						Patterns(*opts.patterns...).
 						Debounce(opts.debounce).
 						Interval(opts.poll).
 						ExecCtx(
-							Exec().
+							kit.Exec().
 								Dir(*opts.dir).
 								Raw().
 								Prefix(genPrefix(*opts.prefix, opts.cmd)),
@@ -54,11 +54,11 @@ func main() {
 					guard.NoInitRun()
 				}
 
-				E(guard.Do())
+				guard.MustDo()
 			}
 		}(opts))
 	}
-	All(fns...)
+	kit.All(fns...)
 }
 
 func genOptions(args []string) *options {
@@ -106,7 +106,7 @@ func genOptions(args []string) *options {
 	opts.debounce = app.Flag("debounce", "suppress the frequency of the event").Default("300ms").Duration()
 	opts.raw = app.Flag("raw", "when you need to interact with the subprocess").Bool()
 
-	app.Version(Version)
+	app.Version(kit.Version)
 
 	args, cmdArgs := parseArgs(args)
 
@@ -149,7 +149,7 @@ func indexOf(list []string, str string) int {
 func argsFromConfigFile(args []string) []string {
 	for _, elem := range args {
 		if len(elem) > 1 && elem[0] == '@' {
-			f, err := ReadFile(elem[1:])
+			f, err := kit.ReadFile(elem[1:])
 			if err != nil {
 				return args
 			}
@@ -162,9 +162,9 @@ func argsFromConfigFile(args []string) []string {
 func genPrefix(prefix string, args []string) string {
 	if prefix == "auto" {
 		h := fnv.New32a()
-		E(h.Write([]byte(strings.Join(args, ""))))
+		kit.E(h.Write([]byte(strings.Join(args, ""))))
 
-		return C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
+		return kit.C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
 	}
 
 	return ""
