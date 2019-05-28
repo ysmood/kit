@@ -8,6 +8,7 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+// ExecContext ...
 type ExecContext struct {
 	cmd *os_exec.Cmd
 	dir string
@@ -28,30 +29,36 @@ func Exec(args ...string) *ExecContext {
 	}
 }
 
+// Args ...
 func (ctx *ExecContext) Args(args []string) *ExecContext {
 	ctx.args = args
 	return ctx
 }
 
+// Cmd ...
 func (ctx *ExecContext) Cmd(cmd *os_exec.Cmd) *ExecContext {
 	ctx.cmd = cmd
 	return ctx
 }
 
+// GetCmd ...
 func (ctx *ExecContext) GetCmd() *os_exec.Cmd {
 	return ctx.cmd
 }
 
+// Dir ...
 func (ctx *ExecContext) Dir(dir string) *ExecContext {
 	ctx.dir = dir
 	return ctx
 }
 
+// Prefix ...
 func (ctx *ExecContext) Prefix(p string) *ExecContext {
 	ctx.prefix = p
 	return ctx
 }
 
+// Raw ...
 func (ctx *ExecContext) Raw() *ExecContext {
 	ctx.isRaw = true
 	return ctx
@@ -74,16 +81,19 @@ func (ctx *ExecContext) do() {
 	ctx.cmd.Args = cmd.Args
 }
 
+// Do ...
 func (ctx *ExecContext) Do() error {
 	ctx.do()
 
 	return run(formatPrefix(ctx.prefix), ctx.isRaw, ctx.cmd)
 }
 
+// MustDo ...
 func (ctx *ExecContext) MustDo() {
 	utils.E(ctx.Do())
 }
 
+// String ...
 func (ctx *ExecContext) String() (string, error) {
 	ctx.do()
 
@@ -92,6 +102,7 @@ func (ctx *ExecContext) String() (string, error) {
 	return string(b), err
 }
 
+// MustString ...
 func (ctx *ExecContext) MustString() string {
 	return utils.E1(ctx.String()).(string)
 }

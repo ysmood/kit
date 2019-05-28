@@ -32,6 +32,7 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, srcinfo.Mode())
 }
 
+// Copy ...
 func Copy(src string, dst string) error {
 	var err error
 	var fds []os.FileInfo

@@ -15,6 +15,7 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+// WalkContext ...
 type WalkContext struct {
 	dir                  string
 	sort                 bool
@@ -43,31 +44,37 @@ func Walk(patterns ...string) *WalkContext {
 	}
 }
 
+// Dir ...
 func (ctx *WalkContext) Dir(d string) *WalkContext {
 	ctx.dir = d
 	return ctx
 }
 
+// Sort ...
 func (ctx *WalkContext) Sort() *WalkContext {
 	ctx.sort = true
 	return ctx
 }
 
+// FollowSymbolicLinks ...
 func (ctx *WalkContext) FollowSymbolicLinks() *WalkContext {
 	ctx.followSymbolicLinks = true
 	return ctx
 }
 
+// PostChildrenCallback ...
 func (ctx *WalkContext) PostChildrenCallback(cb godirwalk.WalkFunc) *WalkContext {
 	ctx.postChildrenCallback = cb
 	return ctx
 }
 
+// Matcher ...
 func (ctx *WalkContext) Matcher(m *Matcher) *WalkContext {
 	ctx.matcher = m
 	return ctx
 }
 
+// Do ...
 func (ctx *WalkContext) Do(cb godirwalk.WalkFunc) error {
 	ctx.callback = cb
 
@@ -97,6 +104,7 @@ func (ctx *WalkContext) List() ([]string, error) {
 	})
 }
 
+// MustList ...
 func (ctx *WalkContext) MustList() []string {
 	return utils.E(ctx.List())[0].([]string)
 }
@@ -168,6 +176,7 @@ func genMatchFn(
 	}
 }
 
+// Matcher ...
 type Matcher struct {
 	dir           string
 	gitMatchers   map[string]gitignore.IgnoreMatcher
@@ -175,6 +184,7 @@ type Matcher struct {
 	patterns      []string
 }
 
+// NewMatcher ...
 func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
@@ -276,6 +286,7 @@ func addIgnoreFile(p string, gs map[string]gitignore.IgnoreMatcher) {
 	}
 }
 
+// Match ...
 func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error) {
 	for _, pattern := range m.patterns {
 		if pattern == WalkGitIgnore {

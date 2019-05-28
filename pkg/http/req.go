@@ -14,6 +14,7 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+// ReqContext ...
 type ReqContext struct {
 	client   *http.Client
 	request  *http.Request
@@ -33,24 +34,29 @@ func Req(url string) *ReqContext {
 	}
 }
 
+// Method ...
 func (ctx *ReqContext) Method(m string) *ReqContext {
 	ctx.method = m
 	return ctx
 }
 
+// URL ...
 func (ctx *ReqContext) URL(url string) *ReqContext {
 	ctx.url = url
 	return ctx
 }
 
+// Post ...
 func (ctx *ReqContext) Post() *ReqContext {
 	return ctx.Method(http.MethodPost)
 }
 
+// Put ...
 func (ctx *ReqContext) Put() *ReqContext {
 	return ctx.Method(http.MethodPut)
 }
 
+// Delete ...
 func (ctx *ReqContext) Delete() *ReqContext {
 	return ctx.Method(http.MethodDelete)
 }
@@ -77,6 +83,7 @@ func (ctx *ReqContext) Client(c *http.Client) *ReqContext {
 	return ctx
 }
 
+// Form ...
 func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.header = append(ctx.header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
@@ -84,6 +91,7 @@ func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	return ctx
 }
 
+// Body ...
 func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
 	ctx.body = b
 	return ctx
@@ -97,11 +105,13 @@ func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 	return ctx
 }
 
+// StringBody ...
 func (ctx *ReqContext) StringBody(s string) *ReqContext {
 	ctx.body = strings.NewReader(string(s))
 	return ctx
 }
 
+// Do ...
 func (ctx *ReqContext) Do() error {
 	if ctx.client == nil {
 		cookie, _ := cookiejar.New(nil)
@@ -138,6 +148,7 @@ func (ctx *ReqContext) Do() error {
 	return nil
 }
 
+// MustDo ...
 func (ctx *ReqContext) MustDo() {
 	utils.E(ctx.Do())
 }
@@ -170,6 +181,7 @@ func (ctx *ReqContext) Bytes() ([]byte, error) {
 	return readBody(res.Body)
 }
 
+// MustBytes ...
 func (ctx *ReqContext) MustBytes() []byte {
 	return utils.E(ctx.Bytes())[0].([]byte)
 }
@@ -194,6 +206,7 @@ func (ctx *ReqContext) String() (string, error) {
 	return string(s), err
 }
 
+// MustString ...
 func (ctx *ReqContext) MustString() string {
 	return string(ctx.MustBytes())
 }
@@ -219,6 +232,7 @@ func (ctx *ReqContext) GJSON(path string) (*gjson.Result, error) {
 	return &g, nil
 }
 
+// MustGJSON ...
 func (ctx *ReqContext) MustGJSON(path string) gjson.Result {
 	return *utils.E(ctx.GJSON(path))[0].(*gjson.Result)
 }

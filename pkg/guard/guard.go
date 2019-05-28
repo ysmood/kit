@@ -11,21 +11,24 @@ import (
 	. "github.com/ysmood/gokit/pkg/utils"
 )
 
+// GuardContext ...
 type GuardContext struct {
 	args     []string
 	patterns []string
 	dir      string
 
-	clearScreen bool
-	interval    *time.Duration // default 300ms
-	execCtx     *ExecContext
-	debounce    *time.Duration // default 300ms
-	noInitRun   bool
+	clearScreen  bool
+	interval     *time.Duration // default 300ms
+	execCtx      *ExecContext
+	execCtxClone ExecContext
+	debounce     *time.Duration // default 300ms
+	noInitRun    bool
 
 	prefix  string
 	count   int
 	wait    chan Nil
 	watcher *watcher.Watcher
+	matcher *Matcher
 }
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
@@ -82,6 +85,7 @@ func (ctx *GuardContext) Debounce(debounce *time.Duration) *GuardContext {
 	return ctx
 }
 
+// ExecCtx ...
 func (ctx *GuardContext) ExecCtx(c *ExecContext) *GuardContext {
 	ctx.execCtx = c
 	return ctx
@@ -102,158 +106,21 @@ func (ctx *GuardContext) Do() error {
 		ctx.execCtx = Exec()
 	}
 
-	logErr := func(err error) {
-		if err != nil {
-			Err(err)
-		}
-	}
-
-	// unescape the {{.path}} {{.op}} placeholders
-	unescapeArgs := func(args []string, e *watcher.Event) []string {
-		if e == nil {
-			e = &watcher.Event{}
-		}
-
-		newArgs := []string{}
-		for _, arg := range args {
-			dir, err := filepath.Abs(ctx.dir)
-			logErr(err)
-
-			p, err := filepath.Abs(e.Path)
-			logErr(err)
-
-			p, err = filepath.Rel(dir, p)
-			logErr(err)
-
-			newArgs = append(
-				newArgs,
-				S(arg, "path", p, "op", e.Op.String()),
-			)
-		}
-		return newArgs
-	}
-
-	var execCtxClone ExecContext
-	run := func(e *watcher.Event) {
-		if ctx.clearScreen {
-			_ = ClearScreen()
-		}
-
-		ctx.count++
-		Log(ctx.prefix, "run", ctx.count, C(ctx.args, "green"))
-
-		execCtxClone = *ctx.execCtx
-		err := execCtxClone.Dir(ctx.dir).Args(unescapeArgs(ctx.args, e)).Do()
-
-		errMsg := ""
-		if err != nil {
-			errMsg = C(err, "red")
-		}
-		Log(ctx.prefix, "done", ctx.count, C(ctx.args, "green"), errMsg)
-
-		ctx.wait <- Nil{}
-	}
-
 	ctx.watcher = watcher.New()
 	matcher, err := NewMatcher(ctx.dir, ctx.patterns)
 	if err != nil {
 		return err
 	}
+	ctx.matcher = matcher
 
-	watchFiles := func(dir string) error {
-		list, err := Walk(ctx.patterns...).Dir(dir).Matcher(matcher).List()
-
-		if err != nil {
-			return err
-		}
-
-		dict := map[string]Nil{}
-
-		for _, p := range list {
-			dict[p] = Nil{}
-		}
-
-		for _, p := range list {
-			dir := filepath.Dir(p)
-			_, has := dict[dir]
-
-			if !has {
-				dict[dir] = Nil{}
-				_ = ctx.watcher.Add(dir)
-			}
-			_ = ctx.watcher.Add(p)
-		}
-
-		var watched string
-		if len(list) > 10 {
-			watched = strings.Join(append(list[0:10], "..."), " ")
-		} else {
-			watched = strings.Join(list, " ")
-		}
-
-		Log(ctx.prefix, "watched", len(list), "files:", C(watched, "green"))
-
-		return nil
-	}
-
-	if err := watchFiles(ctx.dir); err != nil {
+	if err := ctx.watchFiles(ctx.dir); err != nil {
 		return err
 	}
 
-	go func() {
-		debounce := ctx.debounce
-		var lastRun time.Time
-		if debounce == nil {
-			t := time.Millisecond * 300
-			debounce = &t
-		}
-
-		for {
-			select {
-			case e := <-ctx.watcher.Event:
-				matched, _, err := matcher.Match(e.Path, e.IsDir())
-				logErr(err)
-
-				if !matched {
-					continue
-				}
-
-				if time.Since(lastRun) < *debounce {
-					lastRun = time.Now()
-					continue
-				}
-				lastRun = time.Now()
-
-				Log(ctx.prefix, e)
-
-				if e.Op == watcher.Create {
-					if e.IsDir() {
-						err := watchFiles(e.Path)
-						logErr(err)
-					} else {
-						_ = ctx.watcher.Add(e.Path)
-					}
-				}
-
-				if execCtxClone.GetCmd() != nil {
-					_ = KillTree(execCtxClone.GetCmd().Process.Pid)
-
-					<-ctx.wait
-				}
-
-				go run(&e)
-
-			case err := <-ctx.watcher.Error:
-				Log(ctx.prefix, err)
-
-			case <-ctx.watcher.Closed:
-				return
-			}
-		}
-	}()
+	go ctx.watch()
 
 	if !ctx.noInitRun {
-		go run(nil)
+		go ctx.run(nil)
 	}
 
 	interval := ctx.interval
@@ -265,6 +132,146 @@ func (ctx *GuardContext) Do() error {
 	return ctx.watcher.Start(*interval)
 }
 
+// unescape the {{.path}} {{.op}} placeholders
+func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string {
+	if e == nil {
+		e = &watcher.Event{}
+	}
+
+	newArgs := []string{}
+	for _, arg := range args {
+		dir, err := filepath.Abs(ctx.dir)
+		ctx.logErr(err)
+
+		p, err := filepath.Abs(e.Path)
+		ctx.logErr(err)
+
+		p, err = filepath.Rel(dir, p)
+		ctx.logErr(err)
+
+		newArgs = append(
+			newArgs,
+			S(arg, "path", p, "op", e.Op.String()),
+		)
+	}
+	return newArgs
+}
+
+func (ctx *GuardContext) logErr(err error) {
+	if err != nil {
+		Err(err)
+	}
+}
+
+func (ctx *GuardContext) run(e *watcher.Event) {
+	if ctx.clearScreen {
+		_ = ClearScreen()
+	}
+
+	ctx.count++
+	Log(ctx.prefix, "run", ctx.count, C(ctx.args, "green"))
+
+	ctx.execCtxClone = *ctx.execCtx
+	err := ctx.execCtxClone.Dir(ctx.dir).Args(ctx.unescapeArgs(ctx.args, e)).Do()
+
+	errMsg := ""
+	if err != nil {
+		errMsg = C(err, "red")
+	}
+	Log(ctx.prefix, "done", ctx.count, C(ctx.args, "green"), errMsg)
+
+	ctx.wait <- Nil{}
+}
+
+func (ctx *GuardContext) watchFiles(dir string) error {
+	list, err := Walk(ctx.patterns...).Dir(dir).Matcher(ctx.matcher).List()
+
+	if err != nil {
+		return err
+	}
+
+	dict := map[string]Nil{}
+
+	for _, p := range list {
+		dict[p] = Nil{}
+	}
+
+	for _, p := range list {
+		dir := filepath.Dir(p)
+		_, has := dict[dir]
+
+		if !has {
+			dict[dir] = Nil{}
+			_ = ctx.watcher.Add(dir)
+		}
+		_ = ctx.watcher.Add(p)
+	}
+
+	var watched string
+	if len(list) > 10 {
+		watched = strings.Join(append(list[0:10], "..."), " ")
+	} else {
+		watched = strings.Join(list, " ")
+	}
+
+	Log(ctx.prefix, "watched", len(list), "files:", C(watched, "green"))
+
+	return nil
+}
+
+func (ctx *GuardContext) watch() {
+	debounce := ctx.debounce
+	var lastRun time.Time
+	if debounce == nil {
+		t := time.Millisecond * 300
+		debounce = &t
+	}
+
+	for {
+		select {
+		case e := <-ctx.watcher.Event:
+			matched, _, err := ctx.matcher.Match(e.Path, e.IsDir())
+			ctx.logErr(err)
+
+			if !matched {
+				continue
+			}
+
+			if time.Since(lastRun) < *debounce {
+				lastRun = time.Now()
+				continue
+			}
+			lastRun = time.Now()
+
+			Log(ctx.prefix, e)
+
+			if e.Op == watcher.Create {
+				if e.IsDir() {
+					err := ctx.watchFiles(e.Path)
+					ctx.logErr(err)
+				} else {
+					_ = ctx.watcher.Add(e.Path)
+				}
+			}
+
+			if ctx.execCtxClone.GetCmd() != nil {
+				_ = KillTree(ctx.execCtxClone.GetCmd().Process.Pid)
+
+				<-ctx.wait
+			}
+
+			go ctx.run(&e)
+
+		case err := <-ctx.watcher.Error:
+			Log(ctx.prefix, err)
+
+		case <-ctx.watcher.Closed:
+			return
+		}
+	}
+}
+
+// MustDo ...
 func (ctx *GuardContext) MustDo() {
 	E(ctx.Do())
 }

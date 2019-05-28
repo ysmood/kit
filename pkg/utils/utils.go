@@ -71,12 +71,14 @@ func All(actions ...func()) {
 	wg.Wait()
 }
 
+// GenerateRandomBytes ...
 func GenerateRandomBytes(n int) []byte {
 	b := make([]byte, n)
 	_, _ = rand.Read(b)
 	return b
 }
 
+// GenerateRandomString ...
 func GenerateRandomString(s int) string {
 	b := GenerateRandomBytes(s)
 	return base64.URLEncoding.EncodeToString(b)
@@ -137,6 +139,7 @@ func S(tpl string, params ...interface{}) string {
 	return out.String()
 }
 
+// WaitSignal ...
 func WaitSignal(sig os.Signal) {
 	c := make(chan os.Signal, 1)
 	if sig == nil {

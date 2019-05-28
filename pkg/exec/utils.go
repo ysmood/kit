@@ -7,6 +7,7 @@ import (
 	. "github.com/ysmood/gokit/pkg/utils"
 )
 
+// EnsureGoTool ...
 func EnsureGoTool(path string) {
 	if !Exists(GoPath() + "/bin/" + os_path.Base(path)) {
 		E(Exec("go", "get", path).Dir(HomeDir()).Do())

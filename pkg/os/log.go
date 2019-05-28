@@ -13,11 +13,16 @@ import (
 	"github.com/sanity-io/litter"
 )
 
+// Stdout ...
 var Stdout = ansi.NewAnsiStdout()
 
+// Stderr ...
 var Stderr = ansi.NewAnsiStderr()
 
+// Dump ...
 var Dump = litter.Dump
+
+// Sdump ...
 var Sdump = litter.Sdump
 
 // Log log to stdout with timestamp
@@ -37,6 +42,7 @@ func Err(v ...interface{}) {
 	fmt.Fprintln(Stderr, v...)
 }
 
+// ClearScreen ...
 func ClearScreen() error {
 	clsCmd := "clear"
 

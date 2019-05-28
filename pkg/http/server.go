@@ -8,13 +8,16 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+// ServerContext ...
 type ServerContext struct {
 	Handler  *gin.Engine
 	Listener net.Listener
 }
 
+// GinContext ...
 type GinContext = *gin.Context
 
+// Server ...
 func Server(address string) (*ServerContext, error) {
 	s := &ServerContext{}
 
@@ -33,14 +36,17 @@ func Server(address string) (*ServerContext, error) {
 	return s, nil
 }
 
+// MustServer ...
 func MustServer(address string) *ServerContext {
 	return utils.E(Server(address))[0].(*ServerContext)
 }
 
+// Do ...
 func (ctx *ServerContext) Do() error {
 	return http.Serve(ctx.Listener, ctx.Handler)
 }
 
+// MustDo ...
 func (ctx *ServerContext) MustDo() {
 	utils.E(ctx.Do())
 }
