@@ -33,7 +33,7 @@ func TestGuardErr(t *testing.T) {
 func TestGuardMatcherErr(t *testing.T) {
 	guard := kit.Guard("").Dir("/").Patterns(kit.WalkGitIgnore).NoInitRun()
 	err := guard.Do()
-	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git\nexit status 128")
+	assert.Regexp(t, "fatal", err.Error())
 }
 
 func TestGuard(t *testing.T) {

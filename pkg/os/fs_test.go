@@ -1,12 +1,14 @@
 package os_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	kit "github.com/ysmood/gokit"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 func TestOutputString(t *testing.T) {
@@ -154,6 +156,10 @@ func TestMoveErr(t *testing.T) {
 }
 
 func TestGoPath(t *testing.T) {
+	old := os.Getenv("GOPATH")
+	utils.E(os.Setenv("GOPATH", ""))
+	defer func() { utils.E(os.Setenv("GOPATH", old)) }()
+
 	s := kit.GoPath()
 
 	assert.True(t, kit.Exists(s))

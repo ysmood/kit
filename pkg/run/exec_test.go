@@ -41,7 +41,7 @@ func TestExecKillTree(t *testing.T) {
 	exe := kit.Exec("go", "run", "./fixtures/sleep")
 	go func() { kit.Noop(exe.Do()) }()
 
-	time.Sleep(3 * time.Millisecond)
+	time.Sleep(30 * time.Millisecond)
 
 	err := kit.KillTree(exe.GetCmd().Process.Pid)
 

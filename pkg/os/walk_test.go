@@ -10,6 +10,11 @@ import (
 )
 
 func TestMatch(t *testing.T) {
+	gitIgnorePath := kit.HomeDir() + "/.gitignore_global"
+	if !kit.FileExists(gitIgnorePath) {
+		kit.E(kit.OutputFile(gitIgnorePath, "", nil))
+	}
+
 	m, _ := kit.NewMatcher("/root/a", []string{"**", kit.WalkIgnoreHidden})
 
 	matched, negative, _ := m.Match("/root/a/.git", true)
@@ -30,7 +35,7 @@ func TestWalkErr(t *testing.T) {
 func TestWalkGitFatalErr(t *testing.T) {
 	_, err := kit.NewMatcher("/", []string{kit.WalkGitIgnore})
 
-	assert.EqualError(t, err, "fatal: not a git repository (or any of the parent directories): .git\nexit status 128")
+	assert.Regexp(t, "fatal", err.Error())
 }
 
 func TestWalkCallbackErr(t *testing.T) {
