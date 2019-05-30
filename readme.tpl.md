@@ -26,13 +26,11 @@ Such as smart glob:
 
 {{.ExampleWalk}}
 
-### process
-
 A better `Exec` alternatives for the stdlib one.
 
 {{.ExampleExec}}
 
-### req
+### http
 
 The http request lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
 alternative to use with it's fluent api design. You will reduce a lot of your code without sacrificing performance.
@@ -40,19 +38,19 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 
 {{.ExampleReq}}
 
-### guard
-
-{{.ExampleGuard}}
-
-#### CLI tool
-
-## Install CLI Tools
+## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+
+### guard
 
 ```bash
 {{.GuardHelp}}
 ```
+
+You can also use it as a lib
+
+{{.ExampleGuard}}
 
 ## Development
 

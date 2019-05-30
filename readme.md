@@ -37,8 +37,6 @@ func main() {
 
 ```
 
-### process
-
 A better `Exec` alternatives for the stdlib one.
 
 ```go
@@ -55,7 +53,7 @@ func main() {
 
 ```
 
-### req
+### http
 
 The http request lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
 alternative to use with it's fluent api design. You will reduce a lot of your code without sacrificing performance.
@@ -77,26 +75,11 @@ func main() {
 
 ```
 
-### guard
-
-```go
-package main
-
-import . "github.com/ysmood/gokit"
-
-func main() {
-	Guard("go", "run", "./server").ExecCtx(
-		Exec().Prefix("server | @yellow"),
-	).MustDo()
-}
-
-```
-
-#### CLI tool
-
-## Install CLI Tools
+## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+
+### guard
 
 ```bash
 usage: guard [<flags>]
@@ -145,6 +128,21 @@ Flags:
       --raw              when you need to interact with the subprocess
       --version          Show application version.
 
+
+```
+
+You can also use it as a lib
+
+```go
+package main
+
+import . "github.com/ysmood/gokit"
+
+func main() {
+	Guard("go", "run", "./server").ExecCtx(
+		Exec().Prefix("server | @yellow"),
+	).MustDo()
+}
 
 ```
 
