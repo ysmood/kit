@@ -16,7 +16,7 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-func build(deployTag *bool) {
+func build(deployTag bool) {
 	list := gos.Walk("cmd/*").MustList()
 
 	_ = gos.Remove("dist/**")
@@ -33,7 +33,7 @@ func build(deployTag *bool) {
 	}
 	utils.All(tasks...)
 
-	if *deployTag {
+	if deployTag {
 		deploy(utils.Version)
 	}
 }
@@ -43,6 +43,11 @@ func deploy(tag string) {
 
 	run.Exec("git", "tag", tag).MustDo()
 	run.Exec("git", "push", "origin", tag).MustDo()
+
+	_, err := exec.LookPath("hub")
+	if err != nil {
+		panic("please install hub.github.com first")
+	}
 
 	args := []string{"hub", "release", "create", "-m", tag}
 	for _, f := range files {

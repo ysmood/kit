@@ -12,9 +12,11 @@ This project is a collection of often used io related methods.
 
 - Won't produce error, all errors are come from its dependencies.
 
-- Won't use any other lanuage for the development of this project. So it's a good example to show how to use Go only for automation.
+- While providing high level apis, always try to expose low level api for flexibility.
 
 - 100% test coverage and goreportcard
+
+- Won't use any other lanuage for the development of this project.
 
 ## Modules
 

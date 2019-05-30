@@ -1,50 +1,50 @@
 package main
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/ysmood/gokit/pkg/run"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
-const covPath = "coverage.txt"
+var covPath *string
 
-var (
-	app       = kingpin.New("dev", "dev tool for gokit")
-	cmdTest   = app.Command("test", "run test").Default()
-	cmdLab    = app.Command("lab", "run lab")
-	cmdBuild  = app.Command("build", "cross build project")
-	cmdExport = app.Command("export", "export all submodules under gokit namespace")
-	testMatch = cmdTest.Arg("match", "match test name").String()
-	deployTag = cmdBuild.Flag("deploy", "release to github with tag (install hub.github.com first)").Short('d').Bool()
-	viewCov   = app.Command("cov", "view html coverage report")
-)
+var tasks = run.Tasks{
+	"test": run.Task{Init: func(cmd run.TaskCmd) func() {
+		cmd.Default()
 
-func main() {
-	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-	case cmdLab.FullCommand():
-		lab()
+		match := cmd.Arg("match", "match test name").String()
 
-	case cmdTest.FullCommand():
-		test(true)
+		return func() {
+			test(*match, true)
+		}
+	}},
+	"lab": run.Task{Help: "run temp random experimental code", Task: func() {
+		run.Guard("go", "run", "./dev/lab").MustDo()
+	}},
+	"build": run.Task{Init: func(cmd run.TaskCmd) func() {
 
-	case cmdBuild.FullCommand():
-		export()
-		lint()
-		test(false)
-		genReadme()
-		build(deployTag)
-
-	case viewCov.FullCommand():
-		run.Exec("go", "tool", "cover", "-html="+covPath).MustDo()
-
-	case cmdExport.FullCommand():
-		export()
-	}
+		deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
+		return func() {
+			export()
+			lint()
+			test("", false)
+			genReadme()
+			build(*deployTag)
+		}
+	}},
+	"readme": run.Task{Task: genReadme, Help: "build readme"},
+	"export": run.Task{Task: export, Help: "export all submodules under gokit namespace"},
+	"cov": run.Task{Help: "view html coverage report", Task: func() {
+		run.Exec("go", "tool", "cover", "-html="+*covPath).MustDo()
+	}},
 }
 
-func lab() {
-	run.Guard("go", "run", "./dev/lab").MustDo()
+func main() {
+	app := run.TaskNew("dev", "dev tool for gokit")
+	covPath = app.Flag("cov-path", "coverage output file path").Default("coverage.txt").String()
+
+	run.TaskRun(app, tasks)
 }
 
 func lint() {
@@ -52,13 +52,15 @@ func lint() {
 	run.Exec("golint", "-set_exit_status", "./...").MustDo()
 }
 
-func test(dev bool) {
+func test(match string, dev bool) {
+	utils.Noop(Build)
+
 	conf := []string{
 		"go",
 		"test",
-		"-coverprofile=" + covPath,
+		"-coverprofile=" + *covPath,
 		"-covermode=count",
-		"-run", *testMatch,
+		"-run", match,
 		"./...",
 	}
 
@@ -70,4 +72,16 @@ func test(dev bool) {
 	}
 
 	run.Exec(conf...).MustDo()
+}
+
+// BuildArgs ...
+type BuildArgs struct {
+	Deploy bool `default:"true" desc:"release to github with tag (install hub.github.com first)"`
+}
+
+// Build ...
+func Build(b *BuildArgs) {
+	if b.Deploy {
+		fmt.Println("OK")
+	}
 }
