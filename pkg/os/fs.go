@@ -35,7 +35,8 @@ func ThisFilePath() string {
 
 // ThisDirPath get the current file directory path
 func ThisDirPath() string {
-	return path.Dir(ThisFilePath())
+	_, filename, _, _ := runtime.Caller(1)
+	return path.Dir(filename)
 }
 
 // GoPath get the current GOPATH properly
