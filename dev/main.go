@@ -7,44 +7,38 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-var covPath *string
-
-var tasks = run.Tasks{
-	"test": run.Task{Init: func(cmd run.TaskCmd) func() {
-		cmd.Default()
-
-		match := cmd.Arg("match", "match test name").String()
-
-		return func() {
-			test(*match, true)
-		}
-	}},
-	"lab": run.Task{Help: "run temp random experimental code", Task: func() {
-		run.Guard("go", "run", "./dev/lab").MustDo()
-	}},
-	"build": run.Task{Init: func(cmd run.TaskCmd) func() {
-
-		deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
-		return func() {
-			export()
-			lint()
-			test("", false)
-			genReadme()
-			build(*deployTag)
-		}
-	}},
-	"readme": run.Task{Task: genReadme, Help: "build readme"},
-	"export": run.Task{Task: export, Help: "export all submodules under gokit namespace"},
-	"cov": run.Task{Help: "view html coverage report", Task: func() {
-		run.Exec("go", "tool", "cover", "-html="+*covPath).MustDo()
-	}},
-}
+const covPath = "coverage.txt"
 
 func main() {
-	app := run.TaskNew("dev", "dev tool for gokit")
-	covPath = app.Flag("cov-path", "coverage output file path").Default("coverage.txt").String()
+	run.Tasks().App(run.TasksNew("dev", "dev tool for gokit")).Add(
+		run.Task("test", "").Init(func(cmd run.TaskCmd) func() {
+			cmd.Default()
 
-	run.TaskRun(app, tasks)
+			match := cmd.Arg("match", "match test name").String()
+
+			return func() {
+				test(*match, true)
+			}
+		}),
+		run.Task("lab", "run temp random experimental code").Run(func() {
+			run.Guard("go", "run", "./dev/lab").MustDo()
+		}),
+		run.Task("build", "").Init(func(cmd run.TaskCmd) func() {
+			deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
+			return func() {
+				export()
+				lint()
+				test("", false)
+				genReadme()
+				build(*deployTag)
+			}
+		}),
+		run.Task("readme", "build readme").Run(genReadme),
+		run.Task("export", "export all submodules under gokit namespace").Run(export),
+		run.Task("cov", "view html coverage report").Run(func() {
+			run.Exec("go", "tool", "cover", "-html="+covPath).MustDo()
+		}),
+	).Do()
 }
 
 func lint() {
@@ -58,7 +52,7 @@ func test(match string, dev bool) {
 	conf := []string{
 		"go",
 		"test",
-		"-coverprofile=" + *covPath,
+		"-coverprofile=" + covPath,
 		"-covermode=count",
 		"-run", match,
 		"./...",

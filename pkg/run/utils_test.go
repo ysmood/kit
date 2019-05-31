@@ -20,21 +20,18 @@ func TestRunTask(t *testing.T) {
 	os.Args = []string{"test", "act", "--ok"}
 	defer func() { os.Args = old }()
 
-	kit.TaskRun(nil, kit.Tasks{
-		"act": kit.Task{
-			Help: "description",
-			Init: func(cmd kit.TaskCmd) func() {
-				flag := cmd.Flag("ok", "info").Bool()
+	kit.Tasks().App(nil).Add(
+		kit.Task("act", "").Init(func(cmd kit.TaskCmd) func() {
+			flag := cmd.Flag("ok", "info").Bool()
 
-				return func() {
-					outA = *flag
-				}
-			},
-		},
-		"fn": kit.Task{Task: func() {
+			return func() {
+				outA = *flag
+			}
+		}),
+		kit.Task("fn", "").Run(func() {
 			outB = true
-		}},
-	})
+		}),
+	).Do()
 
 	assert.True(t, outA)
 	assert.False(t, outB)

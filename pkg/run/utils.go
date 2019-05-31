@@ -16,40 +16,82 @@ func MustGoTool(path string) {
 	}
 }
 
-// TaskCmd ...
-type TaskCmd = *kingpin.CmdClause
-
-// Task ...
-type Task struct {
-	Help string
-	Init func(TaskCmd) func()
-	Task func()
+// TasksContext ...
+type TasksContext struct {
+	app   *kingpin.Application
+	tasks map[string]*TaskContext
 }
 
-// Tasks ...
-type Tasks = map[string]Task
+// Tasks a simple wrapper for kingpin to make it easier to use
+func Tasks() *TasksContext {
+	return &TasksContext{
+		tasks: map[string]*TaskContext{},
+	}
+}
 
-// TaskNew ...
-var TaskNew = kingpin.New
+// TasksNew ...
+var TasksNew = kingpin.New
 
-// TaskRun a simple wrapper for kingpin to make it easier to use
-// The app arg can be nil
-func TaskRun(app *kingpin.Application, tasks Tasks) {
-	if app == nil {
-		app = kingpin.New("", "")
+// App ...
+func (ctx *TasksContext) App(app *kingpin.Application) *TasksContext {
+	ctx.app = app
+	return ctx
+}
+
+// Add ...
+func (ctx *TasksContext) Add(tasks ...*TaskContext) *TasksContext {
+	for _, task := range tasks {
+		ctx.tasks[task.name] = task
+	}
+	return ctx
+}
+
+// Do ...
+func (ctx *TasksContext) Do() {
+	if ctx.app == nil {
+		ctx.app = kingpin.New("", "")
 	}
 
-	callbacks := map[string]func(){}
-	for name, task := range tasks {
-		cmd := app.Command(name, task.Help)
-		if task.Init == nil {
-			callbacks[name] = task.Task
-		} else {
-			callbacks[name] = task.Init(cmd)
+	for name, task := range ctx.tasks {
+		cmd := ctx.app.Command(name, task.help)
+		if task.run == nil {
+			task.run = task.init(cmd)
 		}
 	}
 
-	name := kingpin.MustParse(app.Parse(os.Args[1:]))
+	name := kingpin.MustParse(ctx.app.Parse(os.Args[1:]))
 
-	callbacks[name]()
+	ctx.tasks[name].run()
+}
+
+// TaskCmd ...
+type TaskCmd = *kingpin.CmdClause
+
+// TaskContext ...
+type TaskContext struct {
+	name string
+	cmd  TaskCmd
+	help string
+	run  func()
+	init func(TaskCmd) func()
+}
+
+// Task ...
+func Task(name, help string) *TaskContext {
+	return &TaskContext{
+		name: name,
+		help: help,
+	}
+}
+
+// Run ...
+func (ctx *TaskContext) Run(f func()) *TaskContext {
+	ctx.run = f
+	return ctx
+}
+
+// Init ...
+func (ctx *TaskContext) Init(f func(TaskCmd) func()) *TaskContext {
+	ctx.init = f
+	return ctx
 }

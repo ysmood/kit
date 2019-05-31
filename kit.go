@@ -184,16 +184,19 @@ var KillTree = run.KillTree
 var MustGoTool = run.MustGoTool
 
 // Task ...
-type Task = run.Task
+var Task = run.Task
 
 // TaskCmd ...
 type TaskCmd = run.TaskCmd
 
-// TaskNew ...
-var TaskNew = run.TaskNew
-
-// TaskRun ...
-var TaskRun = run.TaskRun
+// TaskContext ...
+type TaskContext = run.TaskContext
 
 // Tasks ...
-type Tasks = run.Tasks
+var Tasks = run.Tasks
+
+// TasksContext ...
+type TasksContext = run.TasksContext
+
+// TasksNew ...
+var TasksNew = run.TasksNew
