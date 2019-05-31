@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 
+	gos "github.com/ysmood/gokit/pkg/os"
 	"github.com/ysmood/gokit/pkg/run"
 	"github.com/ysmood/gokit/pkg/utils"
 )
@@ -10,6 +12,8 @@ import (
 const covPath = "coverage.txt"
 
 func main() {
+	os.Chdir(gos.ThisDirPath() + "/../..")
+
 	run.Tasks().App(run.TasksNew("dev", "dev tool for gokit")).Add(
 		run.Task("test", "").Init(func(cmd run.TaskCmd) func() {
 			cmd.Default()

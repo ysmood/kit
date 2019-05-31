@@ -34,9 +34,6 @@ type Nil = utils.Nil
 // Noop ...
 var Noop = utils.Noop
 
-// Retry ...
-var Retry = utils.Retry
-
 // S ...
 var S = utils.S
 
@@ -45,9 +42,6 @@ var Try = utils.Try
 
 // Version ...
 var Version = utils.Version
-
-// WaitSignal ...
-var WaitSignal = utils.WaitSignal
 
 // GinContext ...
 type GinContext = http.GinContext
@@ -133,6 +127,9 @@ var ReadStringFile = os.ReadStringFile
 // Remove ...
 var Remove = os.Remove
 
+// Retry ...
+var Retry = os.Retry
+
 // Sdump ...
 var Sdump = os.Sdump
 
@@ -147,6 +144,9 @@ var ThisDirPath = os.ThisDirPath
 
 // ThisFilePath ...
 var ThisFilePath = os.ThisFilePath
+
+// WaitSignal ...
+var WaitSignal = os.WaitSignal
 
 // Walk ...
 var Walk = os.Walk

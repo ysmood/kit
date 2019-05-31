@@ -4,11 +4,8 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
-	"os"
-	"os/signal"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/tidwall/gjson"
 )
@@ -95,33 +92,6 @@ func Try(fn func()) (err interface{}) {
 	return err
 }
 
-// Retry retry function after a duration for several times
-func Retry(times int, wait time.Duration, fn func()) (errs []interface{}) {
-	var try func(int)
-
-	try = func(countdown int) {
-		defer func() {
-			if r := recover(); r != nil {
-				errs = append(errs, r)
-				if countdown <= 1 {
-					return
-				}
-				time.Sleep(wait)
-				try(countdown - 1)
-			}
-		}()
-
-		fn()
-	}
-
-	try(times)
-
-	if len(errs) < times {
-		return nil
-	}
-	return errs
-}
-
 // S Template render, the params is key-value pairs
 func S(tpl string, params ...interface{}) string {
 	var out bytes.Buffer
@@ -137,15 +107,4 @@ func S(tpl string, params ...interface{}) string {
 	E(t.Execute(&out, dict))
 
 	return out.String()
-}
-
-// WaitSignal ...
-func WaitSignal(sig os.Signal) {
-	c := make(chan os.Signal, 1)
-	if sig == nil {
-		sig = os.Interrupt
-	}
-	signal.Notify(c, sig)
-	<-c
-	close(c)
 }
