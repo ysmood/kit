@@ -11,6 +11,11 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+func TestThisDirPath(t *testing.T) {
+	assert.Regexp(t, `.+/pkg/os/fs_test.go$`, kit.ThisFilePath())
+	assert.Regexp(t, `.+/pkg/os$`, kit.ThisDirPath())
+}
+
 func TestOutputString(t *testing.T) {
 	p := "tmp/" + kit.GenerateRandomString(10)
 

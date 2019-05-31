@@ -60,9 +60,12 @@ To write testable code, I try to isolate all error related dependencies.
 
 ### Build Project
 
+Under project root
+
 ```bash
-go run ./dev --help
-go run ./dev build
+go get ./cmd/gokit-dev
+gokit-dev --help
+gokit-dev build
 ```
 
 Binaries will be built into dist folder.

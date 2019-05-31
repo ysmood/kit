@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime"
 
 	"github.com/karrick/godirwalk"
 	"github.com/mitchellh/go-homedir"
@@ -24,6 +25,17 @@ type MkdirOptions struct {
 func HomeDir() string {
 	p, _ := homedir.Dir()
 	return p
+}
+
+// ThisFilePath get the current file path
+func ThisFilePath() string {
+	_, filename, _, _ := runtime.Caller(1)
+	return filename
+}
+
+// ThisDirPath get the current file directory path
+func ThisDirPath() string {
+	return path.Dir(ThisFilePath())
 }
 
 // GoPath get the current GOPATH properly
