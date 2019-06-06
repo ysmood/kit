@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -61,29 +60,31 @@ func deploy(tag string) {
 func buildForOS(name, osName string) {
 	gos.Log("building:", name, osName)
 
-	f := fmt.Sprint
-
 	env := []string{
-		f("GOOS=", osName),
+		"GOOS=" + osName,
 		"GOARCH=amd64",
 	}
 
-	oPath := f("dist/", name, "-", osName)
+	oPath := "dist/" + name + "-" + osName
 
 	if osName == "darwin" {
-		oPath = f("dist/", name, "-mac")
+		oPath = "dist/" + name + "-mac"
 	}
 
 	utils.E(run.Exec(
 		"go", "build",
 		"-ldflags=-w -s",
 		"-o", oPath,
-		f("./cmd/", name),
+		"./cmd/"+name,
 	).Cmd(&exec.Cmd{
 		Env: append(os.Environ(), env...),
 	}).Do())
 
-	compress(oPath, f(oPath, ".zip"), name+extByOS(osName))
+	if osName == "linux" {
+		compressGz(oPath, oPath+".tar.gz", name+extByOS(osName))
+	} else {
+		compressZip(oPath, oPath+".zip", name+extByOS(osName))
+	}
 
 	_ = os.Remove(oPath)
 
@@ -97,13 +98,36 @@ func extByOS(osName string) string {
 	return ""
 }
 
-func compress(from, to, name string) {
+func compressZip(from, to, name string) {
 	file, err := os.Open(from)
 	utils.E(err)
 	fileInfo, err := file.Stat()
 	utils.E(err)
 
 	tar := archiver.NewZip()
+	tar.CompressionLevel = 9
+	oFile, err := os.Create(to)
+	utils.E(err)
+	utils.E(tar.Create(oFile))
+
+	utils.E(tar.Write(archiver.File{
+		FileInfo: archiver.FileInfo{
+			FileInfo:   fileInfo,
+			CustomName: name,
+		},
+		ReadCloser: file,
+	}))
+
+	tar.Close()
+}
+
+func compressGz(from, to, name string) {
+	file, err := os.Open(from)
+	utils.E(err)
+	fileInfo, err := file.Stat()
+	utils.E(err)
+
+	tar := archiver.NewTarGz()
 	tar.CompressionLevel = 9
 	oFile, err := os.Create(to)
 	utils.E(err)
