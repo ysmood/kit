@@ -106,11 +106,7 @@ func (ctx *GuardContext) Do() error {
 	}
 
 	ctx.watcher = watcher.New()
-	matcher, err := os.NewMatcher(ctx.dir, ctx.patterns)
-	if err != nil {
-		return err
-	}
-	ctx.matcher = matcher
+	ctx.matcher = os.NewMatcher(ctx.dir, ctx.patterns)
 
 	ctx.addWatchFiles(ctx.dir)
 

@@ -36,7 +36,7 @@ func main() {
 			return func() {
 				guard :=
 					kit.Guard(opts.cmd...).
-						Patterns(*opts.patterns...).
+						Patterns(filterEmpty(*opts.patterns)...).
 						Debounce(opts.debounce).
 						Interval(opts.poll).
 						ExecCtx(
@@ -126,6 +126,16 @@ func genOptions(args []string) *options {
 	return opts
 }
 
+func filterEmpty(list []string) []string {
+	newList := []string{}
+	for _, el := range list {
+		if el != "" {
+			newList = append(newList, el)
+		}
+	}
+	return newList
+}
+
 func parseArgs(args []string) (appArgs []string, cmdArgs []string) {
 	i := indexOf(args, "--")
 
@@ -167,7 +177,7 @@ func genPrefix(prefix string, args []string) string {
 		return kit.C(fmt.Sprint(args[0], " | "), fmt.Sprint(h.Sum32()%256))
 	}
 
-	return ""
+	return prefix
 }
 
 func split(args []string, sep string) [][]string {

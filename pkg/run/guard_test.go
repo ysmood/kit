@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	kit "github.com/ysmood/gokit"
 )
 
@@ -28,12 +27,6 @@ func TestGuardErr(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	guard.Stop()
-}
-
-func TestGuardMatcherErr(t *testing.T) {
-	guard := kit.Guard("").Dir("/").Patterns(kit.WalkGitIgnore).NoInitRun()
-	err := guard.Do()
-	assert.Regexp(t, "fatal", err.Error())
 }
 
 func TestGuard(t *testing.T) {

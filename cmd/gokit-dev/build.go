@@ -54,7 +54,7 @@ func deploy(tag string) {
 	}
 	args = append(args, tag)
 
-	run.Exec(args...).MustDo()
+	run.Exec(args...).Raw().MustDo()
 }
 
 func buildForOS(name, osName string) {

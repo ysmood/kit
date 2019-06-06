@@ -2,7 +2,6 @@ package os_test
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,27 +14,11 @@ func TestMatch(t *testing.T) {
 		kit.E(kit.OutputFile(gitIgnorePath, "", nil))
 	}
 
-	m, _ := kit.NewMatcher("/root/a", []string{"**", kit.WalkIgnoreHidden})
+	m := kit.NewMatcher("/root/a", []string{"**", kit.WalkIgnoreHidden})
 
 	matched, negative, _ := m.Match("/root/a/.git", true)
 	assert.Equal(t, false, matched)
 	assert.Equal(t, true, negative)
-}
-
-func TestWalkErr(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-	os.Setenv("PATH", "")
-	defer os.Setenv("PATH", oldPath)
-
-	_, err := kit.Walk("**/file", "!g").List()
-
-	assert.EqualError(t, err, "exec: \"git\": executable file not found in $PATH")
-}
-
-func TestWalkGitFatalErr(t *testing.T) {
-	_, err := kit.NewMatcher("/", []string{kit.WalkGitIgnore})
-
-	assert.Regexp(t, "fatal", err.Error())
 }
 
 func TestWalkCallbackErr(t *testing.T) {
@@ -62,7 +45,7 @@ func TestWalkParrentGitignore(t *testing.T) {
 }
 
 func TestWalkOptions(t *testing.T) {
-	m, _ := kit.NewMatcher("", []string{"*"})
+	m := kit.NewMatcher("", []string{"*"})
 	l, _ := kit.Walk("*").Sort().FollowSymbolicLinks().Matcher(m).List()
 
 	assert.True(t, len(l) > 0)
@@ -70,12 +53,4 @@ func TestWalkOptions(t *testing.T) {
 
 func TestWalkErrPattern(t *testing.T) {
 	assert.EqualError(t, kit.ErrArg(kit.Walk("[]a]").List()), "syntax error in pattern")
-}
-
-func TestWalkGitNotFound(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-	os.Setenv("PATH", "")
-	defer os.Setenv("PATH", oldPath)
-	_, err := kit.NewMatcher("", []string{"!g"})
-	assert.EqualError(t, err, "exec: \"git\": executable file not found in $PATH")
 }

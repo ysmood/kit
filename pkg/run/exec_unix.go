@@ -52,9 +52,10 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		defer restoreState(oldState)
 	}
 
-	go func() {
-		_, _ = io.Copy(p, os.Stdin)
-	}()
+	stdinWriter = p
+	if !stdinPiperRunning {
+		go stdinPiper()
+	}
 
 	reader := bufio.NewReader(p)
 	newline := true
@@ -78,6 +79,29 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	close(ch)
 
 	return cmd.Wait()
+}
+
+var stdinWriter io.Writer
+var stdinPiperRunning = false
+
+// This will cause race condition, but normally we don't want two process handle
+// the stdin at the same time.
+func stdinPiper() {
+	stdinPiperRunning = true
+	buf := make([]byte, 1024)
+	for {
+		nr, er := os.Stdin.Read(buf)
+		if nr > 0 {
+			nw, ew := stdinWriter.Write(buf[0:nr])
+			if ew != nil || nr != nw {
+				break
+			}
+		}
+		if er != nil {
+			break
+		}
+	}
+	stdinPiperRunning = false
 }
 
 func restoreState(oldState *terminal.State) {

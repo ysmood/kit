@@ -1,7 +1,6 @@
 package os
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path"
@@ -86,11 +85,7 @@ func (ctx *WalkContext) Do(cb WalkFunc) error {
 
 	m := ctx.matcher
 	if m == nil {
-		var err error
-		m, err = NewMatcher(ctx.dir, ctx.patterns)
-		if err != nil {
-			return err
-		}
+		m = NewMatcher(ctx.dir, ctx.patterns)
 	}
 
 	return godirwalk.Walk(m.dir, &godirwalk.Options{
@@ -191,7 +186,7 @@ type Matcher struct {
 }
 
 // NewMatcher ...
-func NewMatcher(dir string, patterns []string) (*Matcher, error) {
+func NewMatcher(dir string, patterns []string) *Matcher {
 	dir, err := filepath.Abs(dir)
 	utils.E(err)
 
@@ -202,26 +197,25 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 		cmd := exec.Command("git", "rev-parse", "--show-toplevel")
 		cmd.Dir = dir
 		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return nil, errors.New(string(out) + err.Error())
-		}
-		gitRoot := strings.TrimSpace(string(out))
-
-		submodules = getGitSubmodules(dir)
-		gPath := path.Join(homeDir, ".gitignore_global")
-		g, err := gitignore.NewGitIgnore(gPath, dir)
 		if err == nil {
-			gs[gPath] = g
-		}
+			gitRoot := strings.TrimSpace(string(out))
 
-		// check all parents
-		p := dir
-		for {
-			addIgnoreFile(p, gs)
-			if p == gitRoot || p == "/" {
-				break
+			submodules = getGitSubmodules(dir)
+			gPath := path.Join(homeDir, ".gitignore_global")
+			g, err := gitignore.NewGitIgnore(gPath, dir)
+			if err == nil {
+				gs[gPath] = g
 			}
-			p = filepath.Dir(p)
+
+			// check all parents
+			p := dir
+			for {
+				addIgnoreFile(p, gs)
+				if p == gitRoot || p == "/" {
+					break
+				}
+				p = filepath.Dir(p)
+			}
 		}
 	}
 
@@ -230,7 +224,7 @@ func NewMatcher(dir string, patterns []string) (*Matcher, error) {
 		gitMatchers:   gs,
 		gitSubmodules: submodules,
 		patterns:      normalizePatterns(dir, patterns),
-	}, nil
+	}
 }
 
 var submoduleReg = regexp.MustCompile(`\A [a-f0-9]+ (.+) \(.+\)\z`)

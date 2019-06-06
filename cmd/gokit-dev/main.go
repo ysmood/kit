@@ -24,9 +24,6 @@ func main() {
 				test(*match, true)
 			}
 		}),
-		run.Task("lab", "run temp random experimental code").Run(func() {
-			run.Guard("go", "run", "./dev/lab").MustDo()
-		}),
 		run.Task("build", "").Init(func(cmd run.TaskCmd) func() {
 			deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
 			return func() {
