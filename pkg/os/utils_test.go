@@ -19,7 +19,7 @@ func TestWaitSignal(t *T) {
 
 		p.Signal(os.Interrupt)
 	}()
-	kit.WaitSignal(nil)
+	kit.WaitSignal()
 }
 
 func TestRetry(t *T) {

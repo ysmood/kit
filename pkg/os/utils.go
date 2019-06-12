@@ -7,12 +7,12 @@ import (
 )
 
 // WaitSignal ...
-func WaitSignal(sig os.Signal) {
+func WaitSignal(signals ...os.Signal) {
 	c := make(chan os.Signal, 1)
-	if sig == nil {
-		sig = os.Interrupt
+	if len(signals) == 0 {
+		signals = append(signals, os.Interrupt)
 	}
-	signal.Notify(c, sig)
+	signal.Notify(c, signals...)
 	<-c
 	signal.Stop(c)
 	close(c)
