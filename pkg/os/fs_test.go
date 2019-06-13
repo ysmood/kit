@@ -127,6 +127,17 @@ func TestRemove(t *testing.T) {
 	assert.Equal(t, 0, len(l))
 }
 
+func TestRemoveDir(t *testing.T) {
+	_ = kit.OutputFile("tmp/remove/a", "", nil)
+	_ = kit.OutputFile("tmp/remove/b/c", "", nil)
+	_ = kit.OutputFile("tmp/remove/b/d", "", nil)
+	_ = kit.OutputFile("tmp/remove/e/f/g", "", nil)
+
+	kit.E(kit.Remove("tmp/remove"))
+
+	assert.False(t, kit.DirExists("tmp/remove"))
+}
+
 func TestRemoveSingleFile(t *testing.T) {
 	p := "tmp/remove-single/a"
 	_ = kit.OutputFile(p, "", nil)

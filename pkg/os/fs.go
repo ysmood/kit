@@ -132,8 +132,15 @@ func Move(from, to string, perm *os.FileMode) error {
 	return os.Rename(from, to)
 }
 
-// Remove ...
+// Remove remove dirs, files, patterns as expected
 func Remove(patterns ...string) error {
+	// if any of the patterns is a raw folder path not a pattern remove all children of it
+	for _, p := range patterns {
+		if DirExists(p) {
+			Remove(p + "/**")
+		}
+	}
+
 	return Walk(patterns...).PostChildrenCallback(func(p string, info *godirwalk.Dirent) error {
 		return os.Remove(p)
 	}).Do(func(p string, info *godirwalk.Dirent) error {

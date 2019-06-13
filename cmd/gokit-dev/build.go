@@ -18,11 +18,15 @@ import (
 func build(deployTag bool) {
 	list := gos.Walk("cmd/*").MustList()
 
-	_ = gos.Remove("dist/**")
+	_ = gos.Remove("dist")
 
 	tasks := []func(){}
 	for _, name := range list {
 		name = path.Base(name)
+
+		if name == "gokit-dev" {
+			continue
+		}
 
 		for _, osName := range []string{"darwin", "linux", "windows"} {
 			tasks = append(tasks, func(n, osn string) func() {
@@ -105,7 +109,6 @@ func compressZip(from, to, name string) {
 	utils.E(err)
 
 	tar := archiver.NewZip()
-	tar.CompressionLevel = 9
 	oFile, err := os.Create(to)
 	utils.E(err)
 	utils.E(tar.Create(oFile))
@@ -128,7 +131,6 @@ func compressGz(from, to, name string) {
 	utils.E(err)
 
 	tar := archiver.NewTarGz()
-	tar.CompressionLevel = 9
 	oFile, err := os.Create(to)
 	utils.E(err)
 	utils.E(tar.Create(oFile))
