@@ -16,12 +16,7 @@ import (
 // Copy copy file or dir recursively
 var Copy = copy.Copy
 
-// MkdirOptions ...
-type MkdirOptions struct {
-	perm os.FileMode
-}
-
-// HomeDir ...
+// HomeDir current user's home dir path
 func HomeDir() string {
 	p, _ := homedir.Dir()
 	return p
@@ -48,15 +43,20 @@ func GoPath() string {
 	return gopath
 }
 
+// MkdirOptions ...
+type MkdirOptions struct {
+	Perm os.FileMode
+}
+
 // Mkdir make dir recursively
 func Mkdir(path string, options *MkdirOptions) error {
 	if options == nil {
 		options = &MkdirOptions{
-			perm: 0775,
+			Perm: 0775,
 		}
 	}
 
-	return os.MkdirAll(path, options.perm)
+	return os.MkdirAll(path, options.Perm)
 }
 
 // OutputFileOptions ...
@@ -68,14 +68,14 @@ type OutputFileOptions struct {
 }
 
 // OutputFile auto create file if not exists, it will try to detect the data type and
-// auto output binary, string or gob
+// auto output binary, string or json
 func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	if options == nil {
 		options = &OutputFileOptions{0775, 0664, "", "    "}
 	}
 
 	dir := path.Dir(p)
-	err := Mkdir(dir, &MkdirOptions{perm: options.DirPerm})
+	err := Mkdir(dir, &MkdirOptions{Perm: options.DirPerm})
 
 	if err != nil {
 		return err
@@ -99,18 +99,18 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	return ioutil.WriteFile(p, bin, options.FilePerm)
 }
 
-// ReadFile ...
+// ReadFile read file as bytes
 func ReadFile(p string) ([]byte, error) {
 	return ioutil.ReadFile(p)
 }
 
-// ReadString ...
+// ReadString read file as string
 func ReadString(p string) (string, error) {
 	bin, err := ioutil.ReadFile(p)
 	return string(bin), err
 }
 
-// ReadJSON ...
+// ReadJSON read file as json
 func ReadJSON(p string, data interface{}) error {
 	bin, err := ReadFile(p)
 

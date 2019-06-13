@@ -39,7 +39,8 @@ type WalkFunc = godirwalk.WalkFunc
 // WalkDirent ...
 type WalkDirent = *godirwalk.Dirent
 
-// Walk If the pattern begins with "!", it will become a negative filter pattern.
+// Walk Set up the walk, need to call Do to actually run it.
+// If the pattern begins with "!", it will become a negative filter pattern.
 // Each path will be tested against all pattern, each pattern will override the previous
 // pattern's match result.
 func Walk(patterns ...string) *WalkContext {
@@ -49,13 +50,13 @@ func Walk(patterns ...string) *WalkContext {
 	}
 }
 
-// Dir ...
+// Dir set dir
 func (ctx *WalkContext) Dir(d string) *WalkContext {
 	ctx.dir = d
 	return ctx
 }
 
-// Sort ...
+// Sort whether to sort the result or not
 func (ctx *WalkContext) Sort() *WalkContext {
 	ctx.sort = true
 	return ctx
@@ -79,7 +80,7 @@ func (ctx *WalkContext) Matcher(m *Matcher) *WalkContext {
 	return ctx
 }
 
-// Do ...
+// Do execute walk
 func (ctx *WalkContext) Do(cb WalkFunc) error {
 	ctx.callback = cb
 

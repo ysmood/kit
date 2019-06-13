@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// WaitSignal ...
+// WaitSignal block until get specified os signals
 func WaitSignal(signals ...os.Signal) {
 	c := make(chan os.Signal, 1)
 	if len(signals) == 0 {
