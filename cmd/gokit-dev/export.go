@@ -35,7 +35,7 @@ func export() {
 		for _, n := range s.Names() {
 			v := s.Lookup(n)
 			if v.Exported() {
-				statements += "// " + n + " ...\n"
+				statements += "// " + n + " imported\n"
 				if strings.HasPrefix(v.String(), "type") {
 					statements += fmt.Sprintf("type %s = %s.%s\n", n, pkg.Name, n)
 				} else {

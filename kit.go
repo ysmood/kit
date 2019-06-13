@@ -7,200 +7,200 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-// All ...
+// All imported
 var All = utils.All
 
-// E ...
+// E imported
 var E = utils.E
 
-// E1 ...
+// E1 imported
 var E1 = utils.E1
 
-// ErrArg ...
+// ErrArg imported
 var ErrArg = utils.ErrArg
 
-// RandBytes ...
-var RandBytes = utils.RandBytes
-
-// RandString ...
-var RandString = utils.RandString
-
-// JSON ...
+// JSON imported
 var JSON = utils.JSON
 
-// Nil ...
+// Nil imported
 type Nil = utils.Nil
 
-// Noop ...
+// Noop imported
 var Noop = utils.Noop
 
-// S ...
+// RandBytes imported
+var RandBytes = utils.RandBytes
+
+// RandString imported
+var RandString = utils.RandString
+
+// S imported
 var S = utils.S
 
-// Try ...
+// Try imported
 var Try = utils.Try
 
-// Version ...
+// Version imported
 var Version = utils.Version
 
-// GinContext ...
+// GinContext imported
 type GinContext = http.GinContext
 
-// MustServer ...
+// MustServer imported
 var MustServer = http.MustServer
 
-// Req ...
+// Req imported
 var Req = http.Req
 
-// ReqContext ...
+// ReqContext imported
 type ReqContext = http.ReqContext
 
-// Server ...
+// Server imported
 var Server = http.Server
 
-// ServerContext ...
+// ServerContext imported
 type ServerContext = http.ServerContext
 
-// C ...
+// C imported
 var C = os.C
 
-// ClearScreen ...
+// ClearScreen imported
 var ClearScreen = os.ClearScreen
 
-// Copy ...
+// Copy imported
 var Copy = os.Copy
 
-// DirExists ...
+// DirExists imported
 var DirExists = os.DirExists
 
-// Dump ...
+// Dump imported
 var Dump = os.Dump
 
-// Err ...
+// Err imported
 var Err = os.Err
 
-// Exists ...
+// Exists imported
 var Exists = os.Exists
 
-// FileExists ...
+// FileExists imported
 var FileExists = os.FileExists
 
-// GoPath ...
+// GoPath imported
 var GoPath = os.GoPath
 
-// HomeDir ...
+// HomeDir imported
 var HomeDir = os.HomeDir
 
-// Log ...
+// Log imported
 var Log = os.Log
 
-// Matcher ...
+// Matcher imported
 type Matcher = os.Matcher
 
-// Mkdir ...
+// Mkdir imported
 var Mkdir = os.Mkdir
 
-// MkdirOptions ...
+// MkdirOptions imported
 type MkdirOptions = os.MkdirOptions
 
-// Move ...
+// Move imported
 var Move = os.Move
 
-// NewMatcher ...
+// NewMatcher imported
 var NewMatcher = os.NewMatcher
 
-// OutputFile ...
+// OutputFile imported
 var OutputFile = os.OutputFile
 
-// OutputFileOptions ...
+// OutputFileOptions imported
 type OutputFileOptions = os.OutputFileOptions
 
-// ReadFile ...
+// ReadFile imported
 var ReadFile = os.ReadFile
 
-// ReadJSON ...
+// ReadJSON imported
 var ReadJSON = os.ReadJSON
 
-// ReadString ...
+// ReadString imported
 var ReadString = os.ReadString
 
-// Remove ...
+// Remove imported
 var Remove = os.Remove
 
-// Retry ...
+// Retry imported
 var Retry = os.Retry
 
-// Sdump ...
+// Sdump imported
 var Sdump = os.Sdump
 
-// Stderr ...
+// Stderr imported
 var Stderr = os.Stderr
 
-// Stdout ...
+// Stdout imported
 var Stdout = os.Stdout
 
-// ThisDirPath ...
+// ThisDirPath imported
 var ThisDirPath = os.ThisDirPath
 
-// ThisFilePath ...
+// ThisFilePath imported
 var ThisFilePath = os.ThisFilePath
 
-// WaitSignal ...
+// WaitSignal imported
 var WaitSignal = os.WaitSignal
 
-// Walk ...
+// Walk imported
 var Walk = os.Walk
 
-// WalkContext ...
+// WalkContext imported
 type WalkContext = os.WalkContext
 
-// WalkDirent ...
+// WalkDirent imported
 type WalkDirent = os.WalkDirent
 
-// WalkFunc ...
+// WalkFunc imported
 type WalkFunc = os.WalkFunc
 
-// WalkGitIgnore ...
+// WalkGitIgnore imported
 var WalkGitIgnore = os.WalkGitIgnore
 
-// WalkIgnoreHidden ...
+// WalkIgnoreHidden imported
 var WalkIgnoreHidden = os.WalkIgnoreHidden
 
-// Exec ...
+// Exec imported
 var Exec = run.Exec
 
-// ExecContext ...
+// ExecContext imported
 type ExecContext = run.ExecContext
 
-// Guard ...
+// Guard imported
 var Guard = run.Guard
 
-// GuardContext ...
+// GuardContext imported
 type GuardContext = run.GuardContext
 
-// GuardDefaultPatterns ...
+// GuardDefaultPatterns imported
 var GuardDefaultPatterns = run.GuardDefaultPatterns
 
-// KillTree ...
+// KillTree imported
 var KillTree = run.KillTree
 
-// MustGoTool ...
+// MustGoTool imported
 var MustGoTool = run.MustGoTool
 
-// Task ...
+// Task imported
 var Task = run.Task
 
-// TaskCmd ...
+// TaskCmd imported
 type TaskCmd = run.TaskCmd
 
-// TaskContext ...
+// TaskContext imported
 type TaskContext = run.TaskContext
 
-// Tasks ...
+// Tasks imported
 var Tasks = run.Tasks
 
-// TasksContext ...
+// TasksContext imported
 type TasksContext = run.TasksContext
 
-// TasksNew ...
+// TasksNew imported
 var TasksNew = run.TasksNew
