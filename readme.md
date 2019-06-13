@@ -8,6 +8,8 @@ This project is a collection of often used io related methods.
 
 - Sane defaults to make coding less verbose.
 
+- Cross platform.
+
 - Focus on performance.
 
 - Won't produce error, all errors are come from its dependencies.
@@ -16,7 +18,7 @@ This project is a collection of often used io related methods.
 
 - 100% test coverage and goreportcard
 
-- Won't use any other lanuage for the development of this project.
+- Won't use any other lanuage for the development of this project, no shell script no Makefile, etc.
 
 ## Modules
 
