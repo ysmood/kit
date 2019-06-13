@@ -147,7 +147,7 @@ func compressGz(from, to, name string) {
 }
 
 func genReadme() {
-	fexmaple := utils.E1(gos.ReadStringFile("kit_test.go")).(string)
+	fexmaple := utils.E1(gos.ReadString("kit_test.go")).(string)
 
 	fset := token.NewFileSet()
 	fast := utils.E1(parser.ParseFile(fset, "kit_test.go", fexmaple, parser.ParseComments)).(*ast.File)
@@ -171,7 +171,7 @@ func genReadme() {
 		return true
 	})
 
-	f := utils.E1(gos.ReadStringFile("readme.tpl.md")).(string)
+	f := utils.E1(gos.ReadString("readme.tpl.md")).(string)
 
 	utils.E(gos.OutputFile("readme.md", utils.S(f, list...), nil))
 }

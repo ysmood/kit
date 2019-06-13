@@ -21,7 +21,7 @@ func TestOutputString(t *testing.T) {
 
 	_ = kit.OutputFile(p, p, nil)
 
-	c, err := kit.ReadStringFile(p)
+	c, err := kit.ReadString(p)
 
 	if err != nil {
 		panic(err)
@@ -35,7 +35,7 @@ func TestOutputBytes(t *testing.T) {
 
 	_ = kit.OutputFile(p, []byte("test"), nil)
 
-	c, err := kit.ReadStringFile(p)
+	c, err := kit.ReadString(p)
 
 	if err != nil {
 		panic(err)

@@ -104,8 +104,8 @@ func ReadFile(p string) ([]byte, error) {
 	return ioutil.ReadFile(p)
 }
 
-// ReadStringFile ...
-func ReadStringFile(p string) (string, error) {
+// ReadString ...
+func ReadString(p string) (string, error) {
 	bin, err := ioutil.ReadFile(p)
 	return string(bin), err
 }
