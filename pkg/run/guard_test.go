@@ -8,7 +8,7 @@ import (
 )
 
 func TestGuardDefaults(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 
@@ -30,7 +30,7 @@ func TestGuardErr(t *testing.T) {
 }
 
 func TestGuard(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 
@@ -63,7 +63,7 @@ func TestGuard(t *testing.T) {
 }
 
 func TestGuardDebounce(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 
@@ -84,7 +84,7 @@ func TestGuardDebounce(t *testing.T) {
 }
 
 func TestGuardWatchErr(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 

@@ -17,7 +17,7 @@ func TestThisDirPath(t *testing.T) {
 }
 
 func TestOutputString(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p, p, nil)
 
@@ -31,7 +31,7 @@ func TestOutputString(t *testing.T) {
 }
 
 func TestOutputBytes(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p, []byte("test"), nil)
 
@@ -56,7 +56,7 @@ func TestOutputStringErr2(t *testing.T) {
 }
 
 func TestOutputJSON(t *testing.T) {
-	p := "tmp/deep/" + kit.GenerateRandomString(10)
+	p := "tmp/deep/" + kit.RandString(10)
 
 	data := map[string]interface{}{
 		"A": p,
@@ -76,7 +76,7 @@ func TestOutputJSON(t *testing.T) {
 }
 
 func TestOutputJSONErr(t *testing.T) {
-	p := "tmp/deep/" + kit.GenerateRandomString(10)
+	p := "tmp/deep/" + kit.RandString(10)
 
 	err := kit.OutputFile(p, make(chan kit.Nil), nil)
 
@@ -84,7 +84,7 @@ func TestOutputJSONErr(t *testing.T) {
 }
 
 func TestReadJSONErr(t *testing.T) {
-	p := "tmp/deep/" + kit.GenerateRandomString(10)
+	p := "tmp/deep/" + kit.RandString(10)
 
 	err := kit.ReadJSON(p, nil)
 
@@ -150,7 +150,7 @@ func TestRemoveSingleFile(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/a/b", "", nil)
 	_ = kit.OutputFile(p+"/a/c", "", nil)
@@ -162,7 +162,7 @@ func TestMove(t *testing.T) {
 }
 
 func TestMoveErr(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p, nil, nil)
 
@@ -182,7 +182,7 @@ func TestGoPath(t *testing.T) {
 }
 
 func TestDirExists(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	assert.Equal(t, false, kit.DirExists(p))
 

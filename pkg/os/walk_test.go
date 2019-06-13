@@ -36,7 +36,7 @@ func TestWalkGitSubmodule(t *testing.T) {
 }
 
 func TestWalkParrentGitignore(t *testing.T) {
-	p := "tmp/" + kit.GenerateRandomString(10)
+	p := "tmp/" + kit.RandString(10)
 	kit.E(kit.OutputFile(p+"/f", "", nil))
 
 	l := kit.Walk(p+"/f", "!g").MustList()

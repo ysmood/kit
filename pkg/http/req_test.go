@@ -23,7 +23,7 @@ func TestRequestSuite(t *testing.T) {
 
 func (s *RequestSuite) path() (path, url string) {
 	_, port, _ := net.SplitHostPort(s.listener.Addr().String())
-	r := kit.GenerateRandomString(5)
+	r := kit.RandString(5)
 	path = "/" + r
 	url = "http://127.0.0.1:" + port + path
 	return path, url

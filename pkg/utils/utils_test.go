@@ -61,7 +61,7 @@ func TestJSON(t *T) {
 }
 
 func TestGenerateRandomString(t *T) {
-	v := kit.GenerateRandomString(10)
+	v := kit.RandString(10)
 	raw, _ := base64.URLEncoding.DecodeString(v)
 	assert.Len(t, raw, 10)
 }

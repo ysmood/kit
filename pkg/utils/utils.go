@@ -68,16 +68,16 @@ func All(actions ...func()) {
 	wg.Wait()
 }
 
-// GenerateRandomBytes ...
-func GenerateRandomBytes(n int) []byte {
-	b := make([]byte, n)
+// RandBytes generate random bytes with specified byte length
+func RandBytes(len int) []byte {
+	b := make([]byte, len)
 	_, _ = rand.Read(b)
 	return b
 }
 
-// GenerateRandomString ...
-func GenerateRandomString(s int) string {
-	b := GenerateRandomBytes(s)
+// RandString generate random string with specified string length
+func RandString(len int) string {
+	b := RandBytes(len)
 	return base64.URLEncoding.EncodeToString(b)
 }
 
