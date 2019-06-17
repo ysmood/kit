@@ -1,10 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
-	gos "github.com/ysmood/gokit/pkg/os"
 	"github.com/ysmood/gokit/pkg/run"
 	"github.com/ysmood/gokit/pkg/utils"
 )
@@ -12,8 +8,6 @@ import (
 const covPath = "coverage.txt"
 
 func main() {
-	os.Chdir(gos.ThisDirPath() + "/../..")
-
 	run.Tasks().App(run.TasksNew("dev", "dev tool for gokit")).Add(
 		run.Task("test", "").Init(func(cmd run.TaskCmd) func() {
 			cmd.Default()
@@ -24,14 +18,16 @@ func main() {
 				test(*match, true)
 			}
 		}),
-		run.Task("build", "").Init(func(cmd run.TaskCmd) func() {
+		run.Task("build", "build(deploy) specified dirs(pattern)").Init(func(cmd run.TaskCmd) func() {
 			deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
+			pattern := cmd.Flag("pattern", "folders to build").Short('p').Default("cmd/*").String()
+			ver := cmd.Flag("version", "version").Short('v').Default(utils.Version).String()
 			return func() {
 				export()
 				lint()
 				test("", false)
 				genReadme()
-				build(*deployTag)
+				build(*pattern, *deployTag, *ver)
 			}
 		}),
 		run.Task("readme", "build readme").Run(genReadme),
@@ -48,8 +44,6 @@ func lint() {
 }
 
 func test(match string, dev bool) {
-	utils.Noop(Build)
-
 	conf := []string{
 		"go",
 		"test",
@@ -67,16 +61,4 @@ func test(match string, dev bool) {
 	}
 
 	run.Exec(conf...).MustDo()
-}
-
-// BuildArgs ...
-type BuildArgs struct {
-	Deploy bool `default:"true" desc:"release to github with tag (install hub.github.com first)"`
-}
-
-// Build ...
-func Build(b *BuildArgs) {
-	if b.Deploy {
-		fmt.Println("OK")
-	}
 }
