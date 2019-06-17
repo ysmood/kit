@@ -68,10 +68,13 @@ func TestGenerateRandomString(t *T) {
 
 func TestSTemplate(t *T) {
 	out := kit.S(
-		"{{.a}} {{.b}} {{.c.A}}",
+		"{{.a}} {{.b}} {{.c.A}} {{d}}",
 		"a", "<value>",
 		"b", 10,
 		"c", struct{ A string }{"ok"},
+		"d", func() string {
+			return "ok"
+		},
 	)
-	assert.Equal(t, "<value> 10 ok", out)
+	assert.Equal(t, "<value> 10 ok ok", out)
 }

@@ -32,7 +32,7 @@ type GuardContext struct {
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
 // Because it's based on polling, so it's cross-platform and file system.
-// The args supports go template, variables {{.path}}, {{.op}} are available.
+// The args supports go template, variables {{path}}, {{op}} are available.
 // The default patterns are GuardDefaultPatterns
 func Guard(args ...string) *GuardContext {
 	return &GuardContext{
@@ -125,7 +125,7 @@ func (ctx *GuardContext) Do() error {
 	return ctx.watcher.Start(*interval)
 }
 
-// unescape the {{.path}} {{.op}} placeholders
+// unescape the {{path}} {{op}} placeholders
 func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string {
 	if e == nil {
 		e = &watcher.Event{}
@@ -144,7 +144,10 @@ func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string 
 
 		newArgs = append(
 			newArgs,
-			utils.S(arg, "path", p, "op", e.Op.String()),
+			utils.S(arg,
+				"path", func() string { return p },
+				"op", func() string { return e.Op.String() },
+			),
 		)
 	}
 	return newArgs

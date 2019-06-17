@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"reflect"
 	"sync"
 	"text/template"
 
@@ -96,14 +97,21 @@ func Try(fn func()) (err interface{}) {
 func S(tpl string, params ...interface{}) string {
 	var out bytes.Buffer
 
-	t := template.Must(template.New("").Parse(tpl))
-
 	dict := map[string]interface{}{}
+	fnDict := template.FuncMap{}
+
 	l := len(params)
 	for i := 0; i < l-1; i += 2 {
-		dict[params[i].(string)] = params[i+1]
+		k := params[i].(string)
+		v := params[i+1]
+		if reflect.TypeOf(v).Kind() == reflect.Func {
+			fnDict[k] = v
+		} else {
+			dict[k] = v
+		}
 	}
 
+	t := template.Must(template.New("").Funcs(fnDict).Parse(tpl))
 	E(t.Execute(&out, dict))
 
 	return out.String()

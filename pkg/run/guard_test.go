@@ -12,7 +12,7 @@ func TestGuardDefaults(t *testing.T) {
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 
-	guard := kit.Guard("echo", "ok", "{{.path}}").Dir("..").Patterns("*/*.go")
+	guard := kit.Guard("echo", "ok", "{{op}} {{path}}").Dir("..").Patterns("*/*.go")
 	go guard.MustDo()
 
 	time.Sleep(300 * time.Millisecond)
@@ -37,7 +37,7 @@ func TestGuard(t *testing.T) {
 	d := 0 * time.Millisecond
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("echo", "ok", "{{.path}}").
+	guard := kit.Guard("echo", "ok", "{{path}}").
 		ExecCtx(kit.Exec()).
 		Dir("").
 		Patterns(p + "/**").
@@ -69,7 +69,7 @@ func TestGuardDebounce(t *testing.T) {
 
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("echo", "ok", "{{.path}}").Patterns(p + "/**").Interval(&i)
+	guard := kit.Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Interval(&i)
 	go guard.MustDo()
 
 	go func() {
