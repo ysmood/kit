@@ -12,10 +12,6 @@ import (
 )
 
 func genReadme() {
-	if !gos.FileExists("readme.tpl.md") {
-		return
-	}
-
 	fexmaple := utils.E1(gos.ReadString("kit_test.go")).(string)
 
 	fset := token.NewFileSet()

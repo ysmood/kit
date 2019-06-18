@@ -13,10 +13,6 @@ import (
 
 // Export all the public members of each package under pkg folfer into gokit_exports.go
 func export() {
-	if !gos.FileExists("kit_test.go") {
-		return
-	}
-
 	paths := gos.Walk("pkg/*").MustList()
 
 	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedDeps | packages.NeedTypes}

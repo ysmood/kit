@@ -11,18 +11,14 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-func build(pattern string, deployTag bool, version string) {
-	list := gos.Walk(pattern).MustList()
+func build(pattern []string, deployTag bool, version string) {
+	list := gos.Walk(pattern...).MustList()
 
 	_ = gos.Remove("dist")
 
 	tasks := []func(){}
 	for _, dir := range list {
 		name := path.Base(dir)
-
-		if name == "gokit-dev" {
-			continue
-		}
 
 		for _, osName := range []string{"darwin", "linux", "windows"} {
 			tasks = append(tasks, func(n, dir, osn string) func() {
