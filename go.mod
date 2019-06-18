@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/bmatcuk/doublestar v1.1.1
 	github.com/derekstavis/go-qs v0.0.0-20180720192143-9eef69e6c4e7
 	github.com/dsnet/compress v0.0.1 // indirect

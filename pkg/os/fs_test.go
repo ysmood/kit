@@ -138,6 +138,17 @@ func TestRemoveDir(t *testing.T) {
 	assert.False(t, kit.DirExists("tmp/remove"))
 }
 
+func TestRemoveDirErr(t *testing.T) {
+	p := "tmp/" + kit.RandString(16)
+	_ = kit.OutputFile(p+"/a", "", nil)
+	_ = os.Chmod(p, 0400)
+	defer func() { _ = os.Chmod(p, 0700) }()
+
+	err := kit.Remove(p)
+
+	assert.Regexp(t, "permission denied", err.Error())
+}
+
 func TestRemoveSingleFile(t *testing.T) {
 	p := "tmp/remove-single/a"
 	_ = kit.OutputFile(p, "", nil)

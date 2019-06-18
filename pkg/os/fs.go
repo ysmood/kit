@@ -137,7 +137,10 @@ func Remove(patterns ...string) error {
 	// if any of the patterns is a raw folder path not a pattern remove all children of it
 	for _, p := range patterns {
 		if DirExists(p) {
-			Remove(p + "/**")
+			err := Remove(p + "/**")
+			if err != nil {
+				return err
+			}
 		}
 	}
 

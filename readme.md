@@ -102,6 +102,9 @@ Commands:
   test* [<flags>] [<match>]
     run go unit test
 
+  lint
+    lint project with golint and golangci-lint
+
   build [<flags>]
     build [and deploy] specified dirs
 

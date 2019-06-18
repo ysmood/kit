@@ -70,7 +70,6 @@ type TaskCmd = *kingpin.CmdClause
 // TaskContext ...
 type TaskContext struct {
 	name string
-	cmd  TaskCmd
 	help string
 	run  func()
 	init func(TaskCmd) func()

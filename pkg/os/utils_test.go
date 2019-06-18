@@ -17,7 +17,7 @@ func TestWaitSignal(t *T) {
 		p, err := os.FindProcess(os.Getpid())
 		kit.E(err)
 
-		p.Signal(os.Interrupt)
+		kit.E(p.Signal(os.Interrupt))
 	}()
 	kit.WaitSignal()
 }

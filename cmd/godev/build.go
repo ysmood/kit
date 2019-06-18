@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/blang/semver"
 	"github.com/mholt/archiver"
 	gos "github.com/ysmood/gokit/pkg/os"
 	"github.com/ysmood/gokit/pkg/run"
@@ -34,6 +35,10 @@ func build(pattern []string, deployTag bool, version string) {
 }
 
 func deploy(tag string) {
+	if _, err := semver.ParseTolerant(tag); err != nil {
+		panic("invalid semver flag: --version " + tag + " (" + err.Error() + ")")
+	}
+
 	files := gos.Walk("dist/*").MustList()
 
 	run.Exec("git", "tag", tag).MustDo()

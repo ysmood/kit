@@ -13,6 +13,7 @@ func main() {
 
 	run.Tasks().App(app).Add(
 		run.Task("test", "run go unit test").Init(cmdTest),
+		run.Task("lint", "lint project with golint and golangci-lint").Run(lint),
 		run.Task("build", "build [and deploy] specified dirs").Init(cmdBuild),
 		run.Task("cov", "view html coverage report").Run(cov),
 	).Do()
@@ -48,6 +49,9 @@ func cov() {
 func lint() {
 	run.MustGoTool("golang.org/x/lint/golint")
 	run.Exec("golint", "-set_exit_status", "./...").MustDo()
+
+	run.MustGoTool("github.com/golangci/golangci-lint/cmd/golangci-lint")
+	run.Exec("golangci-lint", "run").MustDo()
 }
 
 func test(path, match string, dev bool) {
