@@ -80,7 +80,7 @@ func main() {
 ## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
-Or you can install each with single line command below.
+Or install with single line command below.
 
 ### godev
 
