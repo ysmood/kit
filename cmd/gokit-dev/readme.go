@@ -18,9 +18,11 @@ func genReadme() {
 	fast := utils.E1(parser.ParseFile(fset, "kit_test.go", fexmaple, parser.ParseComments)).(*ast.File)
 
 	guardHelp := run.Exec("go", "run", "./cmd/guard", "--help").MustString()
+	godevHelp := run.Exec("go", "run", "./cmd/godev", "--help").MustString()
 
 	list := []interface{}{
 		"GuardHelp", guardHelp,
+		"GodevHelp", godevHelp,
 	}
 
 	ast.Inspect(fast, func(n ast.Node) bool {

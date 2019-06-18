@@ -79,7 +79,38 @@ func main() {
 
 ## CLI tool
 
-Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
+
+### godev
+
+A general dev tool for go project to lint, test, build cross platform executable, etc.
+
+```bash
+usage: godev [<flags>] <command> [<args> ...]
+
+dev tool for common go project
+
+Flags:
+  --help                     Show context-sensitive help (also try --help-long
+                             and --help-man).
+  --cov-path="coverage.txt"  path for coverage output
+
+Commands:
+  help [<command>...]
+    Show help.
+
+  test* [<flags>] [<match>]
+    run go unit test
+
+  build [<flags>]
+    build [and deploy] specified dirs
+
+  cov
+    view html coverage report
+
+
+
+```
 
 ### guard
 
@@ -157,8 +188,7 @@ To write testable code, I try to isolate all error related dependencies.
 Under project root
 
 ```bash
-go get ./cmd/gokit-dev
-gokit-dev --help
+go get ./cmd/...
 gokit-dev build
 ```
 

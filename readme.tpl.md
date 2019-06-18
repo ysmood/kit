@@ -44,7 +44,15 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 
 ## CLI tool
 
-Goto the [release page](https://github.com/ysmood/gokit/releases) download the binary for your OS.
+Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
+
+### godev
+
+A general dev tool for go project to lint, test, build cross platform executable, etc.
+
+```bash
+{{.GodevHelp}}
+```
 
 ### guard
 
@@ -65,8 +73,7 @@ To write testable code, I try to isolate all error related dependencies.
 Under project root
 
 ```bash
-go get ./cmd/gokit-dev
-gokit-dev --help
+go get ./cmd/...
 gokit-dev build
 ```
 

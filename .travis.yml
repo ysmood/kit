@@ -1,7 +1,8 @@
 language: go
 
 script:
-  - go run ./cmd/gokit-dev build
+  - go get ./cmd/...
+  - gokit-dev build
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

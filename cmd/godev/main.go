@@ -7,13 +7,13 @@ import (
 var covPath *string
 
 func main() {
-	app := run.TasksNew("godev", "develop tool for common go project")
+	app := run.TasksNew("godev", "dev tool for common go project")
 
 	covPath = app.Flag("cov-path", "path for coverage output").Default("coverage.txt").String()
 
 	run.Tasks().App(app).Add(
 		run.Task("test", "run go unit test").Init(cmdTest),
-		run.Task("build", "build(deploy) specified dirs(pattern)").Init(cmdBuild),
+		run.Task("build", "build [and deploy] specified dirs").Init(cmdBuild),
 		run.Task("cov", "view html coverage report").Run(cov),
 	).Do()
 }
