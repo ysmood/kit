@@ -80,10 +80,13 @@ func main() {
 ## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
+Or you can install each with single line command below.
 
 ### godev
 
 A general dev tool for go project to lint, test, build cross platform executable, etc.
+
+Install: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=godev sh`
 
 ```bash
 usage: godev [<flags>] <command> [<args> ...]
@@ -116,6 +119,8 @@ Commands:
 ```
 
 ### guard
+
+Install: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=guard sh`
 
 ```bash
 usage: guard [<flags>]
