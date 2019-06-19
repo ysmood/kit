@@ -2,6 +2,7 @@ package os_test
 
 import (
 	"errors"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,12 @@ func TestMatch(t *testing.T) {
 	matched, negative, _ := m.Match("/root/a/.git", true)
 	assert.Equal(t, false, matched)
 	assert.Equal(t, true, negative)
+}
+
+func TestWalk(t *testing.T) {
+	list := kit.Walk("*").Dir("fixtures/路 径 [").MustList()
+
+	assert.Equal(t, "青 空", filepath.Base(list[0]))
 }
 
 func TestWalkCallbackErr(t *testing.T) {

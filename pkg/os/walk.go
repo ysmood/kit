@@ -111,38 +111,6 @@ func (ctx *WalkContext) MustList() []string {
 	return utils.E(ctx.List())[0].([]string)
 }
 
-func pathMatch(pattern, name string) (bool, bool, error) {
-	negative := false
-
-	if pattern[0] == '!' {
-		pattern = pattern[1:]
-		negative = true
-	}
-
-	matched, err := doublestar.PathMatch(pattern, name)
-	if err != nil {
-		return false, false, err
-	}
-
-	return matched, negative, nil
-}
-
-func normalizePatterns(dir string, patterns []string) []string {
-	list := []string{}
-	for _, p := range patterns {
-		if p == WalkGitIgnore {
-			list = append(list, p)
-			continue
-		}
-		if p[0] == '!' {
-			list = append(list, path.Clean("!"+dir+string(os.PathSeparator)+p[1:]))
-			continue
-		}
-		list = append(list, path.Clean(dir+string(os.PathSeparator)+p))
-	}
-	return list
-}
-
 func hasWalkGitIgnore(patterns []string) bool {
 	for _, p := range patterns {
 		if p == WalkGitIgnore {
@@ -224,7 +192,7 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 		dir:           dir,
 		gitMatchers:   gs,
 		gitSubmodules: submodules,
-		patterns:      normalizePatterns(dir, patterns),
+		patterns:      patterns,
 	}
 }
 
@@ -297,7 +265,7 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 			continue
 		}
 
-		mm, neg, e := pathMatch(pattern, p)
+		mm, neg, e := pathMatch(pattern, m.dir, p)
 
 		if e != nil {
 			err = e
@@ -315,4 +283,31 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 	}
 
 	return
+}
+
+func pathMatch(pattern, dir, path string) (bool, bool, error) {
+	name := path[len(dir):]
+	nameLen := len(name)
+
+	if nameLen > 0 && name[0] == os.PathSeparator {
+		name = name[1:]
+	}
+
+	negative := false
+
+	if pattern[0] == '!' {
+		pattern = pattern[1:]
+		negative = true
+	}
+
+	if nameLen == 0 {
+		return false, negative, nil
+	}
+
+	matched, err := doublestar.PathMatch(pattern, name)
+	if err != nil {
+		return false, false, err
+	}
+
+	return matched, negative, nil
 }
