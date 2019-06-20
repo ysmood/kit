@@ -28,10 +28,12 @@ func TestE(t *T) {
 	defer func() {
 		r := kit.ErrArg(recover())
 
-		assert.EqualError(t, r, "exec: \"exitexit\": executable file not found in $PATH")
+		assert.EqualError(t, r, "err")
 	}()
 
-	kit.E(kit.Exec("exitexit").Do())
+	kit.E(func() error {
+		return errors.New("err")
+	}())
 }
 
 func TestE1(t *T) {

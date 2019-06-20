@@ -7,15 +7,19 @@ import (
 	kit "github.com/ysmood/gokit"
 )
 
+func wait() {
+	time.Sleep(time.Millisecond * 500)
+}
+
 func TestGuardDefaults(t *testing.T) {
 	p := "tmp/" + kit.RandString(10)
 
 	_ = kit.OutputFile(p+"/f", "ok", nil)
 
-	guard := kit.Guard("echo", "ok", "{{op}} {{path}}").Dir("..").Patterns("*/*.go")
+	guard := kit.Guard("go", "version", "{{op}} {{path}}").Dir("..").Patterns("*/*.go")
 	go guard.MustDo()
 
-	time.Sleep(300 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }
@@ -24,7 +28,7 @@ func TestGuardErr(t *testing.T) {
 	guard := kit.Guard("exitexit").NoInitRun()
 	go guard.MustDo()
 
-	time.Sleep(100 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }
@@ -37,7 +41,7 @@ func TestGuard(t *testing.T) {
 	d := 0 * time.Millisecond
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("echo", "ok", "{{path}}").
+	guard := kit.Guard("go", "version", "{{path}}").
 		ExecCtx(kit.Exec()).
 		Dir("").
 		Patterns(p + "/**").
@@ -57,7 +61,7 @@ func TestGuard(t *testing.T) {
 		_ = kit.Mkdir(p+"/d", nil)
 	}()
 
-	time.Sleep(300 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }
@@ -69,7 +73,7 @@ func TestGuardDebounce(t *testing.T) {
 
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("echo", "ok", "{{path}}").Patterns(p + "/**").Interval(&i)
+	guard := kit.Guard("go", "version", "{{path}}").Patterns(p + "/**").Interval(&i)
 	go guard.MustDo()
 
 	go func() {
@@ -78,7 +82,7 @@ func TestGuardDebounce(t *testing.T) {
 		_ = kit.OutputFile(p+"/b", "b", nil)
 	}()
 
-	time.Sleep(200 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }
@@ -90,7 +94,7 @@ func TestGuardWatchErr(t *testing.T) {
 
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("echo", "ok").Patterns(p + "/**").Interval(&i)
+	guard := kit.Guard("go", "version").Patterns(p + "/**").Interval(&i)
 	go guard.MustDo()
 
 	go func() {
@@ -98,7 +102,7 @@ func TestGuardWatchErr(t *testing.T) {
 		_ = kit.Remove(p+"/f", "a")
 	}()
 
-	time.Sleep(200 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }
@@ -107,7 +111,7 @@ func TestGuardRunErr(t *testing.T) {
 	guard := kit.Guard("exitexit").Patterns("a")
 	go guard.MustDo()
 
-	time.Sleep(200 * time.Millisecond)
+	wait()
 
 	guard.Stop()
 }

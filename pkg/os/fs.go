@@ -8,6 +8,7 @@ import (
 	"path"
 	"runtime"
 
+	"github.com/hectane/go-acl"
 	"github.com/karrick/godirwalk"
 	"github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"
@@ -15,6 +16,9 @@ import (
 
 // Copy copy file or dir recursively
 var Copy = copy.Copy
+
+// Chmod ...
+var Chmod = acl.Chmod
 
 // HomeDir current user's home dir path
 func HomeDir() string {
@@ -75,11 +79,7 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	}
 
 	dir := path.Dir(p)
-	err := Mkdir(dir, &MkdirOptions{Perm: options.DirPerm})
-
-	if err != nil {
-		return err
-	}
+	_ = Mkdir(dir, &MkdirOptions{Perm: options.DirPerm})
 
 	var bin []byte
 
@@ -89,6 +89,7 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	case string:
 		bin = []byte(t)
 	default:
+		var err error
 		bin, err = json.MarshalIndent(data, options.JSONPrefix, options.JSONIndent)
 
 		if err != nil {

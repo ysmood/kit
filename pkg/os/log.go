@@ -38,7 +38,9 @@ func Log(v ...interface{}) {
 // Err log to stderr with timestamp and stack trace
 func Err(v ...interface{}) {
 	t := time.Now().Format("[2006-01-02 15:04:05]")
-	v = append(v, "\n"+string(debug.Stack()))
+	if goos != "windows" {
+		v = append(v, "\n"+string(debug.Stack()))
+	}
 	v = append([]interface{}{C(t, "7")}, v...)
 
 	fmt.Fprintln(Stderr, v...)
@@ -46,13 +48,12 @@ func Err(v ...interface{}) {
 
 // ClearScreen ...
 func ClearScreen() error {
-	clsCmd := "clear"
-
 	if goos == "windows" {
-		clsCmd = "cls"
+		_, err := os.Stdout.WriteString("\n\n\n\n\n")
+		return err
 	}
 
-	cmd := exec.Command(clsCmd)
+	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
 }

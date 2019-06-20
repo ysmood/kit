@@ -64,6 +64,9 @@ type ServerContext = http.ServerContext
 // C imported
 var C = os.C
 
+// Chmod imported
+var Chmod = os.Chmod
+
 // ClearScreen imported
 var ClearScreen = os.ClearScreen
 
@@ -78,6 +81,9 @@ var Dump = os.Dump
 
 // Err imported
 var Err = os.Err
+
+// ExecutableExt imported
+var ExecutableExt = os.ExecutableExt
 
 // Exists imported
 var Exists = os.Exists
@@ -132,6 +138,9 @@ var Retry = os.Retry
 
 // Sdump imported
 var Sdump = os.Sdump
+
+// SendSigInt imported
+var SendSigInt = os.SendSigInt
 
 // Stderr imported
 var Stderr = os.Stderr

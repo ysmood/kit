@@ -178,11 +178,13 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 
 			// check all parents
 			p := dir
-			for {
+			last := ""
+			for last != p {
 				addIgnoreFile(p, gs)
-				if p == gitRoot || p == "/" {
+				if p == gitRoot {
 					break
 				}
+				last = p
 				p = filepath.Dir(p)
 			}
 		}
@@ -192,7 +194,7 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 		dir:           dir,
 		gitMatchers:   gs,
 		gitSubmodules: submodules,
-		patterns:      patterns,
+		patterns:      normalizePatterns(patterns),
 	}
 }
 
@@ -283,6 +285,14 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 	}
 
 	return
+}
+
+func normalizePatterns(patterns []string) []string {
+	newPatterns := []string{}
+	for _, p := range patterns {
+		newPatterns = append(newPatterns, filepath.FromSlash(p))
+	}
+	return newPatterns
 }
 
 func pathMatch(pattern, dir, path string) (bool, bool, error) {

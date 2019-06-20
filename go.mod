@@ -13,6 +13,7 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/karrick/godirwalk v1.10.12
 	github.com/kr/pretty v0.1.0 // indirect
@@ -35,7 +36,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20190618222545-ea8f1a30c443
 	golang.org/x/net v0.0.0-20190619014844-b5b0513f8c1b // indirect
-	golang.org/x/sys v0.0.0-20190620070143-6f217b454f45 // indirect
+	golang.org/x/sys v0.0.0-20190620070143-6f217b454f45
 	golang.org/x/tools v0.0.0-20190619215442-4adf7a708c2d
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect

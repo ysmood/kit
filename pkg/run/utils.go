@@ -5,14 +5,15 @@ import (
 	os_path "path"
 
 	gos "github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 // MustGoTool try to find executable bin under GOPATH, if not exists run go get to download it
 func MustGoTool(path string) {
-	if !gos.Exists(gos.GoPath() + "/bin/" + os_path.Base(path)) {
-		utils.E(Exec("go", "get", path).Dir(gos.HomeDir()).Do())
+	p := os_path.Join(gos.GoPath(), "bin", os_path.Base(path)+gos.ExecutableExt())
+	if !gos.Exists(p) {
+		gos.Log("go get", path)
+		Exec("go", "get", path).Dir(gos.HomeDir()).MustDo()
 	}
 }
 

@@ -67,6 +67,11 @@ func test(path, match string, dev bool) {
 	if dev {
 		run.MustGoTool("github.com/kyoh86/richgo")
 		conf[0] = "richgo"
+		args := append([]string{
+			"-v",
+			"-count=1", // prevent the go test cache
+		}, conf[2:]...)
+		conf = append(conf[:2], args...)
 		run.Guard(conf...).MustDo()
 		return
 	}

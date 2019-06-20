@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 
 	"github.com/blang/semver"
 	"github.com/mholt/archiver"
@@ -12,14 +12,15 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-func build(pattern []string, deployTag bool, version string) {
-	list := gos.Walk(pattern...).MustList()
+func build(patterns []string, deployTag bool, version string) {
+	list := gos.Walk(patterns...).MustList()
+	gos.Log(patterns, list)
 
 	_ = gos.Remove("dist")
 
 	tasks := []func(){}
 	for _, dir := range list {
-		name := path.Base(dir)
+		name := filepath.Base(dir)
 
 		for _, osName := range []string{"darwin", "linux", "windows"} {
 			tasks = append(tasks, func(n, dir, osn string) func() {

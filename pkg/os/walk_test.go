@@ -17,7 +17,9 @@ func TestMatch(t *testing.T) {
 
 	m := kit.NewMatcher("/root/a", []string{"**", kit.WalkIgnoreHidden})
 
-	matched, negative, _ := m.Match("/root/a/.git", true)
+	p, _ := filepath.Abs("/root/a/.git")
+
+	matched, negative, _ := m.Match(p, true)
 	assert.Equal(t, false, matched)
 	assert.Equal(t, true, negative)
 }
@@ -46,6 +48,7 @@ func TestWalkCallbackErr(t *testing.T) {
 func TestWalkGitSubmodule(t *testing.T) {
 	l := kit.Walk("**/file", "!g").Dir("../../").MustList()
 
+	assert.FileExists(t, "fixtures/git-submodule/file")
 	assert.Len(t, l, 1)
 }
 

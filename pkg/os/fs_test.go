@@ -12,7 +12,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	_ = kit.Remove("tmp")
+	_ = kit.Remove("tmp/**")
 	os.Exit(m.Run())
 }
 
@@ -56,8 +56,15 @@ func TestOutputStringErr(t *testing.T) {
 }
 
 func TestOutputStringErr2(t *testing.T) {
-	err := kit.OutputFile("/a/a", "", nil)
-	assert.EqualError(t, err, "mkdir /a: permission denied")
+	p := "tmp/" + kit.RandString(10)
+	kit.E(kit.Mkdir(p, nil))
+
+	_ = kit.Chmod(p, 0400)
+	defer func() { _ = kit.Chmod(p, 0700) }()
+
+	err := kit.OutputFile(p+"/a", "", nil)
+
+	assert.Regexp(t, "Access is denied|permission denied", err.Error())
 }
 
 func TestOutputJSON(t *testing.T) {
@@ -81,7 +88,7 @@ func TestOutputJSON(t *testing.T) {
 }
 
 func TestOutputJSONErr(t *testing.T) {
-	p := "tmp/deep/" + kit.RandString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	err := kit.OutputFile(p, make(chan kit.Nil), nil)
 
@@ -89,11 +96,11 @@ func TestOutputJSONErr(t *testing.T) {
 }
 
 func TestReadJSONErr(t *testing.T) {
-	p := "tmp/deep/" + kit.RandString(10)
+	p := "tmp/" + kit.RandString(10)
 
 	err := kit.ReadJSON(p, nil)
 
-	assert.Regexp(t, "no such file or directory", err.Error())
+	assert.Regexp(t, "no such file or directory|cannot find the file specified", err.Error())
 }
 
 func TestMkdir(t *testing.T) {
@@ -151,7 +158,7 @@ func TestRemoveDirErr(t *testing.T) {
 
 	err := kit.Remove(p)
 
-	assert.Regexp(t, "permission denied", err.Error())
+	assert.Regexp(t, "permission denied|Access is denied", err.Error())
 }
 
 func TestRemoveSingleFile(t *testing.T) {
@@ -184,7 +191,7 @@ func TestMoveErr(t *testing.T) {
 
 	err := kit.Move(p+"/a", p+"/b", nil)
 
-	assert.Regexp(t, "not a directory", err.Error())
+	assert.Regexp(t, "not a directory|cannot find the path specified", err.Error())
 }
 
 func TestGoPath(t *testing.T) {
