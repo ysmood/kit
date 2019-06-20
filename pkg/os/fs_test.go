@@ -11,6 +11,11 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
+func TestMain(m *testing.M) {
+	_ = kit.Remove("tmp")
+	os.Exit(m.Run())
+}
+
 func TestThisDirPath(t *testing.T) {
 	assert.Regexp(t, `.+/pkg/os/fs_test.go$`, kit.ThisFilePath())
 	assert.Regexp(t, `.+/pkg/os$`, kit.ThisDirPath())

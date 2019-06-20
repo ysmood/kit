@@ -1,6 +1,7 @@
 package run_test
 
 import (
+	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -8,6 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	kit "github.com/ysmood/gokit"
 )
+
+func TestMain(m *testing.M) {
+	_ = kit.Remove("tmp")
+	os.Exit(m.Run())
+}
 
 func TestExec(t *testing.T) {
 	kit.Exec("go", "version").MustDo()

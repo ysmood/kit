@@ -28,6 +28,13 @@ func TestWalk(t *testing.T) {
 	assert.Equal(t, "青 空", filepath.Base(list[0]))
 }
 
+func TestWalkDot(t *testing.T) {
+	list := kit.Walk(".").MustList()
+
+	assert.Equal(t, "os", filepath.Base(list[0]))
+	assert.Len(t, list, 1)
+}
+
 func TestWalkCallbackErr(t *testing.T) {
 	err := kit.Walk("**/file", "!g").Do(func(s string, d kit.WalkDirent) error {
 		return errors.New("err")

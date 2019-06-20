@@ -300,6 +300,10 @@ func pathMatch(pattern, dir, path string) (bool, bool, error) {
 		negative = true
 	}
 
+	if pattern == "." && path == dir {
+		return true, negative, nil
+	}
+
 	if nameLen == 0 {
 		return false, negative, nil
 	}
