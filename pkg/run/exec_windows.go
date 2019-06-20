@@ -31,21 +31,29 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	}
 
 	reader := bufio.NewReader(io.MultiReader(stderr, stdout))
-	newline := true
+	buf := make([]byte, 32*1024)
+	prefixBuf := []byte(prefix)
+	bufOut := make([]byte, 32*1024+len(prefixBuf))
+
 	for {
-		r, _, err := reader.ReadRune()
-		if err != nil {
-			gos.Stdout.Write([]byte(string(r)))
+		n, err := reader.Read(buf)
+		if err == io.EOF {
 			break
 		}
-		if newline {
-			gos.Stdout.Write([]byte(prefix))
-			newline = false
+
+		bufOutIndex := 0
+		bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
+		for _, r := range string(buf[:n]) {
+			if err != nil {
+				_, _ = gos.Stdout.Write(buf[:n])
+				return err
+			}
+			if r == '\n' {
+				bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
+			}
+			bufOutIndex += copy(bufOut[bufOutIndex:], []byte(string(r)))
 		}
-		if r == '\n' {
-			newline = true
-		}
-		gos.Stdout.Write([]byte(string(r)))
+		_, _ = gos.Stdout.Write(bufOut[:bufOutIndex])
 	}
 
 	return nil
