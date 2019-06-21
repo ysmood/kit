@@ -120,7 +120,7 @@ func formatPrefix(prefix string) string {
 	return os.C(prefix[:i], color)
 }
 
-func pipeToStdoutWithPrefix(prefix string, reader io.Reader) error {
+func pipeToStdoutWithPrefix(prefix string, reader io.Reader) {
 	const size = 32 * 1024
 	buf := make([]byte, size)
 	prefixBuf := []byte(prefix)
@@ -141,19 +141,14 @@ func pipeToStdoutWithPrefix(prefix string, reader io.Reader) error {
 			}
 			bufOutIndex += copy(bufOut[bufOutIndex:], []byte(string(r)))
 		}
-		_, werr := gos.Stdout.Write(bufOut[:bufOutIndex])
-		if werr != nil {
-			return werr
-		}
+		_, _ = gos.Stdout.Write(bufOut[:bufOutIndex])
 		bufOutIndex = 0
 
 		if rerr != nil {
 			if rerr == io.EOF {
 				break
 			}
-			return rerr
+			return
 		}
 	}
-
-	return nil
 }

@@ -27,7 +27,9 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		return err
 	}
 
-	return pipeToStdoutWithPrefix(prefix, io.MultiReader(stderr, stdout))
+	pipeToStdoutWithPrefix(prefix, io.MultiReader(stderr, stdout))
+
+	return nil
 }
 
 // KillTree kill process and all its children process

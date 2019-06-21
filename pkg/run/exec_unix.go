@@ -58,7 +58,10 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		go stdinPiper()
 	}
 
-	return pipeToStdoutWithPrefix(prefix, p)
+	pipeToStdoutWithPrefix(prefix, p)
+
+	// because we created goroutine for stdin, we need to wait for it to finish
+	return cmd.Wait()
 }
 
 var stdinWriter io.Writer
