@@ -126,25 +126,33 @@ func pipeToStdoutWithPrefix(prefix string, reader io.Reader) error {
 	prefixBuf := []byte(prefix)
 	bufOut := make([]byte, size+len(prefixBuf))
 
+	bufOutIndex := 0
+	newline := true
 	for {
-		n, err := reader.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			_, _ = gos.Stdout.Write(buf[:n])
-			return err
-		}
+		n, rerr := reader.Read(buf)
 
-		bufOutIndex := 0
-		bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
 		for _, r := range string(buf[:n]) {
-			if r == '\n' {
+			if newline {
 				bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
+				newline = false
+			}
+			if r == '\n' {
+				newline = true
 			}
 			bufOutIndex += copy(bufOut[bufOutIndex:], []byte(string(r)))
 		}
-		utils.E(gos.Stdout.Write(bufOut[:bufOutIndex]))
+		_, werr := gos.Stdout.Write(bufOut[:bufOutIndex])
+		if werr != nil {
+			return werr
+		}
+		bufOutIndex = 0
+
+		if rerr != nil {
+			if rerr == io.EOF {
+				break
+			}
+			return rerr
+		}
 	}
 
 	return nil
