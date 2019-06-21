@@ -3,11 +3,14 @@ language: go
 os:
   - linux
   - osx
-  - windows
 
 script:
   - go get ./cmd/...
   - gokit-dev build
+
+cache:
+  directories:
+    - $HOM/gopath
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

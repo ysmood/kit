@@ -1,0 +1,19 @@
+# appveyor.yml
+build: off
+
+clone_folder: c:\ci
+
+environment:
+  PATH: c:\gopath\bin;%PATH%
+  GOPATH: c:\gopath
+
+stack: go 1.12
+
+before_test:
+  - go get ./cmd/...
+
+test_script:
+  - gokit-dev build
+
+cache:
+  - c:\gopath
