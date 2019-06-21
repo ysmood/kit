@@ -1,10 +1,12 @@
 package run
 
 import (
+	"io"
 	"os/exec"
 	"strings"
 
 	"github.com/ysmood/gokit/pkg/os"
+	gos "github.com/ysmood/gokit/pkg/os"
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
@@ -116,4 +118,34 @@ func formatPrefix(prefix string) string {
 	color := prefix[i+1:]
 
 	return os.C(prefix[:i], color)
+}
+
+func pipeToStdoutWithPrefix(prefix string, reader io.Reader) error {
+	const size = 32 * 1024
+	buf := make([]byte, size)
+	prefixBuf := []byte(prefix)
+	bufOut := make([]byte, size+len(prefixBuf))
+
+	for {
+		n, err := reader.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			_, _ = gos.Stdout.Write(buf[:n])
+			return err
+		}
+
+		bufOutIndex := 0
+		bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
+		for _, r := range string(buf[:n]) {
+			if r == '\n' {
+				bufOutIndex += copy(bufOut[bufOutIndex:], prefixBuf)
+			}
+			bufOutIndex += copy(bufOut[bufOutIndex:], []byte(string(r)))
+		}
+		utils.E(gos.Stdout.Write(bufOut[:bufOutIndex]))
+	}
+
+	return nil
 }

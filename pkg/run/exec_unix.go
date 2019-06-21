@@ -3,7 +3,6 @@
 package run
 
 import (
-	"bufio"
 	"io"
 	"os"
 	"os/exec"
@@ -29,7 +28,9 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 
 	// Handle pty size.
 	ch := make(chan os.Signal, 1)
+	defer close(ch)
 	signal.Notify(ch, syscall.SIGWINCH)
+	defer signal.Stop(ch)
 	go func() {
 		for {
 			if _, ok := <-ch; !ok {
@@ -57,28 +58,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		go stdinPiper()
 	}
 
-	reader := bufio.NewReader(p)
-	newline := true
-	for {
-		r, _, err := reader.ReadRune()
-		if err != nil {
-			_, _ = gos.Stdout.Write([]byte(string(r)))
-			break
-		}
-		if newline {
-			_, _ = gos.Stdout.Write([]byte(prefix))
-			newline = false
-		}
-		if r == '\n' {
-			newline = true
-		}
-		_, _ = gos.Stdout.Write([]byte(string(r)))
-	}
-
-	signal.Stop(ch)
-	close(ch)
-
-	return cmd.Wait()
+	return pipeToStdoutWithPrefix(prefix, p)
 }
 
 var stdinWriter io.Writer
