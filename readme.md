@@ -83,6 +83,7 @@ dev tool for common go project
 Flags:
   --help                     Show context-sensitive help (also try --help-long
                              and --help-man).
+  --version                  Show application version.
   --cov-path="coverage.txt"  path for coverage output
 
 Commands:
