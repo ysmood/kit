@@ -5,21 +5,7 @@
 [![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
 [![goreport](https://goreportcard.com/badge/github.com/ysmood/gokit)](https://goreportcard.com/report/github.com/ysmood/gokit)
 
-This project is a collection of often used io related methods.
-
-- Sane defaults to make coding less verbose.
-
-- Cross platform.
-
-- Focus on performance.
-
-- Won't produce error, all errors are come from its dependencies.
-
-- While providing high level apis, always try to expose low level api for flexibility.
-
-- 100% test coverage and goreportcard
-
-- Won't use any other lanuage for the development of this project, no shell script no Makefile, etc.
+This project is a collection of often used io related methods with sane defaults to make coding less verbose.
 
 ## Modules
 
