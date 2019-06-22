@@ -6,7 +6,10 @@ import (
 )
 
 func main() {
-	run.Tasks().App(run.TasksNew("dev", "dev tool for gokit")).Add(
+	app := run.TasksNew("dev", "dev tool for gokit")
+	app.Version(utils.Version)
+
+	run.Tasks().App(app).Add(
 		run.Task("build", "").Init(cmdBuild),
 		run.Task("readme", "build readme").Run(genReadme),
 		run.Task("export", "export all submodules under gokit namespace").Run(export),
@@ -18,7 +21,6 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	args := []string{
 		"godev", "build",
-		"-v", utils.Version,
 		"-p", "cmd/*", "-p", "!cmd/gokit-dev",
 	}
 

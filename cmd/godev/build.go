@@ -4,6 +4,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/blang/semver"
 	"github.com/mholt/archiver"
@@ -12,35 +14,47 @@ import (
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
-func build(patterns []string, deployTag bool, version string) {
-	list := gos.Walk(patterns...).MustList()
-	gos.Log(patterns, list)
+type buildTask struct {
+	dir  string
+	os   string
+	name string
+	bin  string
+	out  string
+	zip  string
+}
 
+func build(patterns []string, deployTag bool, version string) {
 	_ = gos.Remove("dist")
 
+	bTasks := genBuildTasks(patterns)
 	tasks := []func(){}
-	for _, dir := range list {
-		name := filepath.Base(dir)
-
-		for _, osName := range []string{"darwin", "linux", "windows"} {
-			tasks = append(tasks, func(n, dir, osn string) func() {
-				return func() { buildForOS(n, dir, osn) }
-			}(name, dir, osName))
-		}
+	for _, task := range bTasks {
+		func(ctx *buildTask) {
+			tasks = append(tasks, func() { ctx.build() })
+		}(task)
 	}
 	utils.All(tasks...)
 
 	if deployTag {
-		deploy(version)
+		deploy(bTasks, version)
 	}
 }
 
-func deploy(tag string) {
+func deploy(bTasks []*buildTask, tag string) {
+	if tag == "" {
+		for _, t := range bTasks {
+			if t.os == runtime.GOOS {
+				ver, err := run.Exec(t.out, "--version").String()
+				if err == nil {
+					tag = strings.TrimSpace(ver)
+				}
+			}
+		}
+	}
+
 	if _, err := semver.ParseTolerant(tag); err != nil {
 		panic("invalid semver flag: --version " + tag + " (" + err.Error() + ")")
 	}
-
-	files := gos.Walk("dist/*").MustList()
 
 	run.Exec("git", "tag", tag).MustDo()
 	run.Exec("git", "push", "origin", tag).MustDo()
@@ -51,53 +65,74 @@ func deploy(tag string) {
 	}
 
 	args := []string{"hub", "release", "create", "-m", tag}
-	for _, f := range files {
-		args = append(args, "-a", f)
+	for _, t := range bTasks {
+		args = append(args, "-a", t.zip)
 	}
 	args = append(args, tag)
 
 	run.Exec(args...).Raw().MustDo()
 }
 
-func buildForOS(name, dir, osName string) {
-	gos.Log("building:", name, osName)
+func (ctx *buildTask) build() {
+	gos.Log("building:", ctx.dir, "->", ctx.out)
 
 	env := []string{
-		"GOOS=" + osName,
+		"GOOS=" + ctx.os,
 		"GOARCH=amd64",
-	}
-
-	oPath := "dist/" + name + "-" + osName
-
-	if osName == "darwin" {
-		oPath = "dist/" + name + "-mac"
 	}
 
 	utils.E(run.Exec(
 		"go", "build",
 		"-ldflags=-w -s",
-		"-o", oPath,
-		dir,
+		"-o", ctx.out,
+		ctx.dir,
 	).Cmd(&exec.Cmd{
 		Env: append(os.Environ(), env...),
 	}).Do())
 
-	if osName == "linux" {
-		compressGz(oPath, oPath+".tar.gz", name+extByOS(osName))
+	if ctx.os == "linux" {
+		compressGz(ctx.out, ctx.zip, ctx.bin)
 	} else {
-		compressZip(oPath, oPath+".zip", name+extByOS(osName))
+		compressZip(ctx.out, ctx.zip, ctx.bin)
 	}
 
-	_ = os.Remove(oPath)
-
-	gos.Log("build done:", name, osName)
+	gos.Log("build done:", ctx.out)
 }
 
-func extByOS(osName string) string {
-	if osName == "windows" {
-		return ".exe"
+func genBuildTasks(patterns []string) []*buildTask {
+	list := gos.Walk(patterns...).MustList()
+
+	tasks := []*buildTask{}
+	for _, dir := range list {
+		name := filepath.Base(dir)
+		for _, os := range []string{"darwin", "linux", "windows"} {
+			bin := name
+			if os == "windows" {
+				bin += ".exe"
+			}
+
+			out := "dist/" + name + "-" + os
+			if os == "darwin" {
+				out = "dist/" + name + "-mac"
+			}
+
+			zip := out + ".zip"
+			if os == "linux" {
+				zip = out + ".tar.gz"
+			}
+
+			tasks = append(tasks, &buildTask{
+				dir:  dir,
+				os:   os,
+				name: name,
+				bin:  bin,
+				out:  out,
+				zip:  zip,
+			})
+		}
 	}
-	return ""
+
+	return tasks
 }
 
 func compressZip(from, to, name string) {
