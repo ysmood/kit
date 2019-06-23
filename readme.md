@@ -1,5 +1,6 @@
 # Gokit
 
+[![GoDoc](https://godoc.org/github.com/ysmood/gokit?status.svg)](http://godoc.org/github.com/ysmood/gokit)
 [![Build Status](https://travis-ci.org/ysmood/gokit.svg?branch=master)](https://travis-ci.org/ysmood/gokit)
 [![Build status](https://ci.appveyor.com/api/projects/status/b8mkds289asy6q5s/branch/master?svg=true)](https://ci.appveyor.com/project/ysmood/gokit/branch/master)
 [![codecov](https://codecov.io/gh/ysmood/gokit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/gokit)
