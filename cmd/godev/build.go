@@ -23,14 +23,14 @@ type buildTask struct {
 	zip  string
 }
 
-func build(patterns []string, deployTag bool, version string) {
+func build(patterns []string, deployTag bool, version string, isZip bool, osList []string) {
 	_ = gos.Remove("dist")
 
-	bTasks := genBuildTasks(patterns)
+	bTasks := genBuildTasks(patterns, osList)
 	tasks := []func(){}
 	for _, task := range bTasks {
 		func(ctx *buildTask) {
-			tasks = append(tasks, func() { ctx.build() })
+			tasks = append(tasks, func() { ctx.build(isZip) })
 		}(task)
 	}
 	utils.All(tasks...)
@@ -43,7 +43,7 @@ func build(patterns []string, deployTag bool, version string) {
 func deploy(bTasks []*buildTask, tag string) {
 	if tag == "" {
 		for _, t := range bTasks {
-			if t.os == runtime.GOOS {
+			if goos(t.os) == runtime.GOOS {
 				ver, err := run.Exec(t.out, "--version").String()
 				if err == nil {
 					tag = strings.TrimSpace(ver)
@@ -73,11 +73,11 @@ func deploy(bTasks []*buildTask, tag string) {
 	run.Exec(args...).Raw().MustDo()
 }
 
-func (ctx *buildTask) build() {
+func (ctx *buildTask) build(isZip bool) {
 	gos.Log("building:", ctx.dir, "->", ctx.out)
 
 	env := []string{
-		"GOOS=" + ctx.os,
+		"GOOS=" + goos(ctx.os),
 		"GOARCH=amd64",
 	}
 
@@ -90,31 +90,41 @@ func (ctx *buildTask) build() {
 		Env: append(os.Environ(), env...),
 	}).Do())
 
-	if ctx.os == "linux" {
-		compressGz(ctx.out, ctx.zip, ctx.bin)
-	} else {
-		compressZip(ctx.out, ctx.zip, ctx.bin)
+	if isZip {
+		if ctx.os == "linux" {
+			compressGz(ctx.out, ctx.zip, ctx.bin)
+		} else {
+			compressZip(ctx.out, ctx.zip, ctx.bin)
+		}
 	}
 
 	gos.Log("build done:", ctx.out)
 }
 
-func genBuildTasks(patterns []string) []*buildTask {
+func goos(name string) string {
+	if name == "mac" {
+		return "darwin"
+	}
+	return name
+}
+
+func genBuildTasks(patterns []string, osList []string) []*buildTask {
+	if osList == nil {
+		osList = []string{"mac", "linux", "windows"}
+	}
+
 	list := gos.Walk(patterns...).MustList()
 
 	tasks := []*buildTask{}
 	for _, dir := range list {
 		name := filepath.Base(dir)
-		for _, os := range []string{"darwin", "linux", "windows"} {
+		for _, os := range osList {
 			bin := name
 			if os == "windows" {
 				bin += ".exe"
 			}
 
 			out := "dist/" + name + "-" + os
-			if os == "darwin" {
-				out = "dist/" + name + "-mac"
-			}
 
 			zip := out + ".zip"
 			if os == "linux" {
