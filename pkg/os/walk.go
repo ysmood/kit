@@ -290,7 +290,7 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 func normalizePatterns(patterns []string) []string {
 	newPatterns := []string{}
 	for _, p := range patterns {
-		newPatterns = append(newPatterns, filepath.FromSlash(p))
+		newPatterns = append(newPatterns, filepath.FromSlash(filepath.Clean(p)))
 	}
 	return newPatterns
 }

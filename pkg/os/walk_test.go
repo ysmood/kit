@@ -25,7 +25,7 @@ func TestMatch(t *testing.T) {
 }
 
 func TestWalk(t *testing.T) {
-	list := kit.Walk("*").Dir("fixtures/路 径 [").MustList()
+	list := kit.Walk(".//*").Dir("fixtures/路 径 [").MustList()
 
 	assert.Equal(t, "青 空", filepath.Base(list[0]))
 }
