@@ -33,16 +33,17 @@ func cmdTest(cmd run.TaskCmd) func() {
 }
 
 func cmdBuild(cmd run.TaskCmd) func() {
+	patterns := cmd.Arg("pattern", "folders to build").Default(".").Strings()
+	dir := cmd.Flag("dir", "the output dir").Default("dist").String()
 	deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
-	patterns := cmd.Flag("pattern", "folders to build").Short('p').Default(".").Strings()
 	ver := cmd.Flag("deploy-version", "the name of the tag").Short('v').String()
 	noZip := cmd.Flag("no-zip", "don't generate zip file").Short('n').Bool()
-	osList := cmd.Flag("os", "os to build, by default mac, linux and windows will be built").Short('o').Strings()
+	osList := cmd.Flag("os", "os to build, by default mac, linux and windows will be built").Strings()
 
 	return func() {
 		lint()
 		test("./...", "", false)
-		build(*patterns, *deployTag, *ver, !*noZip, *osList)
+		build(*patterns, *dir, *deployTag, *ver, !*noZip, *osList)
 	}
 }
 

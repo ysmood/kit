@@ -21,7 +21,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	args := []string{
 		"godev", "build",
-		"-p", "cmd/*", "-p", "!cmd/gokit-dev",
+		"cmd/*", "!cmd/gokit-dev",
 	}
 
 	return func() {

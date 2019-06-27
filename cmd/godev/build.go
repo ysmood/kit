@@ -23,10 +23,10 @@ type buildTask struct {
 	zip  string
 }
 
-func build(patterns []string, deployTag bool, version string, isZip bool, osList []string) {
-	_ = gos.Remove("dist")
+func build(patterns []string, dist string, deployTag bool, version string, isZip bool, osList []string) {
+	_ = gos.Remove(dist)
 
-	bTasks := genBuildTasks(patterns, osList)
+	bTasks := genBuildTasks(patterns, dist, osList)
 	tasks := []func(){}
 	for _, task := range bTasks {
 		func(ctx *buildTask) {
@@ -108,7 +108,7 @@ func goos(name string) string {
 	return name
 }
 
-func genBuildTasks(patterns []string, osList []string) []*buildTask {
+func genBuildTasks(patterns []string, dist string, osList []string) []*buildTask {
 	if osList == nil {
 		osList = []string{"mac", "linux", "windows"}
 	}
@@ -124,7 +124,7 @@ func genBuildTasks(patterns []string, osList []string) []*buildTask {
 				bin += ".exe"
 			}
 
-			out := "dist/" + name + "-" + os
+			out := filepath.Join(dist, name+"-"+os)
 
 			zip := out + ".zip"
 			if os == "linux" {

@@ -97,7 +97,7 @@ Commands:
   lint
     lint project with golint and golangci-lint
 
-  build [<flags>]
+  build [<flags>] [<pattern>...]
     build [and deploy] specified dirs
 
   cov
