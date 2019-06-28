@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/blang/semver"
@@ -42,12 +41,10 @@ func build(patterns []string, dist string, deployTag bool, version string, isZip
 
 func deploy(bTasks []*buildTask, tag string) {
 	if tag == "" {
-		for _, t := range bTasks {
-			if goos(t.os) == runtime.GOOS {
-				ver, err := run.Exec(t.out, "--version").String()
-				if err == nil {
-					tag = strings.TrimSpace(ver)
-				}
+		if len(bTasks) > 0 {
+			ver, err := run.Exec("go", "run", bTasks[0].dir, "--version").String()
+			if err == nil {
+				tag = strings.TrimSpace(ver)
 			}
 		}
 	}
