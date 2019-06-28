@@ -10,7 +10,7 @@ script:
 
 cache:
   directories:
-    - $HOM/gopath
+    - $HOME/gopath
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
