@@ -41,7 +41,11 @@ Or install with single line command below.
 
 A general dev tool for go project to lint, test, build cross platform executable, etc.
 
-Install: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=godev sh`
+`godev` will release your project to your own github release page.
+Project released with `godev` can be installed via [this one line command](https://github.com/ysmood/github-install).
+`godev` itself is an example of how to use it.
+
+Install `godev`: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=godev sh`
 
 ```bash
 {{.GodevHelp}}
@@ -49,7 +53,7 @@ Install: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=godev sh`
 
 ### guard
 
-Install: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=guard sh`
+Install `guard`: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=guard sh`
 
 ```bash
 {{.GuardHelp}}
