@@ -1,5 +1,9 @@
 package kit
 
+import (
+	"net/http"
+)
+
 func ExampleExec() {
 	Exec("echo", "ok").MustDo()
 
@@ -14,6 +18,14 @@ func ExampleReq() {
 	).MustJSON("json.path.value")
 
 	Log(val)
+}
+
+func ExampleServer() {
+	server := MustServer(":8080")
+	server.Engine.GET("/", func(ctx GinContext) {
+		ctx.String(http.StatusOK, "ok")
+	})
+	server.MustDo()
 }
 
 func ExampleWalk() {

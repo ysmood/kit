@@ -30,6 +30,8 @@ It covers all the functions of the Go's stdlib one, no api is hidden from the or
 
 {{.ExampleReq}}
 
+{{.ExampleServer}}
+
 ## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.

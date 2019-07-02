@@ -32,7 +32,7 @@ func (s *RequestSuite) path() (path, url string) {
 func (s *RequestSuite) SetupSuite() {
 	server := kit.MustServer(":0")
 	s.listener = server.Listener
-	s.router = server.Handler
+	s.router = server.Engine
 
 	go server.MustDo()
 }

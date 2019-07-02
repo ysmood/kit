@@ -10,14 +10,16 @@ import (
 
 // ServerContext ...
 type ServerContext struct {
-	Handler  *gin.Engine
+	Engine   *gin.Engine
 	Listener net.Listener
 }
 
 // GinContext ...
 type GinContext = *gin.Context
 
-// Server listen to a port then create a gin server
+// Server listen to a port then create a gin server.
+// I created this wrapper because gin doesn't give a signal to tell when the
+// port is ready.
 func Server(address string) (*ServerContext, error) {
 	s := &ServerContext{}
 
@@ -30,7 +32,7 @@ func Server(address string) (*ServerContext, error) {
 		return nil, err
 	}
 
-	s.Handler = r
+	s.Engine = r
 	s.Listener = ln
 
 	return s, nil
@@ -43,7 +45,7 @@ func MustServer(address string) *ServerContext {
 
 // Do start the handler loop
 func (ctx *ServerContext) Do() error {
-	return http.Serve(ctx.Listener, ctx.Handler)
+	return http.Serve(ctx.Listener, ctx.Engine)
 }
 
 // MustDo ...

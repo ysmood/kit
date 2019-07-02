@@ -65,6 +65,21 @@ func main() {
 
 ```
 
+```go
+package main
+
+import . "github.com/ysmood/gokit"
+
+func main() {
+	server := MustServer(":8080")
+	server.Engine.GET("/", func(ctx GinContext) {
+		ctx.String(http.StatusOK, "ok")
+	})
+	server.MustDo()
+}
+
+```
+
 ## CLI tool
 
 Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
