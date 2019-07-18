@@ -1,7 +1,7 @@
 package utils_test
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"testing"
@@ -64,7 +64,7 @@ func TestJSON(t *T) {
 
 func TestGenerateRandomString(t *T) {
 	v := kit.RandString(10)
-	raw, _ := base64.URLEncoding.DecodeString(v)
+	raw, _ := hex.DecodeString(v)
 	assert.Len(t, raw, 10)
 }
 

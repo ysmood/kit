@@ -3,7 +3,7 @@ package utils
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/hex"
 	"reflect"
 	"sync"
 	"text/template"
@@ -79,7 +79,7 @@ func RandBytes(len int) []byte {
 // RandString generate random string with specified string length
 func RandString(len int) string {
 	b := RandBytes(len)
-	return base64.URLEncoding.EncodeToString(b)
+	return hex.EncodeToString(b)
 }
 
 // Try try fn with recover, return the panic as value
