@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+	"strconv"
+
 	"github.com/ysmood/gokit/pkg/run"
 	"github.com/ysmood/gokit/pkg/utils"
 )
@@ -26,9 +30,10 @@ func cmdTest(cmd run.TaskCmd) func() {
 
 	match := cmd.Arg("match", "match test name").String()
 	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").String()
+	min := cmd.Flag("min", "if total coverage is lower than the minimum exit with non-zero").Default("0.0").Float64()
 
 	return func() {
-		test(*path, *match, true)
+		test(*path, *match, *min, true)
 	}
 }
 
@@ -39,10 +44,13 @@ func cmdBuild(cmd run.TaskCmd) func() {
 	ver := cmd.Flag("deploy-version", "the name of the tag").Short('v').String()
 	noZip := cmd.Flag("no-zip", "don't generate zip file").Short('n').Bool()
 	osList := cmd.Flag("os", "os to build, by default mac, linux and windows will be built").Strings()
+	strict := cmd.Flag("strict", "strictly lint and test before build").Bool()
 
 	return func() {
-		lint()
-		test("./...", "", false)
+		if *strict {
+			lint()
+			test("./...", "", 100, false)
+		}
 		build(*patterns, *dir, *deployTag, *ver, !*noZip, *osList)
 	}
 }
@@ -59,7 +67,7 @@ func lint() {
 	run.Exec("golangci-lint", "run").MustDo()
 }
 
-func test(path, match string, dev bool) {
+func test(path, match string, min float64, dev bool) {
 	conf := []string{
 		"go",
 		"test",
@@ -78,4 +86,15 @@ func test(path, match string, dev bool) {
 	}
 
 	run.Exec(conf...).MustDo()
+
+	checkCoverage(min)
+}
+
+func checkCoverage(min float64) {
+	out := run.Exec("go", "tool", "cover", "-func="+*covPath).MustString()
+	totalStr := regexp.MustCompile(`(\d+.\d+)%\n\z`).FindStringSubmatch(out)[1]
+	total, _ := strconv.ParseFloat(totalStr, 64)
+	if total < min {
+		panic(fmt.Errorf("total coverage %.1f%% is less than minimum %.1f%%", total, min))
+	}
 }
