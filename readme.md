@@ -14,7 +14,7 @@ This project is a collection of often used io related methods with sane defaults
 
 Covers most used os related functions that are missing from the stdlib.
 
-Such as smart glob:
+Such as the smart glob that handles git ignore properly:
 
 ```go
 package main
@@ -27,7 +27,7 @@ func main() {
 
 ```
 
-A better `Exec` alternatives for the stdlib one.
+A better `Exec` alternative:
 
 ```go
 package main
@@ -45,9 +45,9 @@ func main() {
 
 ### http
 
-The http request lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
-alternative to use with it's fluent api design. You will reduce a lot of your code without sacrificing performance.
-It covers all the functions of the Go's stdlib one, no api is hidden from the origin http lib.
+The http lib from stdlib is pretty verbose to use. The `gokit.Req` is a much better
+alternative to use with it's fluent api design. It helps to reduce the code without sacrificing performance and
+flexiblity. No api is hidden from the origin http lib.
 
 ```go
 package main
@@ -82,15 +82,15 @@ func main() {
 
 ## CLI tool
 
-Goto the [release page](https://github.com/ysmood/gokit/releases) download the exectuable for your OS.
+Goto the [release page](https://github.com/ysmood/gokit/releases) to download the exectuable for your OS.
 Or install with single line command below.
 
 ### godev
 
-A general dev tool for go project to lint, test, build cross platform executable, etc.
+A general dev tool for go project to lint, test, build, deploy cross platform executables.
 
 `godev` will release your project to your own github release page.
-Project released with `godev` can be installed via [this one line command](https://github.com/ysmood/github-install).
+Project released with `godev` can be installed via [this shell script](https://github.com/ysmood/github-install).
 `godev` itself is an example of how to use it.
 
 Install `godev`: `curl -L https://git.io/fjaxx | repo=ysmood/gokit bin=godev sh`
