@@ -30,10 +30,11 @@ func cmdTest(cmd run.TaskCmd) func() {
 
 	match := cmd.Arg("match", "match test name").String()
 	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").String()
+	dev := cmd.Flag("dev", "run as dev mode").Short('d').Bool()
 	min := cmd.Flag("min", "if total coverage is lower than the minimum exit with non-zero").Default("0.0").Float64()
 
 	return func() {
-		test(*path, *match, *min, true)
+		test(*path, *match, *min, *dev)
 	}
 }
 
@@ -81,8 +82,6 @@ func test(path, match string, min float64, dev bool) {
 	if dev {
 		run.MustGoTool("github.com/kyoh86/richgo")
 		conf[0] = "richgo"
-		run.Guard(conf...).MustDo()
-		return
 	}
 
 	run.Exec(conf...).MustDo()
