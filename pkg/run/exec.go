@@ -5,8 +5,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/ysmood/gokit/pkg/os"
-	gos "github.com/ysmood/gokit/pkg/os"
 	"github.com/ysmood/gokit/pkg/utils"
 )
 
@@ -117,7 +115,7 @@ func formatPrefix(prefix string) string {
 
 	color := prefix[i+1:]
 
-	return os.C(prefix[:i], color)
+	return utils.C(prefix[:i], color)
 }
 
 func pipeToStdoutWithPrefix(prefix string, reader io.Reader) {
@@ -141,7 +139,7 @@ func pipeToStdoutWithPrefix(prefix string, reader io.Reader) {
 			}
 			bufOutIndex += copy(bufOut[bufOutIndex:], []byte(string(r)))
 		}
-		_, _ = gos.Stdout.Write(bufOut[:bufOutIndex])
+		_, _ = utils.Stdout.Write(bufOut[:bufOutIndex])
 		bufOutIndex = 0
 
 		if rerr != nil {

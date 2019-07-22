@@ -10,17 +10,32 @@ import (
 // All imported
 var All = utils.All
 
+// C imported
+var C = utils.C
+
+// ClearScreen imported
+var ClearScreen = utils.ClearScreen
+
+// Dump imported
+var Dump = utils.Dump
+
 // E imported
 var E = utils.E
 
 // E1 imported
 var E1 = utils.E1
 
+// Err imported
+var Err = utils.Err
+
 // ErrArg imported
 var ErrArg = utils.ErrArg
 
 // JSON imported
 var JSON = utils.JSON
+
+// Log imported
+var Log = utils.Log
 
 // Nil imported
 type Nil = utils.Nil
@@ -36,6 +51,15 @@ var RandString = utils.RandString
 
 // S imported
 var S = utils.S
+
+// Sdump imported
+var Sdump = utils.Sdump
+
+// Stderr imported
+var Stderr = utils.Stderr
+
+// Stdout imported
+var Stdout = utils.Stdout
 
 // Try imported
 var Try = utils.Try
@@ -61,26 +85,14 @@ var Server = http.Server
 // ServerContext imported
 type ServerContext = http.ServerContext
 
-// C imported
-var C = os.C
-
 // Chmod imported
 var Chmod = os.Chmod
-
-// ClearScreen imported
-var ClearScreen = os.ClearScreen
 
 // Copy imported
 var Copy = os.Copy
 
 // DirExists imported
 var DirExists = os.DirExists
-
-// Dump imported
-var Dump = os.Dump
-
-// Err imported
-var Err = os.Err
 
 // ExecutableExt imported
 var ExecutableExt = os.ExecutableExt
@@ -96,9 +108,6 @@ var GoPath = os.GoPath
 
 // HomeDir imported
 var HomeDir = os.HomeDir
-
-// Log imported
-var Log = os.Log
 
 // Matcher imported
 type Matcher = os.Matcher
@@ -136,17 +145,8 @@ var Remove = os.Remove
 // Retry imported
 var Retry = os.Retry
 
-// Sdump imported
-var Sdump = os.Sdump
-
 // SendSigInt imported
 var SendSigInt = os.SendSigInt
-
-// Stderr imported
-var Stderr = os.Stderr
-
-// Stdout imported
-var Stdout = os.Stdout
 
 // ThisDirPath imported
 var ThisDirPath = os.ThisDirPath

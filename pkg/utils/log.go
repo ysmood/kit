@@ -1,4 +1,4 @@
-package os
+package utils
 
 import (
 	"fmt"
@@ -11,7 +11,6 @@ import (
 	"github.com/k0kubun/go-ansi"
 	"github.com/k0kubun/pp"
 	ansiColor "github.com/mgutz/ansi"
-	"github.com/ysmood/gokit/pkg/utils"
 )
 
 // Stdout ...
@@ -24,7 +23,7 @@ var goos = runtime.GOOS
 
 // Dump ...
 func Dump(val interface{}) {
-	utils.E(pp.Println(val))
+	E(pp.Println(val))
 }
 
 // Sdump ...

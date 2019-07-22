@@ -5,6 +5,7 @@ import (
 	os_path "path"
 
 	gos "github.com/ysmood/gokit/pkg/os"
+	"github.com/ysmood/gokit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -12,7 +13,7 @@ import (
 func MustGoTool(path string) {
 	p := os_path.Join(gos.GoPath(), "bin", os_path.Base(path)+gos.ExecutableExt())
 	if !gos.Exists(p) {
-		gos.Log("go get", path)
+		utils.Log("go get", path)
 		Exec("go", "get", path).Dir(gos.HomeDir()).MustDo()
 	}
 }

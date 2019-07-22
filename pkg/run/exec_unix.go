@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/kr/pty"
-	gos "github.com/ysmood/gokit/pkg/os"
+	"github.com/ysmood/gokit/pkg/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -47,7 +47,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		// Set stdin in raw mode.
 		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
-			gos.Log("[exec] set stdin to raw mode:", err)
+			utils.Log("[exec] set stdin to raw mode:", err)
 		}
 		// Best effort
 		defer restoreState(oldState)

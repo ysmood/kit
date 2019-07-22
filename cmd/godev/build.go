@@ -71,7 +71,7 @@ func deploy(bTasks []*buildTask, tag string) {
 }
 
 func (ctx *buildTask) build(isZip bool) {
-	gos.Log("building:", ctx.dir, "->", ctx.out)
+	utils.Log("building:", ctx.dir, "->", ctx.out)
 
 	env := []string{
 		"GOOS=" + goos(ctx.os),
@@ -95,7 +95,7 @@ func (ctx *buildTask) build(isZip bool) {
 		}
 	}
 
-	gos.Log("build done:", ctx.out)
+	utils.Log("build done:", ctx.out)
 }
 
 func goos(name string) string {

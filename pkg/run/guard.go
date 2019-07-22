@@ -37,7 +37,7 @@ type GuardContext struct {
 func Guard(args ...string) *GuardContext {
 	return &GuardContext{
 		args:   args,
-		prefix: os.C("[guard]", "cyan"),
+		prefix: utils.C("[guard]", "cyan"),
 		count:  0,
 		wait:   make(chan utils.Nil),
 	}
@@ -155,26 +155,26 @@ func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string 
 
 func (ctx *GuardContext) logErr(err error) {
 	if err != nil {
-		os.Log(ctx.prefix, err)
+		utils.Log(ctx.prefix, err)
 	}
 }
 
 func (ctx *GuardContext) run(e *watcher.Event) {
 	if ctx.clearScreen {
-		_ = os.ClearScreen()
+		_ = utils.ClearScreen()
 	}
 
 	ctx.count++
-	os.Log(ctx.prefix, "run", ctx.count, os.C(ctx.args, "green"))
+	utils.Log(ctx.prefix, "run", ctx.count, utils.C(ctx.args, "green"))
 
 	ctx.execCtxClone = *ctx.execCtx
 	err := ctx.execCtxClone.Dir(ctx.dir).Args(ctx.unescapeArgs(ctx.args, e)).Do()
 
 	errMsg := ""
 	if err != nil {
-		errMsg = os.C(err, "red")
+		errMsg = utils.C(err, "red")
 	}
-	os.Log(ctx.prefix, "done", ctx.count, os.C(ctx.args, "green"), errMsg)
+	utils.Log(ctx.prefix, "done", ctx.count, utils.C(ctx.args, "green"), errMsg)
 
 	ctx.wait <- utils.Nil{}
 }
@@ -206,7 +206,7 @@ func (ctx *GuardContext) addWatchFiles(dir string) {
 		watched = strings.Join(list, " ")
 	}
 
-	os.Log(ctx.prefix, "watched", len(list), "files:", os.C(watched, "green"))
+	utils.Log(ctx.prefix, "watched", len(list), "files:", utils.C(watched, "green"))
 }
 
 func (ctx *GuardContext) watch() {
@@ -233,7 +233,7 @@ func (ctx *GuardContext) watch() {
 			}
 			lastRun = time.Now()
 
-			os.Log(ctx.prefix, e)
+			utils.Log(ctx.prefix, e)
 
 			if e.Op == watcher.Create {
 				if e.IsDir() {
