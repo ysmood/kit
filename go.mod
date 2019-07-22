@@ -14,7 +14,9 @@ require (
 	github.com/gin-gonic/gin v1.4.0
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
+	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/karrick/godirwalk v1.10.12
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kr/pty v1.1.5
@@ -28,7 +30,6 @@ require (
 	github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.6
-	github.com/sanity-io/litter v1.1.0
 	github.com/stretchr/testify v1.3.0
 	github.com/tidwall/gjson v1.2.1
 	github.com/tidwall/match v1.0.1 // indirect

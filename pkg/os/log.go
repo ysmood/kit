@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/k0kubun/go-ansi"
+	"github.com/k0kubun/pp"
 	ansiColor "github.com/mgutz/ansi"
-	"github.com/sanity-io/litter"
+	"github.com/ysmood/gokit/pkg/utils"
 )
 
 // Stdout ...
@@ -19,13 +20,17 @@ var Stdout = ansi.NewAnsiStdout()
 // Stderr ...
 var Stderr = ansi.NewAnsiStderr()
 
+var goos = runtime.GOOS
+
 // Dump ...
-var Dump = litter.Dump
+func Dump(val interface{}) {
+	utils.E(pp.Println(val))
+}
 
 // Sdump ...
-var Sdump = litter.Sdump
-
-var goos = runtime.GOOS
+func Sdump(val interface{}) string {
+	return pp.Sprint(val)
+}
 
 // Log log to stdout with timestamp
 func Log(v ...interface{}) {

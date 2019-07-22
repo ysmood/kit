@@ -10,5 +10,6 @@ func TestLog(t *testing.T) {
 	kit.Log("ok")
 	kit.Err("err")
 	kit.Dump(10)
+	kit.Sdump("ok")
 	kit.E(kit.ClearScreen())
 }
