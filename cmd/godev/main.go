@@ -32,9 +32,10 @@ func cmdTest(cmd run.TaskCmd) func() {
 	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").String()
 	dev := cmd.Flag("dev", "run as dev mode").Short('d').Bool()
 	min := cmd.Flag("min", "if total coverage is lower than the minimum exit with non-zero").Default("0.0").Float64()
+	lint := cmd.Flag("lint", "lint before test").Short('l').Bool()
 
 	return func() {
-		test(*path, *match, *min, *dev)
+		test(*path, *match, *min, *lint, *dev)
 	}
 }
 
@@ -49,8 +50,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	return func() {
 		if *strict {
-			lint()
-			test("./...", "", 100, false)
+			test("./...", "", 100, true, false)
 		}
 		build(*patterns, *dir, *deployTag, *ver, !*noZip, *osList)
 	}
@@ -68,7 +68,11 @@ func lint() {
 	run.Exec("golangci-lint", "run").MustDo()
 }
 
-func test(path, match string, min float64, dev bool) {
+func test(path, match string, min float64, isLint, dev bool) {
+	if isLint {
+		lint()
+	}
+
 	conf := []string{
 		"go",
 		"test",
