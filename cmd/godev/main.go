@@ -31,7 +31,9 @@ func cmdTest(cmd run.TaskCmd) func() {
 	match := cmd.Arg("match", "match test name").String()
 	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").String()
 	dev := cmd.Flag("dev", "run as dev mode").Short('d').Bool()
-	min := cmd.Flag("min", "if total coverage is lower than the minimum exit with non-zero").Default("0.0").Float64()
+	min := cmd.Flag(
+		"min", "if total coverage is lower than the minimum exit with non-zero",
+	).Short('m').Default("0.0").Float64()
 	lint := cmd.Flag("lint", "lint before test").Short('l').Bool()
 
 	return func() {
