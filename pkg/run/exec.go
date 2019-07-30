@@ -2,6 +2,7 @@ package run
 
 import (
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -20,6 +21,7 @@ type ExecContext struct {
 	isRaw bool // Set the terminal to raw mode
 
 	args []string
+	env  []string
 }
 
 // Exec execute os command and auto pipe stdout and stdin
@@ -32,6 +34,12 @@ func Exec(args ...string) *ExecContext {
 // Args ...
 func (ctx *ExecContext) Args(args []string) *ExecContext {
 	ctx.args = args
+	return ctx
+}
+
+// Env append the current env with strings, each string should be something like "key=value"
+func (ctx *ExecContext) Env(env ...string) *ExecContext {
+	ctx.env = append(os.Environ(), env...)
 	return ctx
 }
 
@@ -75,6 +83,9 @@ func (ctx *ExecContext) do() {
 	}
 	if ctx.dir != "" {
 		ctx.cmd.Dir = ctx.dir
+	}
+	if ctx.env != nil {
+		ctx.cmd.Env = ctx.env
 	}
 
 	ctx.cmd.Path = cmd.Path

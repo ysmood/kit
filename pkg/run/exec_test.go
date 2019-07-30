@@ -27,6 +27,11 @@ func TestExecPrefix(t *testing.T) {
 func TestExecMustString(t *testing.T) {
 	assert.Regexp(t, "go version", kit.Exec("go", "version").MustString())
 }
+func TestExecEnv(t *testing.T) {
+	s := "tmp/" + kit.RandString(10)
+	kit.E(kit.Mkdir(s, nil))
+	assert.Regexp(t, s, kit.Exec("go", "env").Env("GOTMPDIR="+s).MustString())
+}
 
 func TestExecPrefixColor(t *testing.T) {
 	err := kit.Exec("go", "version").Args([]string{"go", "version"}).Prefix("[app] @green").Do()
