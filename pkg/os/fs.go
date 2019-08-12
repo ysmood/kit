@@ -133,7 +133,8 @@ func Move(from, to string, perm *os.FileMode) error {
 	return os.Rename(from, to)
 }
 
-// Remove remove dirs, files, patterns as expected
+// Remove remove dirs, files, patterns as expected.
+// The pattern cannot be absolute path.
 func Remove(patterns ...string) error {
 	// if any of the patterns is a raw folder path not a pattern remove all children of it
 	for _, p := range patterns {

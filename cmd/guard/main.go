@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	kit "github.com/ysmood/gokit"
+	"github.com/ysmood/kit"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 

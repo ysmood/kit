@@ -11,7 +11,7 @@ import (
 	"github.com/bmatcuk/doublestar"
 	"github.com/karrick/godirwalk"
 	gitignore "github.com/monochromegane/go-gitignore"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // WalkContext ...

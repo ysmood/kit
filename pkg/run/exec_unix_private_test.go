@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	gos "github.com/ysmood/gokit/pkg/os"
+	gos "github.com/ysmood/kit/pkg/os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

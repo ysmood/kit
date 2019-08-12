@@ -8,9 +8,9 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/mholt/archiver"
-	gos "github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	gos "github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 type buildTask struct {

@@ -5,13 +5,14 @@ import (
 	"os"
 	"strings"
 
-	gos "github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	gos "github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
+
 	"golang.org/x/tools/go/packages"
 )
 
-// Export all the public members of each package under pkg folfer into gokit_exports.go
+// Export all the public members of each package under pkg folfer into kit.go
 func export() {
 	paths := gos.Walk("pkg/*").MustList()
 
@@ -29,7 +30,7 @@ func export() {
 	statements := ""
 
 	for _, pkg := range pkgs {
-		header += fmt.Sprintf("    \"github.com/ysmood/gokit/pkg/%s\"\n", pkg.Name)
+		header += fmt.Sprintf("    \"github.com/ysmood/kit/pkg/%s\"\n", pkg.Name)
 
 		s := pkg.Types.Scope()
 		for _, n := range s.Names() {

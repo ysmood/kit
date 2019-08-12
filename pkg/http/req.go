@@ -11,7 +11,7 @@ import (
 
 	"github.com/derekstavis/go-qs"
 	"github.com/tidwall/gjson"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // ReqContext ...

@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	kit "github.com/ysmood/gokit"
+	"github.com/ysmood/kit"
 )
 
 func TestLog(t *testing.T) {

@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 func main() {
-	app := run.TasksNew("dev", "dev tool for gokit")
+	app := run.TasksNew("dev", "dev tool for kit")
 	app.Version(utils.Version)
 
 	run.Tasks().App(app).Add(
 		run.Task("build", "").Init(cmdBuild),
 		run.Task("readme", "build readme").Run(genReadme),
-		run.Task("export", "export all submodules under gokit namespace").Run(export),
+		run.Task("export", "export all submodules under kit namespace").Run(export),
 	).Do()
 }
 
@@ -22,7 +22,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 	args := []string{
 		"godev", "build",
 		"--strict",
-		"cmd/*", "!cmd/gokit-dev",
+		"cmd/*", "!cmd/kit-dev",
 	}
 
 	return func() {

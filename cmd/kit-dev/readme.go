@@ -6,9 +6,9 @@ import (
 	"go/token"
 	"strings"
 
-	gos "github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	gos "github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 func genReadme() {
@@ -50,7 +50,7 @@ func formatExample(code string) string {
 				"```go",
 				"package main",
 				"",
-				"import . \"github.com/ysmood/gokit\"",
+				"import . \"github.com/ysmood/kit\"",
 				"",
 				"func main() {{.code}}",
 				"```",

@@ -1,16 +1,11 @@
 language: go
 
-os:
-  - linux
-  - osx
+go:
+  - 1.12.x
 
 script:
   - go get ./cmd/...
-  - gokit-dev build
-
-cache:
-  directories:
-    - $HOME/gopath
+  - kit-dev build
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

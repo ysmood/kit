@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/radovskyb/watcher"
-	"github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // GuardContext ...

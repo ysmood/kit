@@ -4,8 +4,8 @@ import (
 	"os"
 	os_path "path"
 
-	gos "github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/utils"
+	gos "github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 

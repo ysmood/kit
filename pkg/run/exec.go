@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // ExecContext ...

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 var covPath *string

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	kit "github.com/ysmood/gokit"
+	"github.com/ysmood/kit"
 )
 
 type RequestSuite struct {

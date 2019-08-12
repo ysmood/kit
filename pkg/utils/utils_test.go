@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	kit "github.com/ysmood/gokit"
+	"github.com/ysmood/kit"
 )
 
 type T = testing.T

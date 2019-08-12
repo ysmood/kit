@@ -13,7 +13,4 @@ before_test:
   - go get ./cmd/...
 
 test_script:
-  - gokit-dev build
-
-cache:
-  - c:\gopath
+  - kit-dev build

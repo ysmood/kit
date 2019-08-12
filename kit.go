@@ -1,10 +1,10 @@
 package kit
 
 import (
-	"github.com/ysmood/gokit/pkg/http"
-	"github.com/ysmood/gokit/pkg/os"
-	"github.com/ysmood/gokit/pkg/run"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/http"
+	"github.com/ysmood/kit/pkg/os"
+	"github.com/ysmood/kit/pkg/run"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // All imported

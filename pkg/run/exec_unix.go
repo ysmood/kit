@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/kr/pty"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit/pkg/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

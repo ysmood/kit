@@ -2,14 +2,17 @@ package run_test
 
 import (
 	"os"
+	"path"
 	"testing"
 
+	"github.com/ysmood/kit"
+
 	"github.com/stretchr/testify/assert"
-	kit "github.com/ysmood/gokit"
 )
 
 func TestEnsureGoTool(t *testing.T) {
-	kit.MustGoTool("github.com/ysmood/gokit")
+	_ = os.Remove(path.Join(kit.GoPath(), "bin", "golint"))
+	kit.MustGoTool("golang.org/x/lint/golint")
 }
 
 func TestRunTask(t *testing.T) {

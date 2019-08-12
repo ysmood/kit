@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	kit "github.com/ysmood/gokit"
-	"github.com/ysmood/gokit/pkg/utils"
+	"github.com/ysmood/kit"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 func TestMain(m *testing.M) {
