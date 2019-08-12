@@ -1,4 +1,4 @@
 package utils
 
 // Version version of gokit
-const Version = "v0.13.3"
+const Version = "v0.13.4"

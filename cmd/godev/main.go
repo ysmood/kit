@@ -102,4 +102,5 @@ func checkCoverage(min float64) {
 	if total < min {
 		panic(fmt.Errorf("total coverage %.1f%% is less than minimum %.1f%%", total, min))
 	}
+	fmt.Printf("Total Cover: %.1f%%\n", total)
 }
