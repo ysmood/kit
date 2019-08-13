@@ -19,10 +19,10 @@ Such as the smart glob that handles git ignore properly:
 ```go
 package main
 
-import . "github.com/ysmood/kit"
+import "github.com/ysmood/kit"
 
 func main() {
-	Log(Walk("**/*.go", "**/*.md", WalkGitIgnore).MustList())
+    kit.Log(kit.Walk("**/*.go", "**/*.md", kit.WalkGitIgnore).MustList())
 }
 
 ```
@@ -32,13 +32,14 @@ A better `Exec` alternative:
 ```go
 package main
 
-import . "github.com/ysmood/kit"
+import "github.com/ysmood/kit"
 
 func main() {
-	Exec("echo", "ok").MustDo()
+    kit.Exec("echo", "ok").MustDo()
 
-	str := Exec("echo", "ok").MustString()
-	Log(str)
+    str := kit.Exec("echo", "ok").MustString()
+
+    kit.Log(str)
 }
 
 ```
@@ -52,15 +53,15 @@ flexiblity. No api is hidden from the origin http lib.
 ```go
 package main
 
-import . "github.com/ysmood/kit"
+import "github.com/ysmood/kit"
 
 func main() {
-	val := Req("http://test.com").Post().Query(
-		"search", "keyword",
-		"even", []string{"array", "is", "supported"},
-	).MustJSON("json.path.value")
+    val := kit.Req("http://test.com").Post().Query(
+        "search", "keyword",
+        "even", []string{"array", "is", "supported"},
+    ).MustJSON("json.path.value")
 
-	Log(val)
+    kit.Log(val)
 }
 
 ```
@@ -68,14 +69,14 @@ func main() {
 ```go
 package main
 
-import . "github.com/ysmood/kit"
+import "github.com/ysmood/kit"
 
 func main() {
-	server := MustServer(":8080")
-	server.Engine.GET("/", func(ctx GinContext) {
-		ctx.String(http.StatusOK, "ok")
-	})
-	server.MustDo()
+    server := kit.MustServer(":8080")
+    server.Engine.GET("/", func(ctx kit.GinContext) {
+        ctx.String(200, "ok")
+    })
+    server.MustDo()
 }
 
 ```
@@ -159,7 +160,7 @@ run and guard a command, kill and rerun it when watched files are modified
 
    # the output will be prefix with red 'my-app | '
    guard -p 'my-app | @red' -- python test.py
-   
+
    # use "---" as separator to guard multiple commands
    guard -w 'a/*' -- ls a --- -w 'b/*' -- ls b
 
@@ -185,12 +186,12 @@ You can also use it as a lib
 ```go
 package main
 
-import . "github.com/ysmood/kit"
+import "github.com/ysmood/kit"
 
 func main() {
-	Guard("go", "run", "./server").ExecCtx(
-		Exec().Prefix("server | @yellow"),
-	).MustDo()
+    kit.Guard("go", "run", "./server").ExecCtx(
+        kit.Exec().Prefix("server | @yellow"),
+    ).MustDo()
 }
 
 ```

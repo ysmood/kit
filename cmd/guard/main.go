@@ -92,7 +92,7 @@ func genOptions(args []string) *options {
 
 		 # the output will be prefix with red 'my-app | '
 		 guard -p 'my-app | @red' -- python test.py
-		 
+
 		 # use "---" as separator to guard multiple commands
 		 guard -w 'a/*' -- ls a --- -w 'b/*' -- ls b
 		`,

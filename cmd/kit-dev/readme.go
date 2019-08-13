@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"regexp"
 	"strings"
 
 	gos "github.com/ysmood/kit/pkg/os"
@@ -12,10 +13,10 @@ import (
 )
 
 func genReadme() {
-	fexmaple := utils.E1(gos.ReadString("kit_test.go")).(string)
+	fexmaple := utils.E1(gos.ReadString("examples_test.go")).(string)
 
 	fset := token.NewFileSet()
-	fast := utils.E1(parser.ParseFile(fset, "kit_test.go", fexmaple, parser.ParseComments)).(*ast.File)
+	fast := utils.E1(parser.ParseFile(fset, "examples_test.go", fexmaple, parser.ParseComments)).(*ast.File)
 
 	guardHelp := run.Exec("go", "run", "./cmd/guard", "--help").MustString()
 	godevHelp := run.Exec("go", "run", "./cmd/godev", "--help").MustString()
@@ -44,13 +45,13 @@ func genReadme() {
 }
 
 func formatExample(code string) string {
-	return utils.S(
+	code = utils.S(
 		strings.Join(
 			[]string{
 				"```go",
 				"package main",
 				"",
-				"import . \"github.com/ysmood/kit\"",
+				"import \"github.com/ysmood/kit\"",
 				"",
 				"func main() {{.code}}",
 				"```",
@@ -59,4 +60,8 @@ func formatExample(code string) string {
 		),
 		"code", code,
 	)
+
+	code = regexp.MustCompile(`\t`).ReplaceAllString(code, "    ")
+
+	return code
 }
