@@ -10,7 +10,11 @@ environment:
 stack: go 1.12
 
 before_test:
+  - git submodule update --init
   - go get ./cmd/...
 
 test_script:
-  - kit-dev build
+  - kit-dev export
+  - kit-dev readme
+  - godev -l -m90
+  - godev build "cmd/*" "!cmd/kit-dev"

@@ -2,7 +2,7 @@
 
 [![GoDoc](https://godoc.org/github.com/ysmood/kit?status.svg)](http://godoc.org/github.com/ysmood/kit)
 [![Build Status](https://travis-ci.org/ysmood/kit.svg?branch=master)](https://travis-ci.org/ysmood/kit)
-[![Build status](https://ci.appveyor.com/api/projects/status/b8mkds289asy6q5s/branch/master?svg=true)](https://ci.appveyor.com/project/ysmood/kit/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/im4xdodkpfd5vvwg/branch/master?svg=true)](https://ci.appveyor.com/project/ysmood/kit/branch/master)
 [![codecov](https://codecov.io/gh/ysmood/kit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/kit)
 [![goreport](https://goreportcard.com/badge/github.com/ysmood/kit)](https://goreportcard.com/report/github.com/ysmood/kit)
 
