@@ -27,6 +27,9 @@ type ReqContext struct {
 	body     io.Reader
 }
 
+// JSONResult ...
+type JSONResult = gjson.Result
+
 // Req send http request
 func Req(url string) *ReqContext {
 	return &ReqContext{
@@ -83,7 +86,7 @@ func (ctx *ReqContext) Client(c *http.Client) *ReqContext {
 	return ctx
 }
 
-// Form ...
+// Form the params is a key-value pair list, such as `Form(k, v, k, v)`
 func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.header = append(ctx.header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
@@ -212,7 +215,7 @@ func (ctx *ReqContext) MustString() string {
 }
 
 // JSON parse body as json and provide searching for json strings
-func (ctx *ReqContext) JSON(path string) (*gjson.Result, error) {
+func (ctx *ReqContext) JSON(path string) (*JSONResult, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
 		return nil, err
@@ -224,8 +227,8 @@ func (ctx *ReqContext) JSON(path string) (*gjson.Result, error) {
 }
 
 // MustJSON ...
-func (ctx *ReqContext) MustJSON(path string) gjson.Result {
-	return *utils.E(ctx.JSON(path))[0].(*gjson.Result)
+func (ctx *ReqContext) MustJSON(path string) *JSONResult {
+	return utils.E(ctx.JSON(path))[0].(*gjson.Result)
 }
 
 func paramsToForm(params []interface{}) map[string]interface{} {

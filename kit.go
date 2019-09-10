@@ -70,6 +70,9 @@ var Version = utils.Version
 // GinContext imported
 type GinContext = http.GinContext
 
+// JSONResult imported
+type JSONResult = http.JSONResult
+
 // MustServer imported
 var MustServer = http.MustServer
 
