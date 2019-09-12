@@ -121,11 +121,11 @@ func (s *RequestSuite) TestGetJSON() {
 
 	c := kit.Req(url)
 
-	s.Equal(int64(1), c.MustJSON("deep.path").Int())
+	s.Equal(int64(1), c.MustJSON().Get("deep.path").Int())
 }
 
 func (s *RequestSuite) TestGetJSONErr() {
-	s.EqualError(kit.ErrArg(kit.Req("").JSON("deep.path")), "Get : unsupported protocol scheme \"\"")
+	s.EqualError(kit.ErrArg(kit.Req("").JSON()), "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestPostForm() {

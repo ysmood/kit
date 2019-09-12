@@ -16,7 +16,7 @@ func ExampleReq() {
 	val := kit.Req("http://test.com").Post().Query(
 		"search", "keyword",
 		"even", []string{"array", "is", "supported"},
-	).MustJSON("json.path.value")
+	).MustJSON().Get("json.path.value")
 
 	kit.Log(val)
 }

@@ -215,20 +215,19 @@ func (ctx *ReqContext) MustString() string {
 }
 
 // JSON parse body as json and provide searching for json strings
-func (ctx *ReqContext) JSON(path string) (*JSONResult, error) {
+func (ctx *ReqContext) JSON() (*JSONResult, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
 		return nil, err
 	}
 
 	r := gjson.ParseBytes(b)
-	g := r.Get(path)
-	return &g, nil
+	return &r, nil
 }
 
 // MustJSON ...
-func (ctx *ReqContext) MustJSON(path string) *JSONResult {
-	return utils.E(ctx.JSON(path))[0].(*gjson.Result)
+func (ctx *ReqContext) MustJSON() *JSONResult {
+	return utils.E(ctx.JSON())[0].(*gjson.Result)
 }
 
 func paramsToForm(params []interface{}) map[string]interface{} {
