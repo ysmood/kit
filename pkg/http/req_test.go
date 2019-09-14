@@ -112,6 +112,12 @@ func (s *RequestSuite) TestGetStringWithQuery() {
 	s.Equal("1", v)
 }
 
+func (s *RequestSuite) TestQueryWrongKVAmount() {
+	s.Panics(func() {
+		kit.Req("").Query("a")
+	})
+}
+
 func (s *RequestSuite) TestGetJSON() {
 	path, url := s.path()
 

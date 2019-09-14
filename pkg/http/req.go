@@ -232,8 +232,8 @@ func (ctx *ReqContext) MustJSON() *JSONResult {
 
 func paramsToForm(params []interface{}) map[string]interface{} {
 	f := map[string]interface{}{}
-	l := len(params) - 1
-	for i := 0; i < l; i += 2 {
+
+	for i := 0; i < len(params); i += 2 {
 		f[params[i].(string)] = params[i+1]
 	}
 	return f

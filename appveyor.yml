@@ -7,7 +7,7 @@ environment:
   PATH: c:\gopath\bin;%PATH%
   GOPATH: c:\gopath
 
-stack: go 1.12
+stack: go 1.13
 
 before_test:
   - git submodule update --init

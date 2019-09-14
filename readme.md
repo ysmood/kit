@@ -56,7 +56,7 @@ package main
 import "github.com/ysmood/kit"
 
 func main() {
-    val := kit.Req("http://test.com").Post().Query(
+    val := kit.Req("http://test.com").Post().Form(
         "search", "keyword",
         "even", []string{"array", "is", "supported"},
     ).MustJSON().Get("json.path.value").String()
