@@ -1,4 +1,4 @@
-# Gokit
+# Kit
 
 [![GoDoc](https://godoc.org/github.com/ysmood/kit?status.svg)](http://godoc.org/github.com/ysmood/kit)
 [![Build Status](https://travis-ci.org/ysmood/kit.svg?branch=master)](https://travis-ci.org/ysmood/kit)
