@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/ysmood/kit/pkg/run"
 	"github.com/ysmood/kit/pkg/utils"
@@ -68,6 +69,11 @@ func lint() {
 
 	run.MustGoTool("github.com/golangci/golangci-lint/cmd/golangci-lint")
 	run.Exec("golangci-lint", "run").MustDo()
+
+	out := strings.TrimSpace(run.Exec("gofmt", "-s", "-l", ".").MustString())
+	if out != "" {
+		panic("\"gofmt -s\" check failed:\n" + out)
+	}
 }
 
 func test(path, match string, min float64, isLint, dev bool) {
