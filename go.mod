@@ -25,11 +25,13 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
+	github.com/moul/http2curl v1.0.0
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/otiai10/copy v1.0.1
 	github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776 // indirect
 	github.com/pierrec/lz4 v2.2.6+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.6
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/tidwall/gjson v1.2.1
 	github.com/tidwall/match v1.0.1 // indirect

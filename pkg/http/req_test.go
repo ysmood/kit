@@ -45,9 +45,11 @@ func (s *RequestSuite) TestGetMustString() {
 	})
 
 	c := kit.Req(url)
+	req, err := c.Request()
+	kit.E(err)
 
 	s.Equal("ok", c.MustString())
-	s.Equal(url, c.Request().URL.String())
+	s.Equal(url, req.URL.String())
 }
 
 func (s *RequestSuite) TestGetMustResponse() {
@@ -68,9 +70,11 @@ func (s *RequestSuite) TestGetString() {
 	})
 
 	c := kit.Req(url)
+	req, err := c.Request()
+	kit.E(err)
 
 	s.Equal("ok", kit.E(c.String())[0].(string))
-	s.Equal(url, c.Request().URL.String())
+	s.Equal(url, req.URL.String())
 }
 
 func (s *RequestSuite) TestGetStringErr() {
@@ -97,6 +101,11 @@ func (s *RequestSuite) TestMethodErr() {
 
 func (s *RequestSuite) TestURLErr() {
 	s.EqualError(kit.ErrArg(kit.Req("").Do()), "Get : unsupported protocol scheme \"\"")
+}
+
+func (s *RequestSuite) TestRequestErr() {
+	_, err := kit.Req("").Request()
+	s.EqualError(err, "Get : unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
@@ -229,4 +238,27 @@ func (s *RequestSuite) TestReuseCookie() {
 
 	s.Equal("val", cookieA)
 	s.Equal("b", header)
+}
+
+func (s *RequestSuite) TestMustCurl() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {
+		c.String(200, "ok")
+	})
+
+	c := kit.Req(url)
+
+	res, err := c.Response()
+	kit.E(err)
+
+	expected := kit.S(`curl -X 'GET' '{{.url}}'
+# HTTP/1.1 200 OK
+# Content-Length: 2
+# Content-Type: text/plain; charset=utf-8
+# Date: {{.date}}
+# 
+# ok`, "url", url, "date", res.Header.Get("Date"))
+
+	s.Equal(expected, c.MustCurl())
 }

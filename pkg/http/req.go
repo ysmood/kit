@@ -7,9 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/derekstavis/go-qs"
+	"github.com/moul/http2curl"
 	"github.com/tidwall/gjson"
 	"github.com/ysmood/kit/pkg/utils"
 )
@@ -25,6 +28,7 @@ type ReqContext struct {
 	header   [][]string
 	jsonBody interface{}
 	body     io.Reader
+	resBytes []byte
 }
 
 // JSONResult shortcut for gjson.Result
@@ -157,12 +161,23 @@ func (ctx *ReqContext) MustDo() {
 }
 
 // Request get native request struct, useful for debugging
-func (ctx *ReqContext) Request() *http.Request {
-	return ctx.request
+func (ctx *ReqContext) Request() (*http.Request, error) {
+	if ctx.request != nil {
+		return ctx.request, nil
+	}
+	err := ctx.Do()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.request, nil
 }
 
 // Response send request, get response
 func (ctx *ReqContext) Response() (*http.Response, error) {
+	if ctx.response != nil {
+		return ctx.response, nil
+	}
+
 	err := ctx.Do()
 	if err != nil {
 		return nil, err
@@ -181,7 +196,11 @@ func (ctx *ReqContext) Bytes() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return readBody(res.Body)
+
+	if ctx.resBytes == nil {
+		ctx.resBytes, err = readBody(res.Body)
+	}
+	return ctx.resBytes, err
 }
 
 // MustBytes panic version of Bytes()
@@ -237,4 +256,38 @@ func paramsToForm(params []interface{}) map[string]interface{} {
 		f[params[i].(string)] = params[i+1]
 	}
 	return f
+}
+
+// MustCurl generate request and response details in curl style.
+// Useful when reproduce request on other systems with minimum dependencies.
+// For now gzip is not handled.
+func (ctx *ReqContext) MustCurl() string {
+	res, err := ctx.Response()
+	utils.E(err)
+
+	req, err := ctx.Request()
+	utils.E(err)
+	curl, err := http2curl.GetCurlCommand(req)
+	utils.E(err)
+
+	resStr := res.Proto + " " + res.Status + "\n"
+
+	// format and sort headers
+	headers := [][]string{}
+	for k, vs := range res.Header {
+		for _, v := range vs {
+			headers = append(headers, []string{k, v})
+		}
+	}
+	sort.Slice(headers, func(a, b int) bool { return headers[a][0] < headers[b][0] })
+	for _, h := range headers {
+		resStr += h[0] + ": " + h[1] + "\n"
+	}
+
+	resStr += "\n" + ctx.MustString()
+
+	// prefix bash comment
+	resStr = regexp.MustCompile(`(?m)^`).ReplaceAllString(resStr, "# ")
+
+	return curl.String() + "\n" + resStr
 }

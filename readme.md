@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/ysmood/kit/branch/master/graph/badge.svg)](https://codecov.io/gh/ysmood/kit)
 [![goreport](https://goreportcard.com/badge/github.com/ysmood/kit)](https://goreportcard.com/report/github.com/ysmood/kit)
 
-This project is a collection of often used io related methods with sane defaults to make coding less verbose.
+This project is a collection of often-used io related methods with sane defaults to make coding less verbose.
 
 ## Modules
 
@@ -47,8 +47,8 @@ func main() {
 ### http
 
 The http lib from stdlib is pretty verbose to use. The `kit.Req` is a much better
-alternative to use with it's fluent api design. It helps to reduce the code without sacrificing performance and
-flexiblity. No api is hidden from the origin http lib.
+alternative to use with its fluent api design. It helps to reduce the code without sacrificing performance and
+flexibility. No api is hidden from the origin of http lib.
 
 ```go
 package main
@@ -83,12 +83,12 @@ func main() {
 
 ## CLI tool
 
-Goto the [release page](https://github.com/ysmood/kit/releases) to download the exectuable for your OS.
+Goto the [release page](https://github.com/ysmood/kit/releases) to download the executable for your OS.
 Or install with single line command below.
 
 ### godev
 
-A general dev tool for go project to lint, test, build, deploy cross platform executables.
+A general dev tool for go project to lint, test, build, deploy cross-platform executable.
 
 `godev` will release your project to your own github release page.
 Project released with `godev` can be installed via [this shell script](https://github.com/ysmood/github-install).
@@ -181,7 +181,7 @@ Flags:
 
 ```
 
-You can also use it as a lib
+You can also use it as a lib:
 
 ```go
 package main
