@@ -14,7 +14,7 @@ import (
 	"github.com/ysmood/kit/pkg/utils"
 )
 
-// ReqContext ...
+// ReqContext the request context
 type ReqContext struct {
 	client   *http.Client
 	request  *http.Request
@@ -27,7 +27,7 @@ type ReqContext struct {
 	body     io.Reader
 }
 
-// JSONResult ...
+// JSONResult shortcut for gjson.Result
 type JSONResult = gjson.Result
 
 // Req send http request
@@ -37,29 +37,29 @@ func Req(url string) *ReqContext {
 	}
 }
 
-// Method ...
+// Method request method
 func (ctx *ReqContext) Method(m string) *ReqContext {
 	ctx.method = m
 	return ctx
 }
 
-// URL ...
+// URL the url path for request
 func (ctx *ReqContext) URL(url string) *ReqContext {
 	ctx.url = url
 	return ctx
 }
 
-// Post ...
+// Post use POST as the method
 func (ctx *ReqContext) Post() *ReqContext {
 	return ctx.Method(http.MethodPost)
 }
 
-// Put ...
+// Put use PUT as the method
 func (ctx *ReqContext) Put() *ReqContext {
 	return ctx.Method(http.MethodPut)
 }
 
-// Delete ...
+// Delete use DELETE as the method
 func (ctx *ReqContext) Delete() *ReqContext {
 	return ctx.Method(http.MethodDelete)
 }
@@ -94,7 +94,7 @@ func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	return ctx
 }
 
-// Body ...
+// Body the request body to sent
 func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
 	ctx.body = b
 	return ctx
@@ -108,13 +108,13 @@ func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 	return ctx
 }
 
-// StringBody ...
+// StringBody set request body as a string
 func (ctx *ReqContext) StringBody(s string) *ReqContext {
 	ctx.body = strings.NewReader(string(s))
 	return ctx
 }
 
-// Do ...
+// Do send the request
 func (ctx *ReqContext) Do() error {
 	if ctx.client == nil {
 		cookie, _ := cookiejar.New(nil)
@@ -151,17 +151,17 @@ func (ctx *ReqContext) Do() error {
 	return nil
 }
 
-// MustDo ...
+// MustDo send request, panic if request fails
 func (ctx *ReqContext) MustDo() {
 	utils.E(ctx.Do())
 }
 
-// Request get request
+// Request get native request struct, useful for debugging
 func (ctx *ReqContext) Request() *http.Request {
 	return ctx.request
 }
 
-// Response get response
+// Response send request, get response
 func (ctx *ReqContext) Response() (*http.Response, error) {
 	err := ctx.Do()
 	if err != nil {
@@ -170,12 +170,12 @@ func (ctx *ReqContext) Response() (*http.Response, error) {
 	return ctx.response, nil
 }
 
-// MustResponse get response
+// MustResponse panic version of Response
 func (ctx *ReqContext) MustResponse() *http.Response {
 	return utils.E(ctx.Response())[0].(*http.Response)
 }
 
-// Bytes get response body as bytes
+// Bytes send request, read response body as bytes
 func (ctx *ReqContext) Bytes() ([]byte, error) {
 	res, err := ctx.Response()
 	if err != nil {
@@ -184,7 +184,7 @@ func (ctx *ReqContext) Bytes() ([]byte, error) {
 	return readBody(res.Body)
 }
 
-// MustBytes ...
+// MustBytes panic version of Bytes()
 func (ctx *ReqContext) MustBytes() []byte {
 	return utils.E(ctx.Bytes())[0].([]byte)
 }
@@ -203,18 +203,18 @@ func readBody(b io.ReadCloser) ([]byte, error) {
 	return body, nil
 }
 
-// String get string response
+// String send request, read response as string
 func (ctx *ReqContext) String() (string, error) {
 	s, err := ctx.Bytes()
 	return string(s), err
 }
 
-// MustString ...
+// MustString panic version of String()
 func (ctx *ReqContext) MustString() string {
 	return string(ctx.MustBytes())
 }
 
-// JSON parse body as json and provide searching for json strings
+// JSON send request, get response and parse body as json and provide searching for json strings
 func (ctx *ReqContext) JSON() (*JSONResult, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
@@ -225,7 +225,7 @@ func (ctx *ReqContext) JSON() (*JSONResult, error) {
 	return &r, nil
 }
 
-// MustJSON ...
+// MustJSON panic version of JSON()
 func (ctx *ReqContext) MustJSON() *JSONResult {
 	return utils.E(ctx.JSON())[0].(*gjson.Result)
 }
