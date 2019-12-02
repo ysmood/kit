@@ -20,7 +20,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 	deploy := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
 
 	args := []string{
-		"godev", "build",
+		"go", "run", "./cmd/godev", "build",
 		"--strict",
 		"cmd/*", "!cmd/kit-dev",
 	}

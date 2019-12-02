@@ -72,8 +72,7 @@ To write testable code, I try to isolate all error related dependencies.
 Under project root
 
 ```bash
-go get ./cmd/...
-kit-dev build
+go run ./cmd/kit-dev build
 ```
 
 Binaries will be built into dist folder.

@@ -45,7 +45,8 @@ func cmdTest(cmd run.TaskCmd) func() {
 func cmdBuild(cmd run.TaskCmd) func() {
 	patterns := cmd.Arg("pattern", "folders to build").Default(".").Strings()
 	dir := cmd.Flag("dir", "the output dir").Default("dist").String()
-	deployTag := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
+	deploy := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
+	noGitClean := cmd.Flag("no-git-clean", "do not check git clean when deploy").Short('g').Bool()
 	ver := cmd.Flag("deploy-version", "the name of the tag").Short('v').String()
 	noZip := cmd.Flag("no-zip", "don't generate zip file").Short('n').Bool()
 	osList := cmd.Flag("os", "os to build, by default mac, linux and windows will be built").Strings()
@@ -55,7 +56,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 		if *strict {
 			test("./...", "", 100, true, false)
 		}
-		build(*patterns, *dir, *deployTag, *ver, !*noZip, *osList)
+		build(*patterns, *dir, *deploy, *noGitClean, *ver, !*noZip, *osList)
 	}
 }
 
