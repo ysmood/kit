@@ -262,3 +262,26 @@ func (s *RequestSuite) TestMustCurl() {
 
 	s.Equal(expected, c.MustCurl())
 }
+
+func (s *RequestSuite) TestMustCurlEmptyBody() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {
+		c.String(200, "ok")
+	})
+
+	c := kit.Req(url)
+
+	res, err := c.Response()
+	kit.E(err)
+
+	expected := kit.S(`curl -X GET {{.url}} 
+# HTTP/1.1 200 OK
+# Content-Length: 2
+# Content-Type: text/plain; charset=utf-8
+# Date: {{.date}}
+# 
+# ok`, "url", url, "date", res.Header.Get("Date"))
+
+	s.Equal(expected, c.MustCurl())
+}

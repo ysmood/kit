@@ -279,9 +279,15 @@ func (ctx *ReqContext) MustCurl() string {
 	// get body
 	body, err := ctx.getBody()
 	utils.E(err)
-	bodyData, err := ioutil.ReadAll(body)
-	utils.E(err)
-	ctx.stringBody = string(bodyData)
+	if body != nil {
+		bodyData, err := ioutil.ReadAll(body)
+		utils.E(err)
+		ctx.stringBody = string(bodyData)
+	}
+	stringBody := ""
+	if ctx.stringBody != "" {
+		stringBody = "-d " + shellescape.Quote(ctx.stringBody)
+	}
 
 	res, err := ctx.Response()
 	utils.E(err)
@@ -307,11 +313,11 @@ func (ctx *ReqContext) MustCurl() string {
 	resStr = regexp.MustCompile(`(?m)^`).ReplaceAllString(resStr, "# ")
 
 	return utils.S(
-		"curl -X {{.method}} {{.url}} {{.header}}-d {{.data}}\n{{.resStr}}",
+		"curl -X {{.method}} {{.url}} {{.header}}{{.data}}\n{{.resStr}}",
 		"method", shellescape.Quote(req.Method),
 		"url", shellescape.Quote(req.URL.String()),
 		"header", reqHeaderStr,
-		"data", shellescape.Quote(ctx.stringBody),
+		"data", stringBody,
 		"resStr", strings.Trim(resStr, "\n"),
 	)
 }
