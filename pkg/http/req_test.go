@@ -244,21 +244,21 @@ func (s *RequestSuite) TestMustCurl() {
 	path, url := s.path()
 
 	s.router.GET(path, func(c kit.GinContext) {
-		c.String(200, "ok")
+		c.String(200, "res body")
 	})
 
-	c := kit.Req(url)
+	c := kit.Req(url).JSONBody([]int{10})
 
 	res, err := c.Response()
 	kit.E(err)
 
-	expected := kit.S(`curl -X 'GET' '{{.url}}'
+	expected := kit.S(`curl -X GET {{.url}} -H 'Content-Type: application/json; charset=utf-8' -d '[10]'
 # HTTP/1.1 200 OK
-# Content-Length: 2
+# Content-Length: 8
 # Content-Type: text/plain; charset=utf-8
 # Date: {{.date}}
 # 
-# ok`, "url", url, "date", res.Header.Get("Date"))
+# res body`, "url", url, "date", res.Header.Get("Date"))
 
 	s.Equal(expected, c.MustCurl())
 }

@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
+	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053 // indirect
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bmatcuk/doublestar v1.1.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -25,13 +26,11 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
-	github.com/moul/http2curl v1.0.0
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/otiai10/copy v1.0.1
 	github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776 // indirect
 	github.com/pierrec/lz4 v2.2.6+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.6
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/tidwall/gjson v1.2.1
 	github.com/tidwall/match v1.0.1 // indirect
@@ -42,5 +41,6 @@ require (
 	golang.org/x/sys v0.0.0-20190620070143-6f217b454f45
 	golang.org/x/tools v0.0.0-20190619215442-4adf7a708c2d
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

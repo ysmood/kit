@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/derekstavis/go-qs"
-	"github.com/moul/http2curl"
 	"github.com/tidwall/gjson"
 	"github.com/ysmood/kit/pkg/utils"
+	"gopkg.in/alessio/shellescape.v1"
 )
 
 // ReqContext the request context
@@ -23,12 +23,13 @@ type ReqContext struct {
 	request  *http.Request
 	response *http.Response
 
-	method   string
-	url      string
-	header   [][]string
-	jsonBody interface{}
-	body     io.Reader
-	resBytes []byte
+	method     string
+	url        string
+	header     [][]string
+	jsonBody   interface{}
+	stringBody string
+	body       io.Reader
+	resBytes   []byte
 }
 
 // JSONResult shortcut for gjson.Result
@@ -114,8 +115,24 @@ func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 
 // StringBody set request body as a string
 func (ctx *ReqContext) StringBody(s string) *ReqContext {
-	ctx.body = strings.NewReader(string(s))
+	ctx.stringBody = s
 	return ctx
+}
+
+func (ctx *ReqContext) getBody() (io.Reader, error) {
+	if ctx.stringBody != "" {
+		return strings.NewReader(ctx.stringBody), nil
+	}
+
+	if ctx.jsonBody != nil {
+		body, err := json.Marshal(ctx.jsonBody)
+		if err != nil {
+			return nil, err
+		}
+		return bytes.NewReader(body), nil
+	}
+
+	return ctx.body, nil
 }
 
 // Do send the request
@@ -127,15 +144,12 @@ func (ctx *ReqContext) Do() error {
 		}
 	}
 
-	if ctx.jsonBody != nil {
-		body, err := json.Marshal(ctx.jsonBody)
-		if err != nil {
-			return err
-		}
-		ctx.body = bytes.NewReader(body)
+	body, err := ctx.getBody()
+	if err != nil {
+		return err
 	}
 
-	req, err := http.NewRequest(ctx.method, ctx.url, ctx.body)
+	req, err := http.NewRequest(ctx.method, ctx.url, body)
 	if err != nil {
 		return err
 	}
@@ -262,25 +276,28 @@ func paramsToForm(params []interface{}) map[string]interface{} {
 // Useful when reproduce request on other systems with minimum dependencies.
 // For now gzip is not handled.
 func (ctx *ReqContext) MustCurl() string {
+	// get body
+	body, err := ctx.getBody()
+	utils.E(err)
+	bodyData, err := ioutil.ReadAll(body)
+	utils.E(err)
+	ctx.stringBody = string(bodyData)
+
 	res, err := ctx.Response()
 	utils.E(err)
 
 	req, err := ctx.Request()
 	utils.E(err)
-	curl, err := http2curl.GetCurlCommand(req)
-	utils.E(err)
+
+	// request header
+	reqHeaderStr := ""
+	for _, h := range headerToArr(req.Header) {
+		reqHeaderStr += "-H " + shellescape.Quote(h[0]+": "+h[1]) + " "
+	}
 
 	resStr := res.Proto + " " + res.Status + "\n"
 
-	// format and sort headers
-	headers := [][]string{}
-	for k, vs := range res.Header {
-		for _, v := range vs {
-			headers = append(headers, []string{k, v})
-		}
-	}
-	sort.Slice(headers, func(a, b int) bool { return headers[a][0] < headers[b][0] })
-	for _, h := range headers {
+	for _, h := range headerToArr(res.Header) {
 		resStr += h[0] + ": " + h[1] + "\n"
 	}
 
@@ -289,5 +306,23 @@ func (ctx *ReqContext) MustCurl() string {
 	// prefix bash comment
 	resStr = regexp.MustCompile(`(?m)^`).ReplaceAllString(resStr, "# ")
 
-	return curl.String() + "\n" + resStr
+	return utils.S(
+		"curl -X {{.method}} {{.url}} {{.header}}-d {{.data}}\n{{.resStr}}",
+		"method", shellescape.Quote(req.Method),
+		"url", shellescape.Quote(req.URL.String()),
+		"header", reqHeaderStr,
+		"data", shellescape.Quote(ctx.stringBody),
+		"resStr", strings.Trim(resStr, "\n"),
+	)
+}
+
+func headerToArr(header http.Header) [][]string {
+	headers := [][]string{}
+	for k, vs := range header {
+		for _, v := range vs {
+			headers = append(headers, []string{k, v})
+		}
+	}
+	sort.Slice(headers, func(a, b int) bool { return headers[a][0] < headers[b][0] })
+	return headers
 }
