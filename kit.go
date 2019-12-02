@@ -37,6 +37,12 @@ var JSON = utils.JSON
 // Log imported
 var Log = utils.Log
 
+// MustToJSON imported
+var MustToJSON = utils.MustToJSON
+
+// MustToJSONBytes imported
+var MustToJSONBytes = utils.MustToJSONBytes
+
 // Nil imported
 type Nil = utils.Nil
 

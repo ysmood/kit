@@ -60,6 +60,8 @@ func TestJSON(t *T) {
 	b := kit.JSON([]byte("10"))
 
 	assert.Equal(t, a.Int(), b.Int())
+
+	assert.Equal(t, `{"a":1}`, kit.MustToJSON(map[string]int{"a": 1}))
 }
 
 func TestGenerateRandomString(t *T) {

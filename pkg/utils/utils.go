@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"reflect"
 	"sync"
 	"text/template"
@@ -37,6 +38,18 @@ func E1(arg interface{}, err error) interface{} {
 		panic(err)
 	}
 	return arg
+}
+
+// MustToJSONBytes encode data to json bytes
+func MustToJSONBytes(data interface{}) []byte {
+	bytes, err := json.Marshal(data)
+	E(err)
+	return bytes
+}
+
+// MustToJSON encode data to json string
+func MustToJSON(data interface{}) string {
+	return string(MustToJSONBytes(data))
 }
 
 // JSON parse json for easily access the value from json path
