@@ -48,7 +48,32 @@ Project released with `godev` can be installed via [this shell script](https://g
 Install `godev`: `curl -L https://git.io/fjaxx | repo=ysmood/kit bin=godev sh`
 
 ```bash
-{{.GodevHelp}}
+usage: godev [<flags>] <command> [<args> ...]
+
+dev tool for common go project
+
+Flags:
+  --help                     Show context-sensitive help (also try --help-long
+                             and --help-man).
+  --version                  Show application version.
+  --cov-path="coverage.txt"  path for coverage output
+
+Commands:
+  help [<command>...]
+    Show help.
+
+  test* [<flags>] [<match>]
+    run go unit test
+
+  lint
+    lint project with golint and golangci-lint
+
+  build [<flags>] [<pattern>...]
+    build [and deploy] specified dirs
+
+  cov
+    view html coverage report
+
 ```
 
 ### guard

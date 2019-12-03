@@ -123,8 +123,6 @@ Commands:
   cov
     view html coverage report
 
-
-
 ```
 
 ### guard
