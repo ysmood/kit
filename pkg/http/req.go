@@ -2,14 +2,15 @@ package http
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
-	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/derekstavis/go-qs"
 	"github.com/tidwall/gjson"
@@ -286,7 +287,7 @@ func (ctx *ReqContext) MustCurl() string {
 	}
 	stringBody := ""
 	if ctx.stringBody != "" {
-		stringBody = " \\\n-d " + shellescape.Quote(ctx.stringBody)
+		stringBody = " \\\n  -d " + shellescape.Quote(ctx.stringBody)
 	}
 
 	res, err := ctx.Response()
@@ -298,7 +299,7 @@ func (ctx *ReqContext) MustCurl() string {
 	// request header
 	reqHeaderStr := ""
 	for _, h := range headerToArr(req.Header) {
-		reqHeaderStr += " \\\n-H " + shellescape.Quote(h[0]+": "+h[1])
+		reqHeaderStr += " \\\n  -H " + shellescape.Quote(h[0]+": "+h[1])
 	}
 
 	resStr := res.Proto + " " + res.Status + "\n"
@@ -307,10 +308,16 @@ func (ctx *ReqContext) MustCurl() string {
 		resStr += h[0] + ": " + h[1] + "\n"
 	}
 
-	resStr += "\n" + ctx.MustString()
+	resBytes := ctx.MustBytes()
+	var obj interface{}
+	err = json.Unmarshal(resBytes, &obj)
+	if err == nil {
+		resBytes, _ = json.MarshalIndent(obj, "", "  ")
+	} else if !utf8.Valid(resBytes) {
+		resBytes = []byte(base64.StdEncoding.EncodeToString(resBytes))
+	}
 
-	// prefix bash comment
-	resStr = regexp.MustCompile(`(?m)^`).ReplaceAllString(resStr, "# ")
+	resStr += "\n" + string(resBytes)
 
 	return utils.S(
 		"curl -X {{.method}} {{.url}}{{.header}}{{.data}}\n\n{{.resStr}}",

@@ -244,7 +244,7 @@ func (s *RequestSuite) TestMustCurl() {
 	path, url := s.path()
 
 	s.router.GET(path, func(c kit.GinContext) {
-		c.String(200, "res body")
+		c.JSON(200, map[string]string{"a": "b"})
 	})
 
 	c := kit.Req(url).JSONBody([]int{10})
@@ -253,15 +253,17 @@ func (s *RequestSuite) TestMustCurl() {
 	kit.E(err)
 
 	expected := kit.S(`curl -X GET {{.url}} \
--H 'Content-Type: application/json; charset=utf-8' \
--d '[10]'
+  -H 'Content-Type: application/json; charset=utf-8' \
+  -d '[10]'
 
-# HTTP/1.1 200 OK
-# Content-Length: 8
-# Content-Type: text/plain; charset=utf-8
-# Date: {{.date}}
-# 
-# res body`, "url", url, "date", res.Header.Get("Date"))
+HTTP/1.1 200 OK
+Content-Length: 9
+Content-Type: application/json; charset=utf-8
+Date: {{.date}}
+
+{
+  "a": "b"
+}`, "url", url, "date", res.Header.Get("Date"))
 
 	s.Equal(expected, c.MustCurl())
 }
@@ -270,7 +272,7 @@ func (s *RequestSuite) TestMustCurlEmptyBody() {
 	path, url := s.path()
 
 	s.router.GET(path, func(c kit.GinContext) {
-		c.String(200, "ok")
+		kit.E(c.Writer.Write([]byte{0xff, 0xfe, 0xfd}))
 	})
 
 	c := kit.Req(url)
@@ -280,12 +282,12 @@ func (s *RequestSuite) TestMustCurlEmptyBody() {
 
 	expected := kit.S(`curl -X GET {{.url}}
 
-# HTTP/1.1 200 OK
-# Content-Length: 2
-# Content-Type: text/plain; charset=utf-8
-# Date: {{.date}}
-# 
-# ok`, "url", url, "date", res.Header.Get("Date"))
+HTTP/1.1 200 OK
+Content-Length: 3
+Content-Type: text/plain; charset=utf-8
+Date: {{.date}}
+
+//79`, "url", url, "date", res.Header.Get("Date"))
 
 	s.Equal(expected, c.MustCurl())
 }
