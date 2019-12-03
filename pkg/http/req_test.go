@@ -252,7 +252,10 @@ func (s *RequestSuite) TestMustCurl() {
 	res, err := c.Response()
 	kit.E(err)
 
-	expected := kit.S(`curl -X GET {{.url}} -H 'Content-Type: application/json; charset=utf-8' -d '[10]'
+	expected := kit.S(`curl -X GET {{.url}} \
+-H 'Content-Type: application/json; charset=utf-8' \
+-d '[10]'
+
 # HTTP/1.1 200 OK
 # Content-Length: 8
 # Content-Type: text/plain; charset=utf-8
@@ -275,7 +278,8 @@ func (s *RequestSuite) TestMustCurlEmptyBody() {
 	res, err := c.Response()
 	kit.E(err)
 
-	expected := kit.S(`curl -X GET {{.url}} 
+	expected := kit.S(`curl -X GET {{.url}}
+
 # HTTP/1.1 200 OK
 # Content-Length: 2
 # Content-Type: text/plain; charset=utf-8

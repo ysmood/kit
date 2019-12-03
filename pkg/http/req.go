@@ -286,7 +286,7 @@ func (ctx *ReqContext) MustCurl() string {
 	}
 	stringBody := ""
 	if ctx.stringBody != "" {
-		stringBody = "-d " + shellescape.Quote(ctx.stringBody)
+		stringBody = " \\\n-d " + shellescape.Quote(ctx.stringBody)
 	}
 
 	res, err := ctx.Response()
@@ -298,7 +298,7 @@ func (ctx *ReqContext) MustCurl() string {
 	// request header
 	reqHeaderStr := ""
 	for _, h := range headerToArr(req.Header) {
-		reqHeaderStr += "-H " + shellescape.Quote(h[0]+": "+h[1]) + " "
+		reqHeaderStr += " \\\n-H " + shellescape.Quote(h[0]+": "+h[1])
 	}
 
 	resStr := res.Proto + " " + res.Status + "\n"
@@ -313,7 +313,7 @@ func (ctx *ReqContext) MustCurl() string {
 	resStr = regexp.MustCompile(`(?m)^`).ReplaceAllString(resStr, "# ")
 
 	return utils.S(
-		"curl -X {{.method}} {{.url}} {{.header}}{{.data}}\n{{.resStr}}",
+		"curl -X {{.method}} {{.url}}{{.header}}{{.data}}\n\n{{.resStr}}",
 		"method", shellescape.Quote(req.Method),
 		"url", shellescape.Quote(req.URL.String()),
 		"header", reqHeaderStr,
