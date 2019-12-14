@@ -257,7 +257,7 @@ func (s *RequestSuite) TestMustCurl() {
   -d '[10]'
 
 HTTP/1.1 200 OK
-Content-Length: 9
+Content-Length: 10
 Content-Type: application/json; charset=utf-8
 Date: {{.date}}
 
