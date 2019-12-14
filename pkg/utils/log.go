@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
 	"runtime/debug"
 	"time"
@@ -57,9 +56,8 @@ func ClearScreen() error {
 		return err
 	}
 
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
+	print("\033[H\033[2J")
+	return nil
 }
 
 // C color terminal string
