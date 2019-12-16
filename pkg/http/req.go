@@ -33,9 +33,6 @@ type ReqContext struct {
 	resBytes   []byte
 }
 
-// JSONResult shortcut for gjson.Result
-type JSONResult = gjson.Result
-
 // Req send http request
 func Req(url string) *ReqContext {
 	return &ReqContext{
@@ -249,7 +246,7 @@ func (ctx *ReqContext) MustString() string {
 }
 
 // JSON send request, get response and parse body as json and provide searching for json strings
-func (ctx *ReqContext) JSON() (*JSONResult, error) {
+func (ctx *ReqContext) JSON() (utils.JSONResult, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
 		return nil, err
@@ -260,7 +257,7 @@ func (ctx *ReqContext) JSON() (*JSONResult, error) {
 }
 
 // MustJSON panic version of JSON()
-func (ctx *ReqContext) MustJSON() *JSONResult {
+func (ctx *ReqContext) MustJSON() utils.JSONResult {
 	return utils.E(ctx.JSON())[0].(*gjson.Result)
 }
 

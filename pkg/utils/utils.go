@@ -12,6 +12,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// JSONResult shortcut for gjson.Result
+type JSONResult = *gjson.Result
+
 // Nil used to create empty channel
 type Nil struct{}
 
@@ -53,7 +56,8 @@ func MustToJSON(data interface{}) string {
 }
 
 // JSON parse json for easily access the value from json path
-func JSON(data interface{}) (res gjson.Result) {
+func JSON(data interface{}) JSONResult {
+	var res gjson.Result
 	switch v := data.(type) {
 	case string:
 		res = gjson.Parse(v)
@@ -61,7 +65,7 @@ func JSON(data interface{}) (res gjson.Result) {
 		res = gjson.ParseBytes(v)
 	}
 
-	return res
+	return &res
 }
 
 // All run all actions concurrently

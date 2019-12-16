@@ -34,6 +34,9 @@ var ErrArg = utils.ErrArg
 // JSON imported
 var JSON = utils.JSON
 
+// JSONResult imported
+type JSONResult = utils.JSONResult
+
 // Log imported
 var Log = utils.Log
 
@@ -75,9 +78,6 @@ var Version = utils.Version
 
 // GinContext imported
 type GinContext = http.GinContext
-
-// JSONResult imported
-type JSONResult = http.JSONResult
 
 // MustServer imported
 var MustServer = http.MustServer
