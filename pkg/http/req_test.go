@@ -212,12 +212,12 @@ func (s *RequestSuite) TestHeader() {
 	path, url := s.path()
 
 	s.router.GET(path, func(c kit.GinContext) {
-		h := c.GetHeader("test")
-		c.String(200, h)
+		h := c.Request.Header["Test"]
+		s.Equal("ok_ok", h[0]+h[1])
+		s.Equal("test", c.Request.Host)
 	})
 
-	c := kit.Req(url).Header("test", "ok")
-	s.Equal("ok", c.MustString())
+	kit.Req(url).Host("test").Header("test", "ok", "test", "_ok").MustDo()
 }
 
 func (s *RequestSuite) TestReuseCookie() {

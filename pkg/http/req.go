@@ -26,7 +26,8 @@ type ReqContext struct {
 
 	method     string
 	url        string
-	header     [][]string
+	host       string
+	header     http.Header
 	jsonBody   interface{}
 	stringBody string
 	body       io.Reader
@@ -36,7 +37,8 @@ type ReqContext struct {
 // Req send http request
 func Req(url string) *ReqContext {
 	return &ReqContext{
-		url: url,
+		header: http.Header{},
+		url:    url,
 	}
 }
 
@@ -74,10 +76,22 @@ func (ctx *ReqContext) Query(params ...interface{}) *ReqContext {
 	return ctx
 }
 
+// Host override the host request header
+func (ctx *ReqContext) Host(host string) *ReqContext {
+	ctx.host = host
+	return ctx
+}
+
 // Header Header(k, v, k, v ...)
 func (ctx *ReqContext) Header(params ...string) *ReqContext {
 	for i := 0; i < len(params); i += 2 {
-		ctx.header = append(ctx.header, []string{params[i], params[i+1]})
+		k := params[i]
+		v := params[i+1]
+		if _, has := ctx.header[k]; has {
+			ctx.header[k] = append(ctx.header[k], v)
+		} else {
+			ctx.header[k] = []string{v}
+		}
 	}
 
 	return ctx
@@ -92,7 +106,7 @@ func (ctx *ReqContext) Client(c *http.Client) *ReqContext {
 // Form the params is a key-value pair list, such as `Form(k, v, k, v)`
 func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	query, _ := qs.Marshal(paramsToForm(params))
-	ctx.header = append(ctx.header, []string{"Content-Type", "application/x-www-form-urlencoded; charset=utf-8"})
+	ctx.header["Content-Type"] = []string{"application/x-www-form-urlencoded; charset=utf-8"}
 	ctx.body = strings.NewReader(query)
 	return ctx
 }
@@ -105,7 +119,7 @@ func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
 
 // JSONBody set request body as json
 func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
-	ctx.header = append(ctx.header, []string{"Content-Type", "application/json; charset=utf-8"})
+	ctx.header["Content-Type"] = []string{"application/json; charset=utf-8"}
 	ctx.jsonBody = data
 
 	return ctx
@@ -154,9 +168,8 @@ func (ctx *ReqContext) Do() error {
 
 	ctx.request = req
 
-	for _, h := range ctx.header {
-		req.Header.Add(h[0], h[1])
-	}
+	req.Header = ctx.header
+	req.Host = ctx.host
 
 	res, err := ctx.client.Do(req)
 	if err != nil {
