@@ -164,17 +164,20 @@ func (ctx *GuardContext) run(e *watcher.Event) {
 		_ = utils.ClearScreen()
 	}
 
+	id := utils.RandString(8)
+
 	ctx.count++
-	utils.Log(ctx.prefix, "run", ctx.count, utils.C(ctx.args, "green"))
+	args := ctx.unescapeArgs(ctx.args, e)
+	utils.Log(ctx.prefix, "run", id, ctx.count, utils.C(args, "green"))
 
 	ctx.execCtxClone = *ctx.execCtx
-	err := ctx.execCtxClone.Dir(ctx.dir).Args(ctx.unescapeArgs(ctx.args, e)).Do()
+	err := ctx.execCtxClone.Dir(ctx.dir).Args(args).Do()
 
 	errMsg := ""
 	if err != nil {
 		errMsg = utils.C(err, "red")
 	}
-	utils.Log(ctx.prefix, "done", ctx.count, utils.C(ctx.args, "green"), errMsg)
+	utils.Log(ctx.prefix, "done", id, errMsg)
 
 	ctx.wait <- utils.Nil{}
 }
