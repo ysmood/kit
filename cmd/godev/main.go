@@ -36,9 +36,10 @@ func cmdTest(cmd run.TaskCmd) func() {
 		"min", "if total coverage is lower than the minimum exit with non-zero",
 	).Short('m').Default("0.0").Float64()
 	lint := cmd.Flag("lint", "lint before test").Short('l').Bool()
+	verbose := cmd.Flag("verbose", "enable verbose").Short('v').Bool()
 
 	return func() {
-		test(*path, *match, *min, *lint, *dev)
+		test(*path, *match, *min, *lint, *dev, *verbose)
 	}
 }
 
@@ -54,7 +55,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	return func() {
 		if *strict {
-			test("./...", "", 100, true, false)
+			test("./...", "", 100, true, false, false)
 		}
 		build(*patterns, *dir, *deploy, *noGitClean, *ver, !*noZip, *osList)
 	}
@@ -77,7 +78,7 @@ func lint() {
 	}
 }
 
-func test(path, match string, min float64, isLint, dev bool) {
+func test(path, match string, min float64, isLint, dev, verbose bool) {
 	if isLint {
 		lint()
 	}
@@ -95,6 +96,10 @@ func test(path, match string, min float64, isLint, dev bool) {
 	if dev {
 		run.MustGoTool("github.com/kyoh86/richgo")
 		conf[0] = "richgo"
+	}
+
+	if verbose {
+		conf = append(conf, "-v")
 	}
 
 	run.Exec(conf...).MustDo()
