@@ -73,12 +73,12 @@ func TestGuardDebounce(t *testing.T) {
 
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("go", "version", "{{path}}").Patterns(p + "/**").Interval(&i)
+	guard := kit.Guard("go", "version").Patterns(p + "/**").Interval(&i)
 	go guard.MustDo()
 
 	go func() {
 		time.Sleep(50 * time.Millisecond)
-		_ = kit.OutputFile(p+"/f", "a", nil)
+		_ = kit.OutputFile(p+"/a", "a", nil)
 		_ = kit.OutputFile(p+"/b", "b", nil)
 	}()
 

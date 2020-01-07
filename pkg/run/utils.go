@@ -2,16 +2,61 @@ package run
 
 import (
 	"os"
+	"os/exec"
 	os_path "path"
+	"strings"
 
 	gos "github.com/ysmood/kit/pkg/os"
 	"github.com/ysmood/kit/pkg/utils"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
+var goPathCache string
+
+// GoPath gets the current GOPATH properly
+func GoPath() string {
+	if goPathCache != "" {
+		return goPathCache
+	}
+	path, _ := exec.Command("go", "env", "GOPATH").CombinedOutput()
+	goPathCache = strings.TrimSpace(string(path))
+	return goPathCache
+}
+
+var goBinCache string
+
+// GoBin gets the current GOBIN properly
+func GoBin() string {
+	if goBinCache != "" {
+		return goBinCache
+	}
+	path, _ := exec.Command("go", "env", "GOBIN").CombinedOutput()
+	goBinCache = strings.TrimSpace(string(path))
+
+	if goBinCache == "" {
+		goBinCache = os_path.Join(GoPath(), "bin")
+	}
+	return goBinCache
+}
+
+// LookPath finds the executable from PATH and GOBIN
+func LookPath(name string) string {
+	path, err := exec.LookPath(name)
+	if err == nil {
+		return path
+	}
+
+	path = os_path.Join(GoBin(), name)
+	if gos.FileExists(path) {
+		return path
+	}
+
+	return name
+}
+
 // MustGoTool try to find executable bin under GOPATH, if not exists run go get to download it
 func MustGoTool(path string) {
-	p := os_path.Join(gos.GoPath(), "bin", os_path.Base(path)+gos.ExecutableExt())
+	p := os_path.Join(GoBin(), os_path.Base(path)+gos.ExecutableExt())
 	if !gos.Exists(p) {
 		utils.Log("go get", path)
 		Exec("go", "get", path).Dir(gos.HomeDir()).MustDo()

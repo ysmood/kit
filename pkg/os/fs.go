@@ -2,7 +2,6 @@ package os
 
 import (
 	"encoding/json"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"path"
@@ -36,15 +35,6 @@ func ThisFilePath() string {
 func ThisDirPath() string {
 	_, filename, _, _ := runtime.Caller(1)
 	return path.Dir(filename)
-}
-
-// GoPath get the current GOPATH properly
-func GoPath() string {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-	return gopath
 }
 
 // MkdirOptions ...

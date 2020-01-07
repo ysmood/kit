@@ -192,16 +192,6 @@ func main() {
 
 ```
 
-## Development
+### Test & Build
 
-To write testable code, I try to isolate all error related dependencies.
-
-### Build Project
-
-Under project root
-
-```bash
-go run ./cmd/kit-dev build
-```
-
-Binaries will be built into dist folder.
+See the Github Actions config in this project.

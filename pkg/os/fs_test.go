@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ysmood/kit"
-	"github.com/ysmood/kit/pkg/utils"
 )
 
 func TestMain(m *testing.M) {
@@ -192,16 +191,6 @@ func TestMoveErr(t *testing.T) {
 	err := kit.Move(p+"/a", p+"/b", nil)
 
 	assert.Regexp(t, "not a directory|cannot find the path specified", err.Error())
-}
-
-func TestGoPath(t *testing.T) {
-	old := os.Getenv("GOPATH")
-	utils.E(os.Setenv("GOPATH", ""))
-	defer func() { utils.E(os.Setenv("GOPATH", old)) }()
-
-	s := kit.GoPath()
-
-	assert.True(t, kit.Exists(s))
 }
 
 func TestDirExists(t *testing.T) {

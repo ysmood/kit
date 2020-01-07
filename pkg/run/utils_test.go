@@ -3,6 +3,7 @@ package run_test
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/ysmood/kit"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestEnsureGoTool(t *testing.T) {
-	_ = os.Remove(path.Join(kit.GoPath(), "bin", "golint"))
+	_ = os.Remove(path.Join(kit.GoBin(), "golint"))
 	kit.MustGoTool("golang.org/x/lint/golint")
 }
 
@@ -38,4 +39,28 @@ func TestRunTask(t *testing.T) {
 
 	assert.True(t, outA)
 	assert.False(t, outB)
+}
+
+func TestGoPath(t *testing.T) {
+	old := os.Getenv("GOPATH")
+	kit.E(os.Setenv("GOPATH", ""))
+	defer func() { kit.E(os.Setenv("GOPATH", old)) }()
+
+	s := kit.GoPath()
+
+	assert.True(t, kit.Exists(s))
+}
+
+func TestGoBin(t *testing.T) {
+	assert.Contains(t, kit.GoBin(), "/bin")
+	assert.Contains(t, kit.GoBin(), "/bin")
+}
+
+func TestLookPath(t *testing.T) {
+	PATH := os.Getenv("PATH")
+	os.Setenv("PATH", strings.ReplaceAll(PATH, kit.GoBin(), ""))
+	defer os.Setenv("PATH", PATH)
+
+	p := "golint"
+	assert.NotEqual(t, p, kit.LookPath(p))
 }

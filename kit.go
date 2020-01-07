@@ -112,9 +112,6 @@ var Exists = os.Exists
 // FileExists imported
 var FileExists = os.FileExists
 
-// GoPath imported
-var GoPath = os.GoPath
-
 // HomeDir imported
 var HomeDir = os.HomeDir
 
@@ -190,6 +187,12 @@ var Exec = run.Exec
 // ExecContext imported
 type ExecContext = run.ExecContext
 
+// GoBin imported
+var GoBin = run.GoBin
+
+// GoPath imported
+var GoPath = run.GoPath
+
 // Guard imported
 var Guard = run.Guard
 
@@ -201,6 +204,9 @@ var GuardDefaultPatterns = run.GuardDefaultPatterns
 
 // KillTree imported
 var KillTree = run.KillTree
+
+// LookPath imported
+var LookPath = run.LookPath
 
 // MustGoTool imported
 var MustGoTool = run.MustGoTool

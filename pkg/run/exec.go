@@ -39,7 +39,17 @@ func (ctx *ExecContext) Args(args []string) *ExecContext {
 
 // Env append the current env with strings, each string should be something like "key=value"
 func (ctx *ExecContext) Env(env ...string) *ExecContext {
-	ctx.env = append(os.Environ(), env...)
+	if ctx.env == nil {
+		ctx.env = append(os.Environ(), env...)
+	} else {
+		ctx.env = append(ctx.env, env...)
+	}
+	return ctx
+}
+
+// NewEnv overrides the parrent Env with the env passed in
+func (ctx *ExecContext) NewEnv(env ...string) *ExecContext {
+	ctx.env = env
 	return ctx
 }
 
@@ -73,7 +83,7 @@ func (ctx *ExecContext) Raw() *ExecContext {
 }
 
 func (ctx *ExecContext) do() {
-	cmd := exec.Command(ctx.args[0], ctx.args[1:]...)
+	cmd := exec.Command(LookPath(ctx.args[0]), ctx.args[1:]...)
 
 	if ctx.cmd == nil {
 		ctx.cmd = cmd
@@ -115,7 +125,12 @@ func (ctx *ExecContext) String() (string, error) {
 
 // MustString ...
 func (ctx *ExecContext) MustString() string {
-	return utils.E1(ctx.String()).(string)
+	out, err := ctx.String()
+	if err != nil {
+		utils.Err(out)
+		panic(err)
+	}
+	return out
 }
 
 func formatPrefix(prefix string) string {

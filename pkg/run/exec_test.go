@@ -27,10 +27,17 @@ func TestExecPrefix(t *testing.T) {
 func TestExecMustString(t *testing.T) {
 	assert.Regexp(t, "go version", kit.Exec("go", "version").MustString())
 }
+
+func TestExecMustStringErr(t *testing.T) {
+	assert.Panics(t, func() {
+		kit.Exec(kit.RandString(16)).MustString()
+	})
+}
+
 func TestExecEnv(t *testing.T) {
 	s := "tmp/" + kit.RandString(10)
 	kit.E(kit.Mkdir(s, nil))
-	assert.Regexp(t, s, kit.Exec("go", "env").Env("GOTMPDIR="+s).MustString())
+	assert.Regexp(t, s, kit.Exec("go", "env").Env("GOTMPDIR="+s).Env("A=B").MustString())
 }
 
 func TestExecPrefixColor(t *testing.T) {
@@ -56,5 +63,10 @@ func TestExecKillTree(t *testing.T) {
 
 	err := kit.KillTree(exe.GetCmd().Process.Pid)
 
+	assert.Nil(t, err)
+}
+
+func TestOverrideGoBin(t *testing.T) {
+	err := kit.Exec("go", "version").NewEnv("GOBIN=test").Do()
 	assert.Nil(t, err)
 }
