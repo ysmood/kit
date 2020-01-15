@@ -194,7 +194,7 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 		dir:           dir,
 		gitMatchers:   gs,
 		gitSubmodules: submodules,
-		patterns:      normalizePatterns(patterns),
+		patterns:      normalizePatterns(dir, patterns),
 	}
 }
 
@@ -287,9 +287,15 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 	return
 }
 
-func normalizePatterns(patterns []string) []string {
+func normalizePatterns(dir string, patterns []string) []string {
 	newPatterns := []string{}
 	for _, p := range patterns {
+		if path.IsAbs(p) {
+			if len(dir) >= len(p) || !strings.HasPrefix(p, dir) {
+				continue
+			}
+			p = p[len(dir)+1:]
+		}
 		newPatterns = append(newPatterns, filepath.FromSlash(filepath.Clean(p)))
 	}
 	return newPatterns

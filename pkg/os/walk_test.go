@@ -30,6 +30,19 @@ func TestWalk(t *testing.T) {
 	assert.Equal(t, "青 空", filepath.Base(list[0]))
 }
 
+func TestWallAbsoluteEmpty(t *testing.T) {
+	list := kit.Walk("/a").MustList()
+
+	assert.Len(t, list, 0)
+}
+
+func TestWalkPlainDir(t *testing.T) {
+	list := kit.Walk("fixtures").MustList()
+
+	assert.Equal(t, "fixtures", filepath.Base(list[0]))
+	assert.Len(t, list, 1)
+}
+
 func TestWalkDot(t *testing.T) {
 	list := kit.Walk(".").MustList()
 

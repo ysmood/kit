@@ -124,23 +124,12 @@ func Move(from, to string, perm *os.FileMode) error {
 }
 
 // Remove remove dirs, files, patterns as expected.
-// The pattern cannot be absolute path.
 func Remove(patterns ...string) error {
-	// if any of the patterns is a raw folder path not a pattern remove all children of it
-	for _, p := range patterns {
-		if DirExists(p) {
-			err := Remove(p + "/**")
-			if err != nil {
-				return err
-			}
-		}
-	}
-
 	return Walk(patterns...).PostChildrenCallback(func(p string, info *godirwalk.Dirent) error {
 		return os.Remove(p)
 	}).Do(func(p string, info *godirwalk.Dirent) error {
 		if info.IsDir() {
-			return nil
+			return Remove(path.Join(p, "**"))
 		}
 		return os.Remove(p)
 	})

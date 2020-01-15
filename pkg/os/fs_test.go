@@ -149,6 +149,19 @@ func TestRemoveDir(t *testing.T) {
 	assert.False(t, kit.DirExists("tmp/remove"))
 }
 
+func TestRemoveDirPattern(t *testing.T) {
+	_ = kit.OutputFile("tmp/remove/a/a/a", "", nil)
+	_ = kit.OutputFile("tmp/remove/b/a/a/a", "", nil)
+	_ = kit.OutputFile("tmp/remove/b/a/a/.b", "", nil)
+
+	kit.E(kit.Remove("tmp/remove/*/a"))
+
+	assert.False(t, kit.DirExists("tmp/remove/a/a"))
+	assert.False(t, kit.DirExists("tmp/remove/b/a"))
+
+	kit.E(kit.Remove("tmp/remove"))
+}
+
 func TestRemoveDirErr(t *testing.T) {
 	p := "tmp/" + kit.RandString(16)
 	_ = kit.OutputFile(p+"/a", "", nil)
