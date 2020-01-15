@@ -148,6 +148,9 @@ var ReadString = os.ReadString
 // Remove imported
 var Remove = os.Remove
 
+// RemoveWithDir imported
+var RemoveWithDir = os.RemoveWithDir
+
 // Retry imported
 var Retry = os.Retry
 

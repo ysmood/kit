@@ -14,25 +14,25 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// Copy copy file or dir recursively
+// Copy file or dir recursively
 var Copy = copy.Copy
 
 // Chmod ...
 var Chmod = acl.Chmod
 
-// HomeDir current user's home dir path
+// HomeDir returns the current user's home dir path
 func HomeDir() string {
 	p, _ := homedir.Dir()
 	return p
 }
 
-// ThisFilePath get the current file path
+// ThisFilePath gets the current file path
 func ThisFilePath() string {
 	_, filename, _, _ := runtime.Caller(1)
 	return filename
 }
 
-// ThisDirPath get the current file directory path
+// ThisDirPath gets the current file directory path
 func ThisDirPath() string {
 	_, filename, _, _ := runtime.Caller(1)
 	return path.Dir(filename)
@@ -43,7 +43,7 @@ type MkdirOptions struct {
 	Perm os.FileMode
 }
 
-// Mkdir make dir recursively
+// Mkdir makes dir recursively
 func Mkdir(path string, options *MkdirOptions) error {
 	if options == nil {
 		options = &MkdirOptions{
@@ -62,7 +62,7 @@ type OutputFileOptions struct {
 	JSONIndent string
 }
 
-// OutputFile auto create file if not exists, it will try to detect the data type and
+// OutputFile auto creates file if not exists, it will try to detect the data type and
 // auto output binary, string or json
 func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	if options == nil {
@@ -91,18 +91,18 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 	return ioutil.WriteFile(p, bin, options.FilePerm)
 }
 
-// ReadFile read file as bytes
+// ReadFile reads file as bytes
 func ReadFile(p string) ([]byte, error) {
 	return ioutil.ReadFile(p)
 }
 
-// ReadString read file as string
+// ReadString reads file as string
 func ReadString(p string) (string, error) {
 	bin, err := ioutil.ReadFile(p)
 	return string(bin), err
 }
 
-// ReadJSON read file as json
+// ReadJSON reads file as json
 func ReadJSON(p string, data interface{}) error {
 	bin, err := ReadFile(p)
 
@@ -113,7 +113,7 @@ func ReadJSON(p string, data interface{}) error {
 	return json.Unmarshal(bin, data)
 }
 
-// Move move file or folder to another location, create path if needed
+// Move file or folder to another location, create path if needed
 func Move(from, to string, perm *os.FileMode) error {
 	err := Mkdir(path.Dir(to), nil)
 
@@ -124,29 +124,37 @@ func Move(from, to string, perm *os.FileMode) error {
 	return os.Rename(from, to)
 }
 
-// Remove remove dirs, files, patterns as expected.
+// Remove dirs, files, patterns as expected.
 func Remove(patterns ...string) error {
-	return Walk(patterns...).PostChildrenCallback(func(dir string, info *godirwalk.Dirent) error {
-		err := os.Remove(dir)
-		if err != nil && strings.HasSuffix(err.Error(), "directory not empty") {
-			return Remove(dir, path.Join(dir, "**"))
-		}
-		return err
-	}).Do(func(p string, info *godirwalk.Dirent) error {
-		if info.IsDir() {
-			return nil
-		}
-		return os.Remove(p)
-	})
+	return RemoveWithDir("", patterns...)
 }
 
-// Exists check if file or dir exists
+// RemoveWithDir is the low level of Remove
+func RemoveWithDir(dir string, patterns ...string) error {
+	return Walk(patterns...).
+		Dir(dir).
+		PostChildrenCallback(func(dir string, info *godirwalk.Dirent) error {
+			err := os.Remove(dir)
+			if err != nil && strings.HasSuffix(err.Error(), "directory not empty") {
+				return Remove(dir, path.Join(dir, "**"))
+			}
+			return err
+		}).
+		Do(func(p string, info *godirwalk.Dirent) error {
+			if info.IsDir() {
+				return nil
+			}
+			return os.Remove(p)
+		})
+}
+
+// Exists checks if file or dir exists
 func Exists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
 
-// FileExists check if file exists, only for file, not for dir
+// FileExists checks if file exists, only for file, not for dir
 func FileExists(path string) bool {
 	info, err := os.Stat(path)
 
@@ -161,7 +169,7 @@ func FileExists(path string) bool {
 	return true
 }
 
-// DirExists check if file exists, only for dir, not for file
+// DirExists checks if file exists, only for dir, not for file
 func DirExists(path string) bool {
 	info, err := os.Stat(path)
 

@@ -171,16 +171,13 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 
 			submodules = getGitSubmodules(dir)
 			gPath := path.Join(homeDir, ".gitignore_global")
-			g, err := gitignore.NewGitIgnore(gPath, dir)
-			if err == nil {
-				gs[gPath] = g
-			}
+			addIgnoreFile(gPath, dir, gs)
 
 			// check all parents
 			p := dir
 			last := ""
 			for last != p {
-				addIgnoreFile(p, gs)
+				addIgnoreFile(path.Join(p, ".gitignore"), p, gs)
 				if p == gitRoot {
 					break
 				}
@@ -235,10 +232,14 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 			}
 		}
 
-		addIgnoreFile(p, m.gitMatchers)
+		addIgnoreFile(path.Join(p, ".gitignore"), p, m.gitMatchers)
 	}
 
-	for _, g := range m.gitMatchers {
+	for f, g := range m.gitMatchers {
+		if !strings.HasPrefix(p, path.Dir(f)) {
+			continue
+		}
+
 		if g.Match(p, isDir) {
 			return true
 		}
@@ -246,12 +247,11 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 	return false
 }
 
-func addIgnoreFile(p string, gs map[string]gitignore.IgnoreMatcher) {
-	gPath := path.Join(p, ".gitignore")
-	if _, has := gs[gPath]; !has {
-		g, err := gitignore.NewGitIgnore(gPath)
+func addIgnoreFile(file, dir string, gs map[string]gitignore.IgnoreMatcher) {
+	if _, has := gs[file]; !has {
+		g, err := gitignore.NewGitIgnore(file, dir)
 		if err == nil {
-			gs[gPath] = g
+			gs[file] = g
 		}
 	}
 }
