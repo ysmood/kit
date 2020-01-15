@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/hectane/go-acl"
 	"github.com/karrick/godirwalk"
@@ -125,11 +126,15 @@ func Move(from, to string, perm *os.FileMode) error {
 
 // Remove remove dirs, files, patterns as expected.
 func Remove(patterns ...string) error {
-	return Walk(patterns...).PostChildrenCallback(func(p string, info *godirwalk.Dirent) error {
-		return os.Remove(p)
+	return Walk(patterns...).PostChildrenCallback(func(dir string, info *godirwalk.Dirent) error {
+		err := os.Remove(dir)
+		if err != nil && strings.HasSuffix(err.Error(), "directory not empty") {
+			return Remove(dir, path.Join(dir, "**"))
+		}
+		return err
 	}).Do(func(p string, info *godirwalk.Dirent) error {
 		if info.IsDir() {
-			return Remove(path.Join(p, "**"))
+			return nil
 		}
 		return os.Remove(p)
 	})

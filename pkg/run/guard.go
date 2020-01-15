@@ -247,7 +247,7 @@ func (ctx *GuardContext) watch() {
 				}
 			}
 
-			if ctx.execCtxClone.GetCmd() != nil {
+			if ctx.execCtxClone.GetCmd() != nil && ctx.execCtxClone.GetCmd().Process != nil {
 				_ = KillTree(ctx.execCtxClone.GetCmd().Process.Pid)
 
 				<-ctx.wait
