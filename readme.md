@@ -121,6 +121,8 @@ Commands:
   cov
     view html coverage report
 
+
+
 ```
 
 ### guard
@@ -148,8 +150,9 @@ run and guard a command, kill and rerun it when watched files are modified
    # support go template
    guard -- echo {{op}} {{path}}
 
-   # watch and sync current dir to remote dir with rsync
+   # watch and sync current dir to another machine
    guard -n -- rsync {{path}} root@host:/home/me/app/{{path}}
+   guard -n -- docker cp {{path}} my-container:/app/{{path}}
 
    # the patterns must be quoted
    guard -w '*.go' -w 'lib/**/*.go' -- go run main.go

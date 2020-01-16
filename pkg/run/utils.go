@@ -66,13 +66,13 @@ func MustGoTool(path string) {
 // TasksContext ...
 type TasksContext struct {
 	app   *kingpin.Application
-	tasks map[string]*TaskContext
+	tasks []*TaskContext
 }
 
 // Tasks a simple wrapper for kingpin to make it easier to use
 func Tasks() *TasksContext {
 	return &TasksContext{
-		tasks: map[string]*TaskContext{},
+		tasks: []*TaskContext{},
 	}
 }
 
@@ -87,9 +87,7 @@ func (ctx *TasksContext) App(app *kingpin.Application) *TasksContext {
 
 // Add ...
 func (ctx *TasksContext) Add(tasks ...*TaskContext) *TasksContext {
-	for _, task := range tasks {
-		ctx.tasks[task.name] = task
-	}
+	ctx.tasks = append(ctx.tasks, tasks...)
 	return ctx
 }
 
@@ -99,16 +97,20 @@ func (ctx *TasksContext) Do() {
 		ctx.app = kingpin.New("", "")
 	}
 
-	for name, task := range ctx.tasks {
-		cmd := ctx.app.Command(name, task.help)
+	for _, task := range ctx.tasks {
+		cmd := ctx.app.Command(task.name, task.help)
 		if task.run == nil {
 			task.run = task.init(cmd)
 		}
 	}
 
-	name := kingpin.MustParse(ctx.app.Parse(os.Args[1:]))
+	target := kingpin.MustParse(ctx.app.Parse(os.Args[1:]))
 
-	ctx.tasks[name].run()
+	for _, task := range ctx.tasks {
+		if task.name == target {
+			task.run()
+		}
+	}
 }
 
 // TaskCmd ...
