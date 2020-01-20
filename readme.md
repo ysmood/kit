@@ -148,7 +148,7 @@ run and guard a command, kill and rerun it when watched files are modified
    guard -w '**' -w '!g' -- echo changed
 
    # support go template
-   guard -- echo {{op}} {{path}}
+   guard -- echo {{op}} {{path}} {{file}}
 
    # watch and sync current dir to another machine
    guard -n -- rsync {{path}} root@host:/home/me/app/{{path}}

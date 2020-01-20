@@ -41,7 +41,7 @@ func TestGuard(t *testing.T) {
 	d := 0 * time.Millisecond
 	i := 1 * time.Millisecond
 
-	guard := kit.Guard("go", "version", "{{path}}").
+	guard := kit.Guard("go", "version", "{{path}} {{file}}").
 		ExecCtx(kit.Exec()).
 		Dir("").
 		Patterns(p + "/**").

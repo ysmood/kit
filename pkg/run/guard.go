@@ -1,6 +1,7 @@
 package run
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"strings"
 	"time"
@@ -32,7 +33,7 @@ type GuardContext struct {
 
 // Guard run and guard a command, kill and rerun it if watched files are modified.
 // Because it's based on polling, so it's cross-platform and file system.
-// The args supports go template, variables {{path}}, {{op}} are available.
+// The args supports go template, variables {{path}}, {{file}}, {{op}} are available.
 // The default patterns are GuardDefaultPatterns
 func Guard(args ...string) *GuardContext {
 	return &GuardContext{
@@ -125,7 +126,7 @@ func (ctx *GuardContext) Do() error {
 	return ctx.watcher.Start(*interval)
 }
 
-// unescape the {{path}} {{op}} placeholders
+// unescape the {{path}}, {{file}}, {{op}} placeholders
 func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string {
 	if e == nil {
 		e = &watcher.Event{}
@@ -146,6 +147,7 @@ func (ctx *GuardContext) unescapeArgs(args []string, e *watcher.Event) []string 
 			newArgs,
 			utils.S(arg,
 				"path", func() string { return p },
+				"file", func() string { f, _ := os.ReadFile(p); return string(f) },
 				"op", func() string { return e.Op.String() },
 			),
 		)
@@ -168,7 +170,7 @@ func (ctx *GuardContext) run(e *watcher.Event) {
 
 	ctx.count++
 	args := ctx.unescapeArgs(ctx.args, e)
-	utils.Log(ctx.prefix, "run", id, ctx.count, utils.C(args, "green"))
+	utils.Log(ctx.prefix, "run", id, ctx.count, utils.C(ctx.formatArgs(args), "green"))
 
 	ctx.execCtxClone = *ctx.execCtx
 	err := ctx.execCtxClone.Dir(ctx.dir).Args(args).Do()
@@ -180,6 +182,22 @@ func (ctx *GuardContext) run(e *watcher.Event) {
 	utils.Log(ctx.prefix, "done", id, errMsg)
 
 	ctx.wait <- utils.Nil{}
+}
+
+func (ctx *GuardContext) formatArgs(args []string) []string {
+	list := []string{}
+
+	for _, arg := range args {
+		var s []byte
+		if len(arg) > 20 {
+			s, _ = json.Marshal(arg[:20] + " ...")
+		} else {
+			s, _ = json.Marshal(arg)
+		}
+		list = append(list, string(s))
+	}
+
+	return list
 }
 
 func (ctx *GuardContext) addWatchFiles(dir string) {
