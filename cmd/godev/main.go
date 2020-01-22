@@ -102,7 +102,7 @@ func test(path, match string, min float64, isLint, dev, verbose bool) {
 		conf = append(conf, "-v")
 	}
 
-	run.Exec(conf...).MustDo()
+	run.Exec(conf...).Raw().MustDo()
 
 	checkCoverage(min)
 }
