@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"net/http/cookiejar"
 	"sort"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/derekstavis/go-qs"
@@ -20,6 +22,7 @@ import (
 
 // ReqContext the request context
 type ReqContext struct {
+	context  context.Context
 	client   *http.Client
 	request  *http.Request
 	response *http.Response
@@ -32,9 +35,12 @@ type ReqContext struct {
 	stringBody string
 	body       io.Reader
 	resBytes   []byte
+
+	timeout       time.Duration
+	timeoutCancel func()
 }
 
-// Req send http request
+// Req creates http request instance
 func Req(url string) *ReqContext {
 	return &ReqContext{
 		header: http.Header{},
@@ -42,47 +48,59 @@ func Req(url string) *ReqContext {
 	}
 }
 
-// Method request method
+// Context sets the context of the request
+func (ctx *ReqContext) Context(c context.Context) *ReqContext {
+	ctx.context = c
+	return ctx
+}
+
+// Timeout sets the timeout of the request, it will inherit the Context
+func (ctx *ReqContext) Timeout(d time.Duration) *ReqContext {
+	ctx.timeout = d
+	return ctx
+}
+
+// Method sets request method
 func (ctx *ReqContext) Method(m string) *ReqContext {
 	ctx.method = m
 	return ctx
 }
 
-// URL the url path for request
+// URL sets the url for request
 func (ctx *ReqContext) URL(url string) *ReqContext {
 	ctx.url = url
 	return ctx
 }
 
-// Post use POST as the method
+// Post sets the request method to POST
 func (ctx *ReqContext) Post() *ReqContext {
 	return ctx.Method(http.MethodPost)
 }
 
-// Put use PUT as the method
+// Put sets the request method to PUT
 func (ctx *ReqContext) Put() *ReqContext {
 	return ctx.Method(http.MethodPut)
 }
 
-// Delete use DELETE as the method
+// Delete sets the request method to DELETE
 func (ctx *ReqContext) Delete() *ReqContext {
 	return ctx.Method(http.MethodDelete)
 }
 
-// Query Query(k, v, k, v ...)
+// Query sets the query string of the request, example Query(k, v, k, v ...)
 func (ctx *ReqContext) Query(params ...interface{}) *ReqContext {
 	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.url += "?" + query
 	return ctx
 }
 
-// Host override the host request header
+// Host sets the host request header
 func (ctx *ReqContext) Host(host string) *ReqContext {
 	ctx.host = host
 	return ctx
 }
 
-// Header Header(k, v, k, v ...)
+// Header sets the request header, example Header(k, v, k, v ...)
 func (ctx *ReqContext) Header(params ...string) *ReqContext {
 	for i := 0; i < len(params); i += 2 {
 		k := params[i]
@@ -97,13 +115,13 @@ func (ctx *ReqContext) Header(params ...string) *ReqContext {
 	return ctx
 }
 
-// Client set http client
+// Client sets http client
 func (ctx *ReqContext) Client(c *http.Client) *ReqContext {
 	ctx.client = c
 	return ctx
 }
 
-// Form the params is a key-value pair list, such as `Form(k, v, k, v)`
+// Form sets the request body as form, example Form(k, v, k, v)
 func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	query, _ := qs.Marshal(paramsToForm(params))
 	ctx.header["Content-Type"] = []string{"application/x-www-form-urlencoded; charset=utf-8"}
@@ -111,13 +129,13 @@ func (ctx *ReqContext) Form(params ...interface{}) *ReqContext {
 	return ctx
 }
 
-// Body the request body to sent
+// Body sets the request body
 func (ctx *ReqContext) Body(b io.Reader) *ReqContext {
 	ctx.body = b
 	return ctx
 }
 
-// JSONBody set request body as json
+// JSONBody sets request body as json
 func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 	ctx.header["Content-Type"] = []string{"application/json; charset=utf-8"}
 	ctx.jsonBody = data
@@ -125,7 +143,7 @@ func (ctx *ReqContext) JSONBody(data interface{}) *ReqContext {
 	return ctx
 }
 
-// StringBody set request body as a string
+// StringBody sets request body as string
 func (ctx *ReqContext) StringBody(s string) *ReqContext {
 	ctx.stringBody = s
 	return ctx
@@ -147,33 +165,19 @@ func (ctx *ReqContext) getBody() (io.Reader, error) {
 	return ctx.body, nil
 }
 
-// Do send the request
+// Do the request
 func (ctx *ReqContext) Do() error {
-	if ctx.client == nil {
-		cookie, _ := cookiejar.New(nil)
-		ctx.client = &http.Client{
-			Jar: cookie,
-		}
-	}
-
-	body, err := ctx.getBody()
+	req, err := ctx.Request()
 	if err != nil {
 		return err
 	}
-
-	req, err := http.NewRequest(ctx.method, ctx.url, body)
-	if err != nil {
-		return err
-	}
-
-	ctx.request = req
-
-	req.Header = ctx.header
-	req.Host = ctx.host
 
 	res, err := ctx.client.Do(req)
 	if err != nil {
 		return err
+	}
+	if ctx.timeout != 0 {
+		ctx.timeoutCancel()
 	}
 	ctx.response = res
 
@@ -185,19 +189,48 @@ func (ctx *ReqContext) MustDo() {
 	utils.E(ctx.Do())
 }
 
-// Request get native request struct, useful for debugging
+// Request gets native request struct, useful for debugging
 func (ctx *ReqContext) Request() (*http.Request, error) {
 	if ctx.request != nil {
 		return ctx.request, nil
 	}
-	err := ctx.Do()
+
+	if ctx.context == nil {
+		ctx.context = context.Background()
+	}
+
+	if ctx.timeout != 0 {
+		c, cancel := context.WithTimeout(ctx.context, ctx.timeout)
+		ctx.Context(c)
+		ctx.timeoutCancel = cancel
+	}
+
+	if ctx.client == nil {
+		cookie, _ := cookiejar.New(nil)
+		ctx.client = &http.Client{
+			Jar: cookie,
+		}
+	}
+
+	body, err := ctx.getBody()
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequestWithContext(ctx.context, ctx.method, ctx.url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header = ctx.header
+	req.Host = ctx.host
+
+	ctx.request = req
+
 	return ctx.request, nil
 }
 
-// Response send request, get response
+// Response sends request, get response
 func (ctx *ReqContext) Response() (*http.Response, error) {
 	if ctx.response != nil {
 		return ctx.response, nil
@@ -215,7 +248,7 @@ func (ctx *ReqContext) MustResponse() *http.Response {
 	return utils.E(ctx.Response())[0].(*http.Response)
 }
 
-// Bytes send request, read response body as bytes
+// Bytes sends request, read response body as bytes
 func (ctx *ReqContext) Bytes() ([]byte, error) {
 	res, err := ctx.Response()
 	if err != nil {
@@ -247,7 +280,7 @@ func readBody(b io.ReadCloser) ([]byte, error) {
 	return body, nil
 }
 
-// String send request, read response as string
+// String sends request, read response as string
 func (ctx *ReqContext) String() (string, error) {
 	s, err := ctx.Bytes()
 	return string(s), err
@@ -258,7 +291,7 @@ func (ctx *ReqContext) MustString() string {
 	return string(ctx.MustBytes())
 }
 
-// JSON send request, get response and parse body as json and provide searching for json strings
+// JSON sends request, get response and parse body as json and provide searching for json strings
 func (ctx *ReqContext) JSON() (utils.JSONResult, error) {
 	b, err := ctx.Bytes()
 	if err != nil {
@@ -283,7 +316,7 @@ func paramsToForm(params []interface{}) map[string]interface{} {
 	return f
 }
 
-// MustCurl generate request and response details in curl style.
+// MustCurl generates request and response details in curl style.
 // Useful when reproduce request on other systems with minimum dependencies.
 // For now gzip is not handled.
 func (ctx *ReqContext) MustCurl() string {

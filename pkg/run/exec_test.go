@@ -1,8 +1,8 @@
 package run_test
 
 import (
+	"context"
 	"os"
-	"os/exec"
 	"testing"
 	"time"
 
@@ -17,6 +17,15 @@ func TestMain(m *testing.M) {
 
 func TestExec(t *testing.T) {
 	kit.Exec("go", "version").MustDo()
+}
+
+func TestExecCancel(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := kit.Exec("go", "version").Context(ctx).Do()
+
+	assert.Error(t, err)
 }
 
 func TestExecPrefix(t *testing.T) {
@@ -46,7 +55,7 @@ func TestExecPrefixColor(t *testing.T) {
 }
 
 func TestExecErr(t *testing.T) {
-	err := kit.Exec("").Cmd(exec.Command("exitexit"))
+	err := kit.Exec("exitexit")
 	assert.Regexp(t, "exec: \"exitexit\": executable file not found in", err.Do().Error())
 }
 

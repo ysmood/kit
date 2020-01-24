@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
@@ -35,6 +36,25 @@ func (s *RequestSuite) SetupSuite() {
 	s.router = server.Engine
 
 	go server.MustDo()
+}
+
+func (s *RequestSuite) TestTimeout() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {
+		time.Sleep(time.Hour)
+	})
+
+	err := kit.Req(url).Timeout(time.Nanosecond).Do()
+	s.Error(err)
+}
+
+func (s *RequestSuite) TestTimeoutDone() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {})
+
+	kit.Req(url).Timeout(time.Hour).MustDo()
 }
 
 func (s *RequestSuite) TestGetMustString() {
@@ -104,7 +124,7 @@ func (s *RequestSuite) TestURLErr() {
 }
 
 func (s *RequestSuite) TestRequestErr() {
-	_, err := kit.Req("").Request()
+	err := kit.Req("").Do()
 	s.EqualError(err, "Get : unsupported protocol scheme \"\"")
 }
 

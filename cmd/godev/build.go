@@ -94,9 +94,7 @@ func (ctx *buildTask) build(isZip bool) {
 		"-ldflags=-w -s",
 		"-o", ctx.out,
 		ctx.dir,
-	).Cmd(&exec.Cmd{
-		Env: append(os.Environ(), env...),
-	}).Do())
+	).Env(env...).Do())
 
 	if isZip {
 		if ctx.os == "linux" {

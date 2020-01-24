@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"io"
 	"os"
 	"os/exec"
@@ -11,8 +12,9 @@ import (
 
 // ExecContext ...
 type ExecContext struct {
-	cmd *exec.Cmd
-	dir string
+	context context.Context
+	cmd     *exec.Cmd
+	dir     string
 
 	// Prefix prefix has a special syntax, the string after "@" can specify the color
 	// of the prefix and will be removed from the output
@@ -24,20 +26,26 @@ type ExecContext struct {
 	env  []string
 }
 
-// Exec execute os command and auto pipe stdout and stdin
+// Exec executes os command and auto pipe stdout and stdin
 func Exec(args ...string) *ExecContext {
 	return &ExecContext{
 		args: args,
 	}
 }
 
-// Args ...
+// Context sets the context of the Command
+func (ctx *ExecContext) Context(c context.Context) *ExecContext {
+	ctx.context = c
+	return ctx
+}
+
+// Args sets arguments
 func (ctx *ExecContext) Args(args []string) *ExecContext {
 	ctx.args = args
 	return ctx
 }
 
-// Env append the current env with strings, each string should be something like "key=value"
+// Env appends the current env with strings, each string should be something like "key=value"
 func (ctx *ExecContext) Env(env ...string) *ExecContext {
 	if ctx.env == nil {
 		ctx.env = append(os.Environ(), env...)
@@ -53,43 +61,42 @@ func (ctx *ExecContext) NewEnv(env ...string) *ExecContext {
 	return ctx
 }
 
-// Cmd ...
-func (ctx *ExecContext) Cmd(cmd *exec.Cmd) *ExecContext {
-	ctx.cmd = cmd
-	return ctx
-}
-
-// GetCmd ...
-func (ctx *ExecContext) GetCmd() *exec.Cmd {
-	return ctx.cmd
-}
-
-// Dir ...
+// Dir sets the working dir to execute
 func (ctx *ExecContext) Dir(dir string) *ExecContext {
 	ctx.dir = dir
 	return ctx
 }
 
-// Prefix ...
+// Prefix sets the prefix string of the stdout and stderr
 func (ctx *ExecContext) Prefix(p string) *ExecContext {
 	ctx.prefix = p
 	return ctx
 }
 
-// Raw ...
+// Raw enables the raw stdin mode
 func (ctx *ExecContext) Raw() *ExecContext {
 	ctx.isRaw = true
 	return ctx
 }
 
-func (ctx *ExecContext) do() {
-	cmd := exec.Command(LookPath(ctx.args[0]), ctx.args[1:]...)
+// GetCmd gets the exec.Cmd to execute
+func (ctx *ExecContext) GetCmd() *exec.Cmd {
+	if ctx.cmd != nil {
+		return ctx.cmd
+	}
+
+	if len(ctx.args) == 0 {
+		return nil
+	}
+
+	if ctx.context == nil {
+		ctx.context = context.Background()
+	}
+
+	cmd := exec.CommandContext(ctx.context, LookPath(ctx.args[0]), ctx.args[1:]...)
 
 	if ctx.cmd == nil {
 		ctx.cmd = cmd
-	} else {
-		clone := *ctx.cmd
-		ctx.cmd = &clone
 	}
 	if ctx.dir != "" {
 		ctx.cmd.Dir = ctx.dir
@@ -100,13 +107,15 @@ func (ctx *ExecContext) do() {
 
 	ctx.cmd.Path = cmd.Path
 	ctx.cmd.Args = cmd.Args
+
+	return ctx.cmd
 }
 
-// Do ...
+// Do the exec.Cmd
 func (ctx *ExecContext) Do() error {
-	ctx.do()
+	cmd := ctx.GetCmd()
 
-	return run(formatPrefix(ctx.prefix), ctx.isRaw, ctx.cmd)
+	return run(formatPrefix(ctx.prefix), ctx.isRaw, cmd)
 }
 
 // MustDo ...
@@ -116,9 +125,9 @@ func (ctx *ExecContext) MustDo() {
 
 // String ...
 func (ctx *ExecContext) String() (string, error) {
-	ctx.do()
+	cmd := ctx.GetCmd()
 
-	b, err := ctx.cmd.CombinedOutput()
+	b, err := cmd.CombinedOutput()
 
 	return string(b), err
 }
