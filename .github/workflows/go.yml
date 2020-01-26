@@ -3,7 +3,13 @@ on: [push]
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macOS-latest
+
+    runs-on: ${{ matrix.os }}
 
     steps:
 
@@ -22,7 +28,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
 
-  build-windows:
+  test-windows:
     runs-on: windows-latest
 
     steps:
@@ -33,10 +39,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: build
+    - name: test
       run: |
         git submodule update --init
-        go run ./cmd/kit-dev export
-        go run ./cmd/kit-dev readme
-        go run ./cmd/godev -m 90
-        go run ./cmd/godev build "cmd/*" "!cmd/kit-dev"
+        go test ./...

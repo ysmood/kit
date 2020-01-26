@@ -12,8 +12,8 @@ import (
 )
 
 func TestEnsureGoTool(t *testing.T) {
-	_ = os.Remove(filepath.Join(kit.GoBin(), "golint"))
-	kit.MustGoTool("golang.org/x/lint/golint")
+	_ = os.Remove(filepath.Join(kit.GoBin(), "kit-gotool-test"))
+	kit.MustGoTool("github.com/ysmood/kit/pkg/run/fixtures/kit-gotool-test")
 }
 
 func TestRunTask(t *testing.T) {
@@ -52,15 +52,17 @@ func TestGoPath(t *testing.T) {
 }
 
 func TestGoBin(t *testing.T) {
-	assert.Contains(t, kit.GoBin(), "/bin")
-	assert.Contains(t, kit.GoBin(), "/bin")
+	assert.Contains(t, kit.GoBin(), "bin")
+	assert.Contains(t, kit.GoBin(), "bin") // use cache
 }
 
 func TestLookPath(t *testing.T) {
+	kit.MustGoTool("github.com/ysmood/kit/pkg/run/fixtures/kit-gotool-test")
+
 	PATH := os.Getenv("PATH")
 	kit.E(os.Setenv("PATH", strings.ReplaceAll(PATH, kit.GoBin(), "")))
 	defer func() { kit.E(os.Setenv("PATH", PATH)) }()
 
-	p := "golint"
+	p := "kit-gotool-test"
 	assert.NotEqual(t, p, kit.LookPath(p))
 }

@@ -157,12 +157,6 @@ var Retry = os.Retry
 // SendSigInt imported
 var SendSigInt = os.SendSigInt
 
-// ThisDirPath imported
-var ThisDirPath = os.ThisDirPath
-
-// ThisFilePath imported
-var ThisFilePath = os.ThisFilePath
-
 // WaitSignal imported
 var WaitSignal = os.WaitSignal
 

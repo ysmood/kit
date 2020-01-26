@@ -15,11 +15,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestThisDirPath(t *testing.T) {
-	assert.Regexp(t, `.+/pkg/os/fs_test.go$`, kit.ThisFilePath())
-	assert.Regexp(t, `.+/pkg/os$`, kit.ThisDirPath())
-}
-
 func TestOutputString(t *testing.T) {
 	p := "tmp/" + kit.RandString(10)
 

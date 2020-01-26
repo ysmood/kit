@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"path"
-	"runtime"
+	"path/filepath"
 
 	"github.com/hectane/go-acl"
 	"github.com/karrick/godirwalk"
@@ -23,18 +22,6 @@ var Chmod = acl.Chmod
 func HomeDir() string {
 	p, _ := homedir.Dir()
 	return p
-}
-
-// ThisFilePath gets the current file path
-func ThisFilePath() string {
-	_, filename, _, _ := runtime.Caller(1)
-	return filename
-}
-
-// ThisDirPath gets the current file directory path
-func ThisDirPath() string {
-	_, filename, _, _ := runtime.Caller(1)
-	return path.Dir(filename)
 }
 
 // MkdirOptions ...
@@ -68,7 +55,7 @@ func OutputFile(p string, data interface{}, options *OutputFileOptions) error {
 		options = &OutputFileOptions{0775, 0664, "", "    "}
 	}
 
-	dir := path.Dir(p)
+	dir := filepath.Dir(p)
 	_ = Mkdir(dir, &MkdirOptions{Perm: options.DirPerm})
 
 	var bin []byte
@@ -114,7 +101,7 @@ func ReadJSON(p string, data interface{}) error {
 
 // Move file or folder to another location, create path if needed
 func Move(from, to string, perm *os.FileMode) error {
-	err := Mkdir(path.Dir(to), nil)
+	err := Mkdir(filepath.Dir(to), nil)
 
 	if err != nil {
 		return err

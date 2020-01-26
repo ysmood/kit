@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	gos "github.com/ysmood/kit/pkg/os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -31,7 +30,7 @@ func (t testWriter) Read(p []byte) (n int, err error) {
 func TestStdinPiper(t *testing.T) {
 	stdinWriter = testWriter{err: errors.New("err")}
 	old := os.Stdin
-	os.Stdin, _ = os.Open(gos.ThisFilePath())
+	os.Stdin, _ = os.Open("fixtures/kit-gotool-test/main.go")
 	defer func() { os.Stdin = old }()
 	stdinPiper()
 }

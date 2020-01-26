@@ -3,11 +3,13 @@ package run
 import (
 	"os"
 	"os/exec"
-	os_path "path"
+	"path/filepath"
+	os_path "path/filepath"
 	"strings"
 
 	gos "github.com/ysmood/kit/pkg/os"
 	"github.com/ysmood/kit/pkg/utils"
+	"github.com/ysmood/lookpath"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -39,15 +41,13 @@ func GoBin() string {
 	return goBinCache
 }
 
-// LookPath finds the executable from PATH and GOBIN
+// LookPath finds the executable from PATH and GOBIN, if nothing found
+// the input value will be returned
 func LookPath(name string) string {
-	path, err := exec.LookPath(name)
-	if err == nil {
-		return path
-	}
+	pathENV := os.Getenv("PATH") + string(filepath.ListSeparator) + GoBin()
 
-	path = os_path.Join(GoBin(), name)
-	if gos.FileExists(path) {
+	path, err := lookpath.LookPath(pathENV, name)
+	if err == nil {
 		return path
 	}
 

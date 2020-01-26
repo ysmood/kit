@@ -3,7 +3,6 @@ package os
 import (
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -236,7 +235,7 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 	}
 
 	for f, g := range m.gitMatchers {
-		if !strings.HasPrefix(p, path.Dir(f)) {
+		if !strings.HasPrefix(p, filepath.Dir(f)) {
 			continue
 		}
 
