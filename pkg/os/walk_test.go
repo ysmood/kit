@@ -30,6 +30,17 @@ func TestWalk(t *testing.T) {
 	assert.Equal(t, "青 空", filepath.Base(list[0]))
 }
 
+func TestWallAbsolutePattern(t *testing.T) {
+	p := "tmp/" + kit.RandString(10)
+	kit.E(kit.OutputFile(p+"/f", "", nil))
+	p, _ = filepath.Abs(p)
+
+	list := kit.Walk(p + "/f").MustList()
+
+	assert.Len(t, list, 1)
+	assert.Equal(t, p+"/f", list[0])
+}
+
 func TestWallAbsoluteEmpty(t *testing.T) {
 	list := kit.Walk("/a").MustList()
 
