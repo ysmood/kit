@@ -35,7 +35,7 @@ func Log(v ...interface{}) {
 	t := time.Now().Format("[2006-01-02 15:04:05]")
 	v = append([]interface{}{C(t, "7")}, v...)
 
-	fmt.Fprintln(Stdout, v...)
+	E(fmt.Fprintln(Stdout, v...))
 }
 
 // Err log to stderr with timestamp and stack trace
@@ -46,7 +46,7 @@ func Err(v ...interface{}) {
 	}
 	v = append([]interface{}{C(t, "7")}, v...)
 
-	fmt.Fprintln(Stderr, v...)
+	E(fmt.Fprintln(Stderr, v...))
 }
 
 // ClearScreen ...

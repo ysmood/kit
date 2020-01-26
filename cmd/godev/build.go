@@ -170,7 +170,7 @@ func compressZip(from, to, name string) {
 		ReadCloser: file,
 	}))
 
-	tar.Close()
+	utils.E(tar.Close())
 }
 
 func compressGz(from, to, name string) {
@@ -192,5 +192,5 @@ func compressGz(from, to, name string) {
 		ReadCloser: file,
 	}))
 
-	tar.Close()
+	utils.E(tar.Close())
 }

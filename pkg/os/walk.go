@@ -170,14 +170,14 @@ func NewMatcher(dir string, patterns []string) *Matcher {
 			gitRoot := strings.TrimSpace(string(out))
 
 			submodules = getGitSubmodules(dir)
-			gPath := path.Join(homeDir, ".gitignore_global")
+			gPath := filepath.Join(homeDir, ".gitignore_global")
 			addIgnoreFile(gPath, dir, gs)
 
 			// check all parents
 			p := dir
 			last := ""
 			for last != p {
-				addIgnoreFile(path.Join(p, ".gitignore"), p, gs)
+				addIgnoreFile(filepath.Join(p, ".gitignore"), p, gs)
 				if p == gitRoot {
 					break
 				}
@@ -232,7 +232,7 @@ func (m *Matcher) gitMatch(p string, isDir bool) bool {
 			}
 		}
 
-		addIgnoreFile(path.Join(p, ".gitignore"), p, m.gitMatchers)
+		addIgnoreFile(filepath.Join(p, ".gitignore"), p, m.gitMatchers)
 	}
 
 	for f, g := range m.gitMatchers {
@@ -290,7 +290,7 @@ func (m *Matcher) Match(p string, isDir bool) (matched, negative bool, err error
 func normalizePatterns(dir string, patterns []string) []string {
 	newPatterns := []string{}
 	for _, p := range patterns {
-		if path.IsAbs(p) {
+		if filepath.IsAbs(p) {
 			if len(dir) >= len(p) || !strings.HasPrefix(p, dir) {
 				continue
 			}

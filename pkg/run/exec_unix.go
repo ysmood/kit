@@ -24,7 +24,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 	}
 
 	// Make sure to close the pty at the end.
-	defer func() { p.Close() }() // Best effort.
+	defer func() { utils.E(p.Close()) }() // Best effort.
 
 	// Handle pty size.
 	ch := make(chan os.Signal, 1)

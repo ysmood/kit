@@ -2,7 +2,7 @@ package run_test
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func TestEnsureGoTool(t *testing.T) {
-	_ = os.Remove(path.Join(kit.GoBin(), "golint"))
+	_ = os.Remove(filepath.Join(kit.GoBin(), "golint"))
 	kit.MustGoTool("golang.org/x/lint/golint")
 }
 
@@ -58,8 +58,8 @@ func TestGoBin(t *testing.T) {
 
 func TestLookPath(t *testing.T) {
 	PATH := os.Getenv("PATH")
-	os.Setenv("PATH", strings.ReplaceAll(PATH, kit.GoBin(), ""))
-	defer os.Setenv("PATH", PATH)
+	kit.E(os.Setenv("PATH", strings.ReplaceAll(PATH, kit.GoBin(), "")))
+	defer func() { kit.E(os.Setenv("PATH", PATH)) }()
 
 	p := "golint"
 	assert.NotEqual(t, p, kit.LookPath(p))
