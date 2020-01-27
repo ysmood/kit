@@ -19,7 +19,7 @@ func main() {
 
 	run.Tasks().App(app).Add(
 		run.Task("test", "run go unit test").Init(cmdTest),
-		run.Task("lint", "lint project with golint and golangci-lint").Run(lint),
+		run.Task("lint", "lint project with golint and golangci-lint").Init(cmdLint),
 		run.Task("build", "build [and deploy] specified dirs").Init(cmdBuild),
 		run.Task("cov", "view html coverage report").Run(cov),
 	).Do()
@@ -64,22 +64,34 @@ func cov() {
 	run.Exec("go", "tool", "cover", "-html="+*covPath).MustDo()
 }
 
-func lint() {
+func cmdLint(cmd run.TaskCmd) func() {
+	path := cmd.Arg("path", "match test name").Default("./...").String()
+
+	return func() {
+		lint(*path)
+	}
+}
+
+func lint(path string) {
 	run.MustGoTool("golang.org/x/lint/golint")
-	fmt.Println("[lint] golang.org/x/lint/golint ./...")
-	run.Exec("golint", "-set_exit_status", "./...").MustDo()
+	fmt.Println("[lint] golang.org/x/lint/golint " + path)
+	run.Exec("golint", "-set_exit_status", path).MustDo()
 
 	run.MustGoTool("github.com/kisielk/errcheck")
-	fmt.Println("[lint] github.com/kisielk/errcheck ./...")
-	run.Exec("errcheck", "./...").MustDo()
+	fmt.Println("[lint] github.com/kisielk/errcheck " + path)
+	run.Exec("errcheck", path).MustDo()
 
-	fmt.Println("[lint] gofmt -s -l .")
-	run.Exec("gofmt", "-s", "-l", ".").MustDo()
+	fmtPath := path
+	if path == "./..." {
+		fmtPath = "."
+	}
+	fmt.Println("[lint] gofmt -s -l " + fmtPath)
+	run.Exec("gofmt", "-s", "-l", fmtPath).MustDo()
 }
 
 func test(path, match string, min float64, isLint, dev, verbose bool) {
 	if isLint {
-		lint()
+		lint(path)
 	}
 
 	conf := []string{
