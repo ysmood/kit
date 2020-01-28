@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/ysmood/kit/pkg/run"
 	"github.com/ysmood/kit/pkg/utils"
@@ -85,8 +86,13 @@ func lint(path string) {
 	if path == "./..." {
 		fmtPath = "."
 	}
-	fmt.Println("[lint] gofmt -s -l " + fmtPath)
-	run.Exec("gofmt", "-s", "-l", fmtPath).MustDo()
+	fmt.Println("[lint] gofmt -s -l -w " + fmtPath)
+	// gofmt doesn't return non-zero when fails, we have to check return manually
+	out := strings.TrimSpace(run.Exec("gofmt", "-s", "-l", "-w", fmtPath).MustString())
+	if out != "" {
+		panic("\"gofmt -s\" check failed:\n" + out)
+	}
+
 }
 
 func test(path, match string, min float64, isLint, dev, verbose bool) {
