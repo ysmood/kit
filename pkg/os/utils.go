@@ -18,7 +18,7 @@ func WaitSignal(signals ...os.Signal) {
 	close(c)
 }
 
-// Retry retry function after a duration for several times
+// Retry retry function after a duration for several times, if success returns nil
 func Retry(times int, wait time.Duration, fn func()) (errs []interface{}) {
 	var try func(int)
 

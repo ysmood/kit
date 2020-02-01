@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ysmood/kit/pkg/os"
 	"github.com/ysmood/kit/pkg/run"
 	"github.com/ysmood/kit/pkg/utils"
 )
@@ -125,6 +126,10 @@ func test(path, match string, min float64, isLint, dev, verbose bool) {
 }
 
 func checkCoverage(min float64) {
+	if s, _ := os.ReadString(*covPath); s == "" || s == "mode: count\n" {
+		return
+	}
+
 	out := run.Exec("go", "tool", "cover", "-func="+*covPath).MustString()
 	totalStr := regexp.MustCompile(`(\d+.\d+)%\n\z`).FindStringSubmatch(out)[1]
 	total, _ := strconv.ParseFloat(totalStr, 64)
