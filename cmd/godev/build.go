@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/mholt/archiver"
@@ -64,21 +65,25 @@ func deployToGithub(bTasks []*buildTask, tag string) {
 		panic("invalid semver flag: --version " + tag + " (" + err.Error() + ")")
 	}
 
-	run.Exec("git", "tag", tag).MustDo()
-	run.Exec("git", "push", "origin", tag).MustDo()
+	_ = run.Exec("git", "tag", tag).Do()
+	_ = run.Exec("git", "push", "origin", tag).Do()
 
 	_, err := exec.LookPath("hub")
 	if err != nil {
 		panic("please install hub.github.com first")
 	}
 
-	args := []string{"hub", "release", "create", "-m", tag}
-	for _, t := range bTasks {
-		args = append(args, "-a", t.zip)
-	}
-	args = append(args, tag)
+	gos.Retry(5, 3*time.Second, func() {
+		_ = run.Exec("hub", "release", "delete", tag).Raw().Do()
 
-	run.Exec(args...).Raw().MustDo()
+		args := []string{"hub", "release", "create", "-m", tag}
+		for _, t := range bTasks {
+			args = append(args, "-a", t.zip)
+		}
+		args = append(args, tag)
+
+		run.Exec(args...).Raw().MustDo()
+	})
 }
 
 func (ctx *buildTask) build(isZip bool) {
