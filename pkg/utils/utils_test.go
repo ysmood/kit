@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/kit"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 type T = testing.T
@@ -81,4 +82,20 @@ func TestSTemplate(t *T) {
 		},
 	)
 	assert.Equal(t, "<value> 10 ok ok", out)
+}
+
+func TestObservable(t *testing.T) {
+	o := utils.Observable{}
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			o.Publish(i)
+		}
+	}()
+
+	e := o.Until(func(e utils.Event) bool {
+		return e.(int) == 5
+	})
+
+	assert.Equal(t, 5, e)
 }

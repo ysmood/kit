@@ -31,6 +31,9 @@ var Err = utils.Err
 // ErrArg imported
 var ErrArg = utils.ErrArg
 
+// Event imported
+type Event = utils.Event
+
 // JSON imported
 var JSON = utils.JSON
 
@@ -52,6 +55,9 @@ type Nil = utils.Nil
 // Noop imported
 var Noop = utils.Noop
 
+// Observable imported
+type Observable = utils.Observable
+
 // RandBytes imported
 var RandBytes = utils.RandBytes
 
@@ -69,6 +75,9 @@ var Stderr = utils.Stderr
 
 // Stdout imported
 var Stdout = utils.Stdout
+
+// Subscriber imported
+type Subscriber = utils.Subscriber
 
 // Try imported
 var Try = utils.Try
