@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/kit"
@@ -88,8 +89,10 @@ func TestSTemplate(t *T) {
 func TestObservable(t *testing.T) {
 	o := utils.NewObservable()
 
+	i := 0
 	go func() {
-		for i := 0; i < 10; i++ {
+		time.Sleep(time.Millisecond)
+		for ; i < 10; i++ {
 			o.Publish(i)
 		}
 	}()
@@ -98,8 +101,11 @@ func TestObservable(t *testing.T) {
 		return e.(int) == 5
 	})
 
+	time.Sleep(10 * time.Millisecond)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 5, e)
+	assert.Equal(t, 10, i)
 }
 
 func TestObservableCancel(t *testing.T) {

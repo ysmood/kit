@@ -25,10 +25,11 @@ func NewObservable() *Observable {
 
 // Publish event to all subscribers
 func (o *Observable) Publish(e Event) {
-	// no need to lock this
-	o.subscribers.Range(func(_, s interface{}) bool {
+	o.subscribers.Range(func(_, s interface{}) (goOn bool) {
+		goOn = true
+		defer func() { _ = recover() }()
 		s.(Subscriber) <- e
-		return true
+		return
 	})
 }
 
@@ -43,6 +44,7 @@ func (o *Observable) Subscribe() Subscriber {
 
 // Unsubscribe from the observable
 func (o *Observable) Unsubscribe(s *Subscriber) {
+	close(*s)
 	o.subscribers.Delete(s)
 }
 
