@@ -49,6 +49,9 @@ var MustToJSON = utils.MustToJSON
 // MustToJSONBytes imported
 var MustToJSONBytes = utils.MustToJSONBytes
 
+// NewObservable imported
+var NewObservable = utils.NewObservable
+
 // Nil imported
 type Nil = utils.Nil
 

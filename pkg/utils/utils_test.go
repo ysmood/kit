@@ -85,7 +85,7 @@ func TestSTemplate(t *T) {
 }
 
 func TestObservable(t *testing.T) {
-	o := utils.Observable{}
+	o := utils.NewObservable()
 
 	go func() {
 		for i := 0; i < 10; i++ {

@@ -4,7 +4,7 @@ import "sync"
 
 // Observable is a thread-safe event helper
 type Observable struct {
-	subscribers sync.Map
+	subscribers *sync.Map
 }
 
 // Event of the observale
@@ -12,6 +12,13 @@ type Event interface{}
 
 // Subscriber of the observable
 type Subscriber chan Event
+
+// NewObservable creates a new observable
+func NewObservable() *Observable {
+	return &Observable{
+		subscribers: &sync.Map{},
+	}
+}
 
 // Publish event to all subscribers
 func (o *Observable) Publish(e Event) {
