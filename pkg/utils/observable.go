@@ -1,6 +1,9 @@
 package utils
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
 // Observable is a thread-safe event helper
 type Observable struct {
@@ -43,16 +46,19 @@ func (o *Observable) Unsubscribe(s *Subscriber) {
 	o.subscribers.Delete(s)
 }
 
-// Until filter returns true keep waiting
-func (o *Observable) Until(filter func(e Event) bool) (e Event) {
+// Until check returns true keep waiting
+func (o *Observable) Until(ctx context.Context, check func(e Event) bool) (Event, error) {
 	s := o.Subscribe()
 	defer o.Unsubscribe(&s)
 
-	for e = range s {
-		if filter(e) {
-			break
+	for {
+		select {
+		case e := <-s:
+			if check(e) {
+				return e, nil
+			}
+		case <-ctx.Done():
+			return nil, ctx.Err()
 		}
 	}
-
-	return
 }

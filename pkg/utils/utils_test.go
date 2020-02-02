@@ -1,6 +1,7 @@
 package utils_test
 
 import (
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -93,9 +94,23 @@ func TestObservable(t *testing.T) {
 		}
 	}()
 
-	e := o.Until(func(e utils.Event) bool {
+	e, err := o.Until(context.Background(), func(e utils.Event) bool {
 		return e.(int) == 5
 	})
 
+	assert.Nil(t, err)
 	assert.Equal(t, 5, e)
+}
+
+func TestObservableCancel(t *testing.T) {
+	o := utils.NewObservable()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := o.Until(ctx, func(e utils.Event) bool {
+		return false
+	})
+
+	assert.Error(t, err)
 }
