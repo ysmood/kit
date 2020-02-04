@@ -24,7 +24,7 @@ func TestAll(t *T) {
 		fmt.Println("one")
 	}, func() {
 		fmt.Println("two")
-	})
+	})()
 }
 
 func TestE(t *T) {

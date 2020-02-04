@@ -37,7 +37,7 @@ func build(patterns []string, dist string, deploy, noGitClean bool, version stri
 			tasks = append(tasks, func() { ctx.build(isZip) })
 		}(task)
 	}
-	utils.All(tasks...)
+	utils.All(tasks...)()
 
 	if deploy {
 		deployToGithub(bTasks, version)

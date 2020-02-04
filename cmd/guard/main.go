@@ -58,7 +58,7 @@ func main() {
 			}
 		}(opts))
 	}
-	kit.All(fns...)
+	kit.All(fns...)()
 }
 
 func genOptions(args []string) *options {

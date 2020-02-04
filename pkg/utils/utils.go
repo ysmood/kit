@@ -68,8 +68,8 @@ func JSON(data interface{}) JSONResult {
 	return &res
 }
 
-// All run all actions concurrently
-func All(actions ...func()) {
+// All run all actions concurrently, returns the wait function for all actions.
+func All(actions ...func()) func() {
 	wg := &sync.WaitGroup{}
 
 	wg.Add(len(actions))
@@ -83,7 +83,7 @@ func All(actions ...func()) {
 		go runner(action)
 	}
 
-	wg.Wait()
+	return wg.Wait
 }
 
 // RandBytes generate random bytes with specified byte length
