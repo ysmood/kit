@@ -10,4 +10,7 @@ func TestWindowsLog(t *testing.T) {
 	defer func() { goos = runtime.GOOS }()
 
 	_ = ClearScreen()
+
+	stdout()
+	stderr()
 }
