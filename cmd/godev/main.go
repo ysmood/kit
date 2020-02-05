@@ -31,7 +31,7 @@ func cmdTest(cmd run.TaskCmd) func() {
 	cmd.Default()
 
 	match := cmd.Arg("match", "match test name").String()
-	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").String()
+	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").Strings()
 	dev := cmd.Flag("dev", "run as dev mode").Short('d').Bool()
 	min := cmd.Flag(
 		"min", "if total coverage is lower than the minimum exit with non-zero",
@@ -56,7 +56,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	return func() {
 		if *strict {
-			test("./...", "", 100, true, false, false)
+			test([]string{"./..."}, "", 100, true, false, false)
 		}
 		build(*patterns, *dir, *deploy, *noGitClean, *ver, !*noZip, *osList)
 	}
@@ -67,36 +67,38 @@ func cov() {
 }
 
 func cmdLint(cmd run.TaskCmd) func() {
-	path := cmd.Arg("path", "match test name").Default("./...").String()
+	path := cmd.Arg("path", "match test name").Default("./...").Strings()
 
 	return func() {
 		lint(*path)
 	}
 }
 
-func lint(path string) {
+func lint(path []string) {
 	run.MustGoTool("golang.org/x/lint/golint")
-	fmt.Println("[lint] golang.org/x/lint/golint " + path)
-	run.Exec("golint", "-set_exit_status", path).MustDo()
+	fmt.Println(fmt.Sprintf("[lint] golang.org/x/lint/golint %v", path))
+	args := append([]string{"golint", "-set_exit_status"}, path...)
+	run.Exec(args...).MustDo()
 
 	run.MustGoTool("github.com/kisielk/errcheck")
-	fmt.Println("[lint] github.com/kisielk/errcheck " + path)
-	run.Exec("errcheck", path).MustDo()
+	fmt.Println(fmt.Sprintf("[lint] github.com/kisielk/errcheck %v", path))
+	args = append([]string{"errcheck"}, path...)
+	run.Exec(args...).MustDo()
 
 	fmtPath := path
-	if path == "./..." {
-		fmtPath = "."
+	if path[0] == "./..." {
+		fmtPath = []string{"."}
 	}
-	fmt.Println("[lint] gofmt -s -l -w " + fmtPath)
+	fmt.Println(fmt.Sprintf("[lint] gofmt -s -l -w %v", fmtPath))
 	// gofmt doesn't return non-zero when fails, we have to check return manually
-	out := strings.TrimSpace(run.Exec("gofmt", "-s", "-l", "-w", fmtPath).MustString())
+	args = append([]string{"gofmt", "-s", "-l", "-w"}, fmtPath...)
+	out := strings.TrimSpace(run.Exec(args...).MustString())
 	if out != "" {
 		panic("\"gofmt -s\" check failed:\n" + out)
 	}
-
 }
 
-func test(path, match string, min float64, isLint, dev, verbose bool) {
+func test(path []string, match string, min float64, isLint, dev, verbose bool) {
 	if isLint {
 		lint(path)
 	}
@@ -108,8 +110,9 @@ func test(path, match string, min float64, isLint, dev, verbose bool) {
 		"-count=1", // prevent the go test cache
 		"-covermode=count",
 		"-run", match,
-		path,
 	}
+
+	conf = append(conf, path...)
 
 	if dev {
 		run.MustGoTool("github.com/kyoh86/richgo")

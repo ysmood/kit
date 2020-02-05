@@ -112,7 +112,7 @@ Commands:
   test* [<flags>] [<match>]
     run go unit test
 
-  lint [<path>]
+  lint [<path>...]
     lint project with golint and golangci-lint
 
   build [<flags>] [<pattern>...]
