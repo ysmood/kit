@@ -61,6 +61,9 @@ var Noop = utils.Noop
 // Observable imported
 type Observable = utils.Observable
 
+// Pause imported
+var Pause = utils.Pause
+
 // RandBytes imported
 var RandBytes = utils.RandBytes
 

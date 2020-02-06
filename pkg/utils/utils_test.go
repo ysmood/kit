@@ -124,3 +124,7 @@ func TestObservableCancel(t *testing.T) {
 func TestSleep(t *T) {
 	kit.Sleep(0.01)
 }
+
+func TestPause(t *T) {
+	go kit.Pause()
+}

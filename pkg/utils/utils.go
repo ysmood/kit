@@ -139,3 +139,8 @@ func S(tpl string, params ...interface{}) string {
 func Sleep(seconds float64) {
 	time.Sleep(time.Duration(seconds * float64(time.Second)))
 }
+
+// Pause the execution
+func Pause() {
+	<-make(chan Nil)
+}
