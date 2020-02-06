@@ -73,6 +73,9 @@ var S = utils.S
 // Sdump imported
 var Sdump = utils.Sdump
 
+// Sleep imported
+var Sleep = utils.Sleep
+
 // Stderr imported
 var Stderr = utils.Stderr
 

@@ -120,3 +120,7 @@ func TestObservableCancel(t *testing.T) {
 
 	assert.Error(t, err)
 }
+
+func TestSleep(t *T) {
+	kit.Sleep(0.01)
+}
