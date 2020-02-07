@@ -10,11 +10,20 @@ import (
 // All imported
 var All = utils.All
 
+// BackoffSleeper imported
+var BackoffSleeper = utils.BackoffSleeper
+
 // C imported
 var C = utils.C
 
 // ClearScreen imported
 var ClearScreen = utils.ClearScreen
+
+// CountSleeper imported
+var CountSleeper = utils.CountSleeper
+
+// DefaultBackoff imported
+var DefaultBackoff = utils.DefaultBackoff
 
 // Dump imported
 var Dump = utils.Dump
@@ -31,6 +40,9 @@ var Err = utils.Err
 // ErrArg imported
 var ErrArg = utils.ErrArg
 
+// ErrMaxSleepCount imported
+var ErrMaxSleepCount = utils.ErrMaxSleepCount
+
 // Event imported
 type Event = utils.Event
 
@@ -42,6 +54,9 @@ type JSONResult = utils.JSONResult
 
 // Log imported
 var Log = utils.Log
+
+// MergeSleepers imported
+var MergeSleepers = utils.MergeSleepers
 
 // MustToJSON imported
 var MustToJSON = utils.MustToJSON
@@ -70,6 +85,9 @@ var RandBytes = utils.RandBytes
 // RandString imported
 var RandString = utils.RandString
 
+// Retry imported
+var Retry = utils.Retry
+
 // S imported
 var S = utils.S
 
@@ -78,6 +96,9 @@ var Sdump = utils.Sdump
 
 // Sleep imported
 var Sleep = utils.Sleep
+
+// Sleeper imported
+type Sleeper = utils.Sleeper
 
 // Stderr imported
 var Stderr = utils.Stderr
@@ -169,8 +190,8 @@ var Remove = os.Remove
 // RemoveWithDir imported
 var RemoveWithDir = os.RemoveWithDir
 
-// Retry imported
-var Retry = os.Retry
+// RetryPanic imported
+var RetryPanic = os.RetryPanic
 
 // SendSigInt imported
 var SendSigInt = os.SendSigInt

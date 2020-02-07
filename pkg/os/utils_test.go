@@ -38,7 +38,7 @@ func TestWaitSignal(t *T) {
 
 func TestRetry(t *T) {
 	count := 0
-	errs := kit.Retry(3, time.Nanosecond, func() {
+	errs := kit.RetryPanic(3, time.Nanosecond, func() {
 		count = count + 1
 	})
 
@@ -48,7 +48,7 @@ func TestRetry(t *T) {
 
 func TestRetryHalf(t *T) {
 	count := 0
-	errs := kit.Retry(5, time.Nanosecond, func() {
+	errs := kit.RetryPanic(5, time.Nanosecond, func() {
 		count = count + 1
 
 		if count < 3 {
@@ -62,7 +62,7 @@ func TestRetryHalf(t *T) {
 
 func TestRetry3Times(t *T) {
 	count := 0
-	errs := kit.Retry(3, time.Nanosecond, func() {
+	errs := kit.RetryPanic(3, time.Nanosecond, func() {
 		count = count + 1
 		panic(count)
 	})

@@ -145,11 +145,3 @@ func TestObservableFilter(t *testing.T) {
 
 	assert.Equal(t, []int{0, 2, 4}, list)
 }
-
-func TestSleep(t *T) {
-	kit.Sleep(0.01)
-}
-
-func TestPause(t *T) {
-	go kit.Pause()
-}

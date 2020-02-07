@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/tidwall/gjson"
 )
@@ -133,14 +132,4 @@ func S(tpl string, params ...interface{}) string {
 	E(t.Execute(&out, dict))
 
 	return out.String()
-}
-
-// Sleep the execution for specified seconds, such as 2.3 seconds
-func Sleep(seconds float64) {
-	time.Sleep(time.Duration(seconds * float64(time.Second)))
-}
-
-// Pause the execution
-func Pause() {
-	<-make(chan Nil)
 }

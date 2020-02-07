@@ -73,7 +73,7 @@ func deployToGithub(bTasks []*buildTask, tag string) {
 		panic("please install hub.github.com first")
 	}
 
-	gos.Retry(5, 3*time.Second, func() {
+	gos.RetryPanic(5, 3*time.Second, func() {
 		_ = run.Exec("hub", "release", "delete", tag).Raw().Do()
 
 		args := []string{"hub", "release", "create", "-m", tag}
