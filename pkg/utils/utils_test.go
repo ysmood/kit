@@ -100,16 +100,19 @@ func TestObservable(t *testing.T) {
 	e, err := o.Until(context.Background(), func(e utils.Event) bool {
 		return e.(int) == 5
 	})
-
 	time.Sleep(10 * time.Millisecond)
 
 	assert.Nil(t, err)
+	assert.Equal(t, 0, o.Count())
 	assert.Equal(t, 5, e)
 	assert.Equal(t, 10, i)
 }
 
 func TestObservableCancel(t *testing.T) {
 	o := utils.NewObservable()
+	o.Subscribe()
+
+	assert.Equal(t, 1, o.Count())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
