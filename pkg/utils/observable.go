@@ -15,12 +15,6 @@ type Observable struct {
 // Event of the observale
 type Event interface{}
 
-// Subscriber of the observable
-type Subscriber struct {
-	C  chan Event
-	id int64
-}
-
 // NewObservable creates a new observable
 func NewObservable() *Observable {
 	return &Observable{
@@ -28,7 +22,8 @@ func NewObservable() *Observable {
 	}
 }
 
-// Publish event to all subscribers
+// Publish event to all subscribers, no internal goroutine is used,
+// so the publish can block the goroutine. Use goroutine or buffer to prevent the blocking.
 func (o *Observable) Publish(e Event) {
 	o.subscribers.Range(func(_, s interface{}) (goOn bool) {
 		goOn = true
@@ -69,7 +64,7 @@ func (o *Observable) Count() int {
 }
 
 // Until check returns true keep waiting
-func (o *Observable) Until(ctx context.Context, check func(e Event) bool) (Event, error) {
+func (o *Observable) Until(ctx context.Context, check func(Event) bool) (Event, error) {
 	s := o.Subscribe()
 	defer o.Unsubscribe(s)
 
@@ -83,4 +78,24 @@ func (o *Observable) Until(ctx context.Context, check func(e Event) bool) (Event
 			return nil, ctx.Err()
 		}
 	}
+}
+
+// Subscriber of the observable
+type Subscriber struct {
+	C  chan Event
+	id int64
+}
+
+// Filter events
+func (s *Subscriber) Filter(filter func(Event) bool) chan Event {
+	filtered := make(chan Event)
+	go func() {
+		for e := range s.C {
+			if filter(e) {
+				filtered <- e
+			}
+		}
+		close(filtered)
+	}()
+	return filtered
 }

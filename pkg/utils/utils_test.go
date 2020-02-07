@@ -124,6 +124,28 @@ func TestObservableCancel(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestObservableFilter(t *testing.T) {
+	o := utils.NewObservable()
+	s := o.Subscribe()
+	c := s.Filter(func(e utils.Event) bool {
+		return e.(int)%2 == 0
+	})
+
+	go func() {
+		for i := 0; i < 6; i++ {
+			o.Publish(i)
+		}
+		o.Unsubscribe(s)
+	}()
+
+	list := []int{}
+	for e := range c {
+		list = append(list, e.(int))
+	}
+
+	assert.Equal(t, []int{0, 2, 4}, list)
+}
+
 func TestSleep(t *T) {
 	kit.Sleep(0.01)
 }
