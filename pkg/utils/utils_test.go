@@ -50,6 +50,16 @@ func TestE1(t *T) {
 	kit.E1("ok", errors.New("err"))
 }
 
+func TestErrInjector(t *T) {
+	j := utils.ErrInjector{}
+
+	j.CountInject(2, errors.New("inject"))
+
+	assert.Nil(t, j.E(nil))
+	assert.Error(t, j.E(nil))
+	assert.Nil(t, j.E(nil))
+}
+
 func TestTry(t *T) {
 	err := kit.Try(func() {
 		panic("err")

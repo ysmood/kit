@@ -40,6 +40,9 @@ var Err = utils.Err
 // ErrArg imported
 var ErrArg = utils.ErrArg
 
+// ErrInjector imported
+type ErrInjector = utils.ErrInjector
+
 // ErrMaxSleepCount imported
 var ErrMaxSleepCount = utils.ErrMaxSleepCount
 

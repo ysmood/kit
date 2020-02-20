@@ -43,6 +43,38 @@ func E1(arg interface{}, err error) interface{} {
 	return arg
 }
 
+// ErrInjector let you easily mock error for testing
+type ErrInjector struct {
+	fn func(error) error
+}
+
+// CountInject inject err after E is called with specified times
+func (e *ErrInjector) CountInject(times int, err error) {
+	count := 1
+	e.Inject(func(origin error) error {
+		if count == times {
+			e.Inject(nil)
+			return err
+		}
+		count++
+		return origin
+	})
+}
+
+// Inject the fn and enable the enjection, call it with nil to disable injection
+func (e *ErrInjector) Inject(fn func(error) error) {
+	e.fn = fn
+}
+
+// E inject error
+func (e *ErrInjector) E(err error) error {
+	if e.fn == nil {
+		return err
+	}
+
+	return e.fn(err)
+}
+
 // MustToJSONBytes encode data to json bytes
 func MustToJSONBytes(data interface{}) []byte {
 	bytes, err := json.Marshal(data)
