@@ -17,3 +17,8 @@ func SendSigInt(pid int) error {
 func ExecutableExt() string {
 	return ""
 }
+
+// Escape file name based on the os. Half-width illegal char will be replaced with its full-width version.
+func Escape(name string) string {
+	return name
+}

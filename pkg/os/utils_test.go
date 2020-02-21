@@ -70,3 +70,13 @@ func TestRetry3Times(t *T) {
 	assert.Equal(t, []interface{}{1, 2, 3}, errs)
 	assert.Equal(t, 3, count)
 }
+
+func TestEscape(t *T) {
+	expected := "/?*"
+
+	if runtime.GOOS == "windows" {
+		expected = "／？＊"
+	}
+
+	assert.Equal(t, expected, kit.Escape("/?*"))
+}

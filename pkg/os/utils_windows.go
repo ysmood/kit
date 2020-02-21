@@ -50,3 +50,28 @@ func SendSigInt(pid int) error {
 func ExecutableExt() string {
 	return ".exe"
 }
+
+var escapeMap = map[rune]rune{
+	'\\': '￥',
+	'/':  '／',
+	':':  '：',
+	'*':  '＊',
+	'?':  '？',
+	'"':  '”',
+	'<':  '＜',
+	'>':  '＞',
+	'|':  '｜',
+}
+
+// Escape file name based on the os. Half-width illegal char will be replaced with its full-width version.
+func Escape(name string) string {
+	escaped := make([]rune, len(name))
+	for i, r := range name {
+		c, has := escapeMap[r]
+		if has {
+			r = c
+		}
+		escaped[i] = r
+	}
+	return string(escaped)
+}

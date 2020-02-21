@@ -145,6 +145,9 @@ var Copy = os.Copy
 // DirExists imported
 var DirExists = os.DirExists
 
+// Escape imported
+var Escape = os.Escape
+
 // ExecutableExt imported
 var ExecutableExt = os.ExecutableExt
 
