@@ -72,7 +72,7 @@ func TestRetry3Times(t *T) {
 }
 
 func TestEscape(t *T) {
-	expected := "/?*"
+	expected := "／?*"
 
 	if runtime.GOOS == "windows" {
 		expected = "／？＊"

@@ -4,6 +4,7 @@ package os
 
 import (
 	"os"
+	"strings"
 	"syscall"
 )
 
@@ -20,5 +21,5 @@ func ExecutableExt() string {
 
 // Escape file name based on the os. Half-width illegal char will be replaced with its full-width version.
 func Escape(name string) string {
-	return name
+	return strings.ReplaceAll(name, "/", "／")
 }
