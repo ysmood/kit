@@ -49,8 +49,20 @@ func (o *Observable) Subscribe() *Subscriber {
 
 // Unsubscribe from the observable
 func (o *Observable) Unsubscribe(s *Subscriber) {
+	defer func() { _ = recover() }()
+
 	close(s.C)
 	o.subscribers.Delete(s.id)
+}
+
+// UnsubscribeAll current subscribers
+func (o *Observable) UnsubscribeAll() {
+	defer func() { _ = recover() }()
+
+	o.subscribers.Range(func(_, s interface{}) bool {
+		o.Unsubscribe(s.(*Subscriber))
+		return true
+	})
 }
 
 // Count returns the number of subscribers

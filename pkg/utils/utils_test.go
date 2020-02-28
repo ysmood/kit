@@ -145,7 +145,7 @@ func TestObservableFilter(t *testing.T) {
 		for i := 0; i < 6; i++ {
 			o.Publish(i)
 		}
-		o.Unsubscribe(s)
+		o.UnsubscribeAll()
 	}()
 
 	list := []int{}
