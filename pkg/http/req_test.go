@@ -99,7 +99,7 @@ func (s *RequestSuite) TestGetString() {
 
 func (s *RequestSuite) TestGetStringErr() {
 	_, err := kit.Req("").String()
-	s.EqualError(err, "Get : unsupported protocol scheme \"\"")
+	s.EqualError(err, "Get \"\": unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestSetClient() {
@@ -120,12 +120,12 @@ func (s *RequestSuite) TestMethodErr() {
 }
 
 func (s *RequestSuite) TestURLErr() {
-	s.EqualError(kit.ErrArg(kit.Req("").Do()), "Get : unsupported protocol scheme \"\"")
+	s.EqualError(kit.ErrArg(kit.Req("").Do()), "Get \"\": unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestRequestErr() {
 	err := kit.Req("").Do()
-	s.EqualError(err, "Get : unsupported protocol scheme \"\"")
+	s.EqualError(err, "Get \"\": unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestGetStringWithQuery() {
@@ -160,7 +160,7 @@ func (s *RequestSuite) TestGetJSON() {
 }
 
 func (s *RequestSuite) TestGetJSONErr() {
-	s.EqualError(kit.ErrArg(kit.Req("").JSON()), "Get : unsupported protocol scheme \"\"")
+	s.EqualError(kit.ErrArg(kit.Req("").JSON()), "Get \"\": unsupported protocol scheme \"\"")
 }
 
 func (s *RequestSuite) TestPostForm() {

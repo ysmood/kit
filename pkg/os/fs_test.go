@@ -3,6 +3,7 @@ package os_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -158,6 +159,10 @@ func TestRemoveDirPattern(t *testing.T) {
 }
 
 func TestRemoveDirErr(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
 	p := "tmp/" + kit.RandString(16)
 	_ = kit.OutputFile(p+"/a", "", nil)
 	_ = os.Chmod(p, 0400)
