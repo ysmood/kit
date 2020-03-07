@@ -25,7 +25,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/monochromegane/go-gitignore v0.0.0-20160105113617-38717d0a108c
 	github.com/nwaples/rardecode v1.1.0 // indirect
-	github.com/otiai10/copy v1.0.2
+	github.com/otiai10/copy v1.1.1
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
 	github.com/radovskyb/watcher v1.0.7
 	github.com/stretchr/testify v1.5.1
@@ -35,7 +35,7 @@ require (
 	github.com/ysmood/lookpath v1.1.0
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527
-	golang.org/x/tools v0.0.0-20200305185322-6a641547f55b
+	golang.org/x/tools v0.0.0-20200306191617-51e69f71924f
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 )
