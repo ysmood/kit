@@ -57,7 +57,7 @@ func BackoffSleeper(init, maxInterval time.Duration, algorithm func(time.Duratio
 			return nil
 		}
 
-		interval := init
+		var interval time.Duration
 		if init < maxInterval {
 			interval = algorithm(init)
 		} else {
