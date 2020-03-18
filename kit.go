@@ -136,6 +136,9 @@ var Server = http.Server
 // ServerContext imported
 type ServerContext = http.ServerContext
 
+// CD imported
+var CD = os.CD
+
 // Chmod imported
 var Chmod = os.Chmod
 

@@ -219,3 +219,25 @@ func TestDirExists(t *testing.T) {
 func TestFileExists(t *testing.T) {
 	assert.Equal(t, false, kit.FileExists("."))
 }
+
+func TestCD(t *testing.T) {
+	curr, err := os.Getwd()
+	kit.E(err)
+
+	f, err := filepath.Abs("fixtures")
+	kit.E(err)
+
+	cd := kit.CD("fixtures")
+	defer func() {
+		cd()
+
+		dir, err := os.Getwd()
+		kit.E(err)
+		assert.Equal(t, curr, dir)
+	}()
+
+	dir, err := os.Getwd()
+	kit.E(err)
+
+	assert.Equal(t, f, dir)
+}

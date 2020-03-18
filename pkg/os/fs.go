@@ -10,6 +10,7 @@ import (
 	"github.com/karrick/godirwalk"
 	"github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"
+	"github.com/ysmood/kit/pkg/utils"
 )
 
 // Copy file or dir recursively
@@ -164,4 +165,16 @@ func DirExists(path string) bool {
 	}
 
 	return true
+}
+
+// CD to a dir and return a function to cd back to the preivous dir
+func CD(dir string) func() {
+	curr, err := os.Getwd()
+	utils.E(err)
+
+	utils.E(os.Chdir(dir))
+
+	return func() {
+		utils.E(os.Chdir(curr))
+	}
 }
