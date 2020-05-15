@@ -14,10 +14,10 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/alessio/shellescape"
 	"github.com/derekstavis/go-qs"
 	"github.com/tidwall/gjson"
 	"github.com/ysmood/kit/pkg/utils"
-	"gopkg.in/alessio/shellescape.v1"
 )
 
 // ReqContext the request context

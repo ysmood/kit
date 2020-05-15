@@ -249,7 +249,7 @@ func (s *RequestSuite) TestReuseCookie() {
 	s.router.GET(path, func(c kit.GinContext) {
 		cookieA, _ = c.Cookie("t")
 		header = c.GetHeader("a")
-		c.SetCookie("t", "val", 3600, "", "", http.SameSiteDefaultMode, false, true)
+		c.SetCookie("t", "val", 3600, "", "", false, true)
 	})
 
 	c := kit.Req(url)

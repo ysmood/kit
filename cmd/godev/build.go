@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	gos "github.com/ysmood/kit/pkg/os"
 	"github.com/ysmood/kit/pkg/run"
 	"github.com/ysmood/kit/pkg/utils"
