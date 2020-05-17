@@ -26,7 +26,7 @@ func ErrArg(args ...interface{}) error {
 	return args[len(args)-1].(error)
 }
 
-// E the last arg is error, panic it
+// E if the last arg is error, panic it
 func E(args ...interface{}) []interface{} {
 	err, ok := args[len(args)-1].(error)
 	if ok {
