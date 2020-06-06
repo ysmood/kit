@@ -46,9 +46,6 @@ type ErrInjector = utils.ErrInjector
 // ErrMaxSleepCount imported
 var ErrMaxSleepCount = utils.ErrMaxSleepCount
 
-// Event imported
-type Event = utils.Event
-
 // JSON imported
 var JSON = utils.JSON
 
@@ -67,17 +64,11 @@ var MustToJSON = utils.MustToJSON
 // MustToJSONBytes imported
 var MustToJSONBytes = utils.MustToJSONBytes
 
-// NewObservable imported
-var NewObservable = utils.NewObservable
-
 // Nil imported
 type Nil = utils.Nil
 
 // Noop imported
 var Noop = utils.Noop
-
-// Observable imported
-type Observable = utils.Observable
 
 // Pause imported
 var Pause = utils.Pause
@@ -108,9 +99,6 @@ var Stderr = utils.Stderr
 
 // Stdout imported
 var Stdout = utils.Stdout
-
-// Subscriber imported
-type Subscriber = utils.Subscriber
 
 // Try imported
 var Try = utils.Try

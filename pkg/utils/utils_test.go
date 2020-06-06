@@ -1,12 +1,10 @@
 package utils_test
 
 import (
-	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/kit"
@@ -94,64 +92,4 @@ func TestSTemplate(t *T) {
 		},
 	)
 	assert.Equal(t, "<value> 10 ok ok", out)
-}
-
-func TestObservable(t *testing.T) {
-	o := utils.NewObservable()
-
-	i := 0
-	go func() {
-		time.Sleep(time.Millisecond)
-		for ; i < 10; i++ {
-			o.Publish(i)
-		}
-	}()
-
-	e, err := o.Until(context.Background(), func(e utils.Event) bool {
-		return e.(int) == 5
-	})
-	time.Sleep(10 * time.Millisecond)
-
-	assert.Nil(t, err)
-	assert.Equal(t, 0, o.Count())
-	assert.Equal(t, 5, e)
-	assert.Equal(t, 10, i)
-}
-
-func TestObservableCancel(t *testing.T) {
-	o := utils.NewObservable()
-	o.Subscribe()
-
-	assert.Equal(t, 1, o.Count())
-
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-
-	_, err := o.Until(ctx, func(e utils.Event) bool {
-		return false
-	})
-
-	assert.Error(t, err)
-}
-
-func TestObservableFilter(t *testing.T) {
-	o := utils.NewObservable()
-	s := o.Subscribe()
-	c := s.Filter(func(e utils.Event) bool {
-		return e.(int)%2 == 0
-	})
-
-	go func() {
-		for i := 0; i < 6; i++ {
-			o.Publish(i)
-		}
-		o.UnsubscribeAll()
-	}()
-
-	list := []int{}
-	for e := range c {
-		list = append(list, e.(int))
-	}
-
-	assert.Equal(t, []int{0, 2, 4}, list)
 }
