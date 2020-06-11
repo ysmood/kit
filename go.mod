@@ -27,7 +27,7 @@ require (
 	github.com/tidwall/gjson v1.6.0
 	github.com/ysmood/lookpath v1.1.0
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980
-	golang.org/x/tools v0.0.0-20200606014950-c42cb6316fb6
+	golang.org/x/sys v0.0.0-20200610111108-226ff32320da
+	golang.org/x/tools v0.0.0-20200611181506-99be2d6e796f
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

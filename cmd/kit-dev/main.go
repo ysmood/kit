@@ -30,8 +30,9 @@ func cmdBuild(cmd run.TaskCmd) func() {
 			args = append(args, "-d")
 		}
 
+		run.Exec(args...).MustDo()
+
 		export()
 		genReadme()
-		run.Exec(args...).MustDo()
 	}
 }

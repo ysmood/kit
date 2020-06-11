@@ -23,11 +23,7 @@ type buildTask struct {
 	zip  string
 }
 
-func build(patterns []string, dist string, deploy, noGitClean bool, version string, isZip bool, osList []string) {
-	if deploy && !noGitClean {
-		checkGitClean()
-	}
-
+func build(patterns []string, dist string, deploy bool, version string, isZip bool, osList []string) {
 	_ = gos.Remove(dist)
 
 	bTasks := genBuildTasks(patterns, dist, osList)
@@ -41,13 +37,6 @@ func build(patterns []string, dist string, deploy, noGitClean bool, version stri
 
 	if deploy {
 		deployToGithub(bTasks, version)
-	}
-}
-
-func checkGitClean() {
-	out := run.Exec("git", "status", "--porcelain").MustString()
-	if out != "" {
-		panic("git status must be clean before deployment:\n" + out)
 	}
 }
 

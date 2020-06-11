@@ -48,7 +48,6 @@ func cmdBuild(cmd run.TaskCmd) func() {
 	patterns := cmd.Arg("pattern", "folders to build").Default(".").Strings()
 	dir := cmd.Flag("dir", "the output dir").Default("dist").String()
 	deploy := cmd.Flag("deploy", "release to github with tag").Short('d').Bool()
-	noGitClean := cmd.Flag("no-git-clean", "do not check git clean when deploy").Short('g').Bool()
 	ver := cmd.Flag("deploy-version", "the name of the tag").Short('v').String()
 	noZip := cmd.Flag("no-zip", "don't generate zip file").Short('n').Bool()
 	osList := cmd.Flag("os", "os to build, by default mac, linux and windows will be built").Strings()
@@ -58,7 +57,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 		if *strict {
 			test([]string{"./..."}, "", 100, true, false, false)
 		}
-		build(*patterns, *dir, *deploy, *noGitClean, *ver, !*noZip, *osList)
+		build(*patterns, *dir, *deploy, *ver, !*noZip, *osList)
 	}
 }
 
@@ -75,6 +74,9 @@ func cmdLint(cmd run.TaskCmd) func() {
 }
 
 func lint(path []string) {
+	run.Exec("go", "mod", "tidy").MustDo()
+	checkGitClean()
+
 	run.MustGoTool("golang.org/x/lint/golint")
 	fmt.Println(fmt.Sprintf("[lint] golang.org/x/lint/golint %v", path))
 	args := append([]string{"golint", "-set_exit_status"}, path...)
@@ -140,4 +142,12 @@ func checkCoverage(min float64) {
 		panic(fmt.Errorf("total coverage %.1f%% is less than minimum %.1f%%", total, min))
 	}
 	fmt.Printf("Total Cover: %.1f%%\n", total)
+}
+
+func checkGitClean() {
+	out := run.Exec("git", "status", "--porcelain").MustString()
+	if out != "" {
+		out += run.Exec("git", "--no-pager", "diff").MustString()
+		panic("git status must be clean before deployment:\n" + out)
+	}
 }
