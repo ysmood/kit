@@ -148,6 +148,6 @@ func checkGitClean() {
 	out := run.Exec("git", "status", "--porcelain").MustString()
 	if out != "" {
 		out += run.Exec("git", "--no-pager", "diff").MustString()
-		panic("git status must be clean before deployment:\n" + out)
+		panic("git status must be clean:\n" + out)
 	}
 }
