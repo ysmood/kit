@@ -240,6 +240,16 @@ func (s *RequestSuite) TestHeader() {
 	kit.Req(url).Host("test").Header("test", "ok", "test", "_ok").MustDo()
 }
 
+func (s *RequestSuite) TestResetHeader() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {
+		s.Equal("", c.GetHeader("test"))
+	})
+
+	kit.Req(url).Header("test", "ok").Headers(http.Header{}).MustDo()
+}
+
 func (s *RequestSuite) TestReuseCookie() {
 	path, url := s.path()
 

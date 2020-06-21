@@ -100,7 +100,7 @@ func (ctx *ReqContext) Host(host string) *ReqContext {
 	return ctx
 }
 
-// Header sets the request header, example Header(k, v, k, v ...)
+// Header appends the request header, example Header(k, v, k, v ...)
 func (ctx *ReqContext) Header(params ...string) *ReqContext {
 	for i := 0; i < len(params); i += 2 {
 		k := params[i]
@@ -112,6 +112,12 @@ func (ctx *ReqContext) Header(params ...string) *ReqContext {
 		}
 	}
 
+	return ctx
+}
+
+// Headers sets the request header
+func (ctx *ReqContext) Headers(header http.Header) *ReqContext {
+	ctx.header = header
 	return ctx
 }
 
