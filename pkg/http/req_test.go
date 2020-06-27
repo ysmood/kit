@@ -32,6 +32,10 @@ func (s *RequestSuite) path() (path, url string) {
 
 func (s *RequestSuite) SetupSuite() {
 	server := kit.MustServer(":0")
+	opt := &http.Server{}
+	opt.SetKeepAlivesEnabled(false)
+	server.Set(opt)
+
 	s.listener = server.Listener
 	s.router = server.Engine
 

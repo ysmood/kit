@@ -1,4 +1,4 @@
 package utils
 
 // Version version the project
-const Version = "v0.24.2"
+const Version = "v0.24.3"
