@@ -213,9 +213,9 @@ func (ctx *ReqContext) Request() (*http.Request, error) {
 
 	if ctx.client == nil {
 		cookie, _ := cookiejar.New(nil)
-		ctx.client = &http.Client{
-			Jar: cookie,
-		}
+		c := *http.DefaultClient // clone
+		ctx.client = &c
+		ctx.client.Jar = cookie
 	}
 
 	body, err := ctx.getBody()
