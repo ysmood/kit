@@ -1,14 +1,16 @@
 package main
 
 import (
-	"os"
+	"archive/tar"
+	"archive/zip"
+	"bytes"
+	"compress/gzip"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/blang/semver"
-	"github.com/mholt/archiver/v3"
+	"github.com/blang/semver/v4"
 	gos "github.com/ysmood/kit/pkg/os"
 	"github.com/ysmood/kit/pkg/run"
 	"github.com/ysmood/kit/pkg/utils"
@@ -146,45 +148,43 @@ func genBuildTasks(patterns []string, dist string, osList []string) []*buildTask
 }
 
 func compressZip(from, to, name string) {
-	file, err := os.Open(from)
-	utils.E(err)
-	fileInfo, err := file.Stat()
+	data, err := gos.ReadFile(from)
 	utils.E(err)
 
-	tar := archiver.NewZip()
-	oFile, err := os.Create(to)
+	var b bytes.Buffer
+	w := zip.NewWriter(&b)
+	f, err := w.CreateHeader(&zip.FileHeader{
+		Name:     name,
+		Modified: time.Now(),
+	})
 	utils.E(err)
-	utils.E(tar.Create(oFile))
 
-	utils.E(tar.Write(archiver.File{
-		FileInfo: archiver.FileInfo{
-			FileInfo:   fileInfo,
-			CustomName: name,
-		},
-		ReadCloser: file,
-	}))
+	utils.E(f.Write(data))
+	utils.E(w.Close())
 
-	utils.E(tar.Close())
+	utils.E(gos.OutputFile(to, b.Bytes(), nil))
 }
 
 func compressGz(from, to, name string) {
-	file, err := os.Open(from)
-	utils.E(err)
-	fileInfo, err := file.Stat()
+	data, err := gos.ReadFile(from)
 	utils.E(err)
 
-	tar := archiver.NewTarGz()
-	oFile, err := os.Create(to)
-	utils.E(err)
-	utils.E(tar.Create(oFile))
+	var gb bytes.Buffer
+	gw := gzip.NewWriter(&gb)
+	utils.E(gw.Write(data))
+	utils.E(gw.Close())
 
-	utils.E(tar.Write(archiver.File{
-		FileInfo: archiver.FileInfo{
-			FileInfo:   fileInfo,
-			CustomName: name,
-		},
-		ReadCloser: file,
+	var tb bytes.Buffer
+	tw := tar.NewWriter(&tb)
+
+	utils.E(tw.WriteHeader(&tar.Header{
+		Name:    name,
+		ModTime: time.Now(),
+		Size:    int64(gb.Len()),
 	}))
+	utils.E(tw.Write(gb.Bytes()))
 
-	utils.E(tar.Close())
+	utils.E(tw.Close())
+
+	utils.E(gos.OutputFile(to, tb.Bytes(), nil))
 }
