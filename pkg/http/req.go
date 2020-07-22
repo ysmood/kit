@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -35,6 +36,7 @@ type ReqContext struct {
 	stringBody string
 	body       io.Reader
 	resBytes   []byte
+	proxy      string
 
 	timeout       time.Duration
 	timeoutCancel func()
@@ -69,6 +71,12 @@ func (ctx *ReqContext) Method(m string) *ReqContext {
 // URL sets the url for request
 func (ctx *ReqContext) URL(url string) *ReqContext {
 	ctx.url = url
+	return ctx
+}
+
+// Proxy sets the proxy for request
+func (ctx *ReqContext) Proxy(url string) *ReqContext {
+	ctx.proxy = url
 	return ctx
 }
 
@@ -216,6 +224,15 @@ func (ctx *ReqContext) Request() (*http.Request, error) {
 		c := *http.DefaultClient // clone
 		ctx.client = &c
 		ctx.client.Jar = cookie
+	}
+
+	if ctx.proxy != "" {
+		proxyURL, err := url.Parse(ctx.proxy)
+		if err != nil {
+			return nil, err
+		}
+		transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+		ctx.client.Transport = transport
 	}
 
 	body, err := ctx.getBody()

@@ -325,3 +325,18 @@ Date: {{.date}}
 
 	s.Equal(expected, c.MustCurl())
 }
+
+func (s *RequestSuite) TestProxy() {
+	path, url := s.path()
+
+	s.router.GET(path, func(c kit.GinContext) {
+		kit.E(c.Writer.WriteString(c.Request.URL.String()))
+	})
+
+	target := "http://test.com" + path
+	c := kit.Req(target).Proxy(url)
+	s.Equal(target, c.MustString())
+
+	c = kit.Req(target).Proxy("0://abc.com")
+	s.Error(c.Do())
+}
