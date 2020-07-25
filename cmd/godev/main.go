@@ -88,6 +88,15 @@ func lint(path []string) {
 	args = append([]string{"errcheck"}, path...)
 	run.Exec(args...).MustDo()
 
+	cyclePath := path
+	if path[0] == "./..." {
+		cyclePath = []string{"."}
+	}
+	run.MustGoTool("github.com/fzipp/gocyclo")
+	fmt.Println(fmt.Sprintf("[lint] github.com/fzipp/gocyclo %v", cyclePath))
+	args = append([]string{"gocyclo", "-over", "15"}, cyclePath...)
+	run.Exec(args...).MustDo()
+
 	fmtPath := path
 	if path[0] == "./..." {
 		fmtPath = []string{"."}
