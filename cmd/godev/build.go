@@ -87,6 +87,7 @@ func (ctx *buildTask) build(isZip bool) {
 
 	utils.E(run.Exec(
 		"go", "build",
+		"-trimpath",
 		"-ldflags=-w -s",
 		"-o", ctx.out,
 		ctx.dir,
