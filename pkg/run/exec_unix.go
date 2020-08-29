@@ -10,7 +10,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/kr/pty"
+	"github.com/creack/pty"
 	"github.com/ysmood/kit/pkg/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
