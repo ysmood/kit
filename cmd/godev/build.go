@@ -3,8 +3,9 @@ package main
 import (
 	"archive/tar"
 	"archive/zip"
-	"bytes"
 	"compress/gzip"
+	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -94,11 +95,7 @@ func (ctx *buildTask) build(isZip bool) {
 	).Env(env...).Do())
 
 	if isZip {
-		if ctx.os == "linux" {
-			compressGz(ctx.out, ctx.zip, ctx.bin)
-		} else {
-			compressZip(ctx.out, ctx.zip, ctx.bin)
-		}
+		compress(ctx.out, ctx.zip, ctx.bin)
 	}
 
 	utils.Log("build done:", ctx.out)
@@ -148,44 +145,47 @@ func genBuildTasks(patterns []string, dist string, osList []string) []*buildTask
 	return tasks
 }
 
-func compressZip(from, to, name string) {
-	data, err := gos.ReadFile(from)
+func compress(from, to, name string) {
+	fi, err := os.Stat(from)
 	utils.E(err)
-
-	var b bytes.Buffer
-	w := zip.NewWriter(&b)
-	f, err := w.CreateHeader(&zip.FileHeader{
-		Name:     name,
-		Modified: time.Now(),
-	})
+	src, err := os.Open(from)
 	utils.E(err)
+	utils.E(gos.OutputFile(to, "", nil))
+	dst, err := os.OpenFile(to, os.O_RDWR, 0664)
 
-	utils.E(f.Write(data))
-	utils.E(w.Close())
+	var compressor io.Writer
+	var close func()
+	if filepath.Ext(to) == ".zip" {
+		compressor, close = compressZip(fi, dst)
+	} else {
+		compressor, close = compressGz(fi, dst)
+	}
 
-	utils.E(gos.OutputFile(to, b.Bytes(), nil))
+	utils.E(io.Copy(compressor, src))
+	close()
 }
 
-func compressGz(from, to, name string) {
-	data, err := gos.ReadFile(from)
+func compressZip(fi os.FileInfo, dst io.Writer) (io.Writer, func()) {
+	zw := zip.NewWriter(dst)
+	h, err := zip.FileInfoHeader(fi)
 	utils.E(err)
+	w, err := zw.CreateHeader(h)
+	utils.E(err)
+	return w, func() {
+		utils.E(zw.Close())
+	}
+}
 
-	var gb bytes.Buffer
-	gw := gzip.NewWriter(&gb)
-	utils.E(gw.Write(data))
-	utils.E(gw.Close())
+func compressGz(fi os.FileInfo, dst io.Writer) (io.Writer, func()) {
+	gw := gzip.NewWriter(dst)
+	tw := tar.NewWriter(gw)
 
-	var tb bytes.Buffer
-	tw := tar.NewWriter(&tb)
+	h, err := tar.FileInfoHeader(fi, "")
+	utils.E(err)
+	utils.E(tw.WriteHeader(h))
 
-	utils.E(tw.WriteHeader(&tar.Header{
-		Name:    name,
-		ModTime: time.Now(),
-		Size:    int64(gb.Len()),
-	}))
-	utils.E(tw.Write(gb.Bytes()))
-
-	utils.E(tw.Close())
-
-	utils.E(gos.OutputFile(to, tb.Bytes(), nil))
+	return tw, func() {
+		utils.E(tw.Close())
+		utils.E(gw.Close())
+	}
 }
