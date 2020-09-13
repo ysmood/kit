@@ -156,18 +156,19 @@ func compress(from, to, name string) {
 	var compressor io.Writer
 	var close func()
 	if filepath.Ext(to) == ".zip" {
-		compressor, close = compressZip(fi, dst)
+		compressor, close = compressZip(fi, dst, name)
 	} else {
-		compressor, close = compressGz(fi, dst)
+		compressor, close = compressGz(fi, dst, name)
 	}
 
 	utils.E(io.Copy(compressor, src))
 	close()
 }
 
-func compressZip(fi os.FileInfo, dst io.Writer) (io.Writer, func()) {
+func compressZip(fi os.FileInfo, dst io.Writer, name string) (io.Writer, func()) {
 	zw := zip.NewWriter(dst)
 	h, err := zip.FileInfoHeader(fi)
+	h.Name = name
 	utils.E(err)
 	w, err := zw.CreateHeader(h)
 	utils.E(err)
@@ -176,11 +177,12 @@ func compressZip(fi os.FileInfo, dst io.Writer) (io.Writer, func()) {
 	}
 }
 
-func compressGz(fi os.FileInfo, dst io.Writer) (io.Writer, func()) {
+func compressGz(fi os.FileInfo, dst io.Writer, name string) (io.Writer, func()) {
 	gw := gzip.NewWriter(dst)
 	tw := tar.NewWriter(gw)
 
 	h, err := tar.FileInfoHeader(fi, "")
+	h.Name = name
 	utils.E(err)
 	utils.E(tw.WriteHeader(h))
 
