@@ -154,15 +154,15 @@ func checkCoverage(min float64) {
 	totalStr := regexp.MustCompile(`(\d+.\d+)%\n\z`).FindStringSubmatch(out)[1]
 	total, _ := strconv.ParseFloat(totalStr, 64)
 	if total < min {
-		panic(fmt.Errorf("total coverage %.1f%% is less than minimum %.1f%%", total, min))
+		panic(fmt.Sprintf("[lint] Test coverage %.1f%% must >= %.1f%%", total, min))
 	}
-	fmt.Printf("Total Cover: %.1f%%\n", total)
+	fmt.Printf("Test coverage: %.1f%%\n", total)
 }
 
 func checkGitClean() {
 	out := run.Exec("git", "status", "--porcelain").MustString()
 	if out != "" {
 		out += run.Exec("git", "--no-pager", "diff").MustString()
-		panic("git status must be clean:\n" + out)
+		panic("[lint] Changes of \"go generate\" or \"lint auto fix\" are not committed:\n" + out)
 	}
 }
