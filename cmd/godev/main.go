@@ -42,6 +42,8 @@ func cmdTest(cmd run.TaskCmd) func() {
 	match := cmd.Arg("match", "match test name").String()
 	path := cmd.Flag("path", "the base dir of path").Short('p').Default("./...").Strings()
 	dev := cmd.Flag("dev", "run as dev mode").Short('d').Bool()
+	fast := cmd.Flag("failfast", "fail on first error").Short('f').Bool()
+	short := cmd.Flag("short", "run as short mode").Short('s').Bool()
 	race := cmd.Flag("race", "enable race detector").Short('r').Bool()
 	min := cmd.Flag(
 		"min", "if total coverage percentage is lower than the minimum exit with non-zero",
@@ -50,7 +52,7 @@ func cmdTest(cmd run.TaskCmd) func() {
 	verbose := cmd.Flag("verbose", "enable verbose").Short('v').Bool()
 
 	return func() {
-		test(*path, *match, *min, *lint, *dev, *race, *verbose)
+		test(*path, *match, *min, *lint, *dev, *fast, *short, *race, *verbose)
 	}
 }
 
@@ -65,7 +67,7 @@ func cmdBuild(cmd run.TaskCmd) func() {
 
 	return func() {
 		if *strict {
-			test([]string{"./..."}, "", 100, true, false, false, false)
+			test([]string{"./..."}, "", 100, true, false, false, false, false, false)
 		}
 		build(*patterns, *dir, *deploy, *ver, !*noZip, *osList)
 	}
@@ -119,7 +121,7 @@ func lint(path []string) {
 	}
 }
 
-func test(path []string, match string, min float64, isLint, dev, race, verbose bool) {
+func test(path []string, match string, min float64, isLint, dev, fast, short, race, verbose bool) {
 	if isLint {
 		lint(path)
 	}
@@ -137,6 +139,14 @@ func test(path []string, match string, min float64, isLint, dev, race, verbose b
 	if dev {
 		run.MustGoTool("github.com/kyoh86/richgo")
 		conf[0] = "richgo"
+	}
+
+	if fast {
+		conf = append(conf, "-failfast")
+	}
+
+	if short {
+		conf = append(conf, "-short")
 	}
 
 	if race {
