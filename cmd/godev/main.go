@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	gos "os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,6 +15,14 @@ import (
 var covPath *string
 
 func main() {
+	defer func() {
+		err := recover()
+		if err != nil {
+			_, _ = fmt.Fprintln(utils.Stderr, err)
+			gos.Exit(1)
+		}
+	}()
+
 	app := run.TasksNew("godev", "dev tool for common go project")
 	app.Version(utils.Version)
 
