@@ -45,10 +45,7 @@ func run(prefix string, isRaw bool, cmd *exec.Cmd) error {
 		rawLock.Lock()
 		defer rawLock.Unlock()
 		// Set stdin in raw mode.
-		oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
-		if err != nil {
-			utils.Log("[exec] set stdin to raw mode:", err)
-		}
+		oldState, _ := terminal.MakeRaw(int(os.Stdin.Fd()))
 		// Best effort
 		defer restoreState(oldState)
 	}
