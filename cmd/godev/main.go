@@ -181,6 +181,6 @@ func checkCoverage(min float64) {
 func checkGitClean() {
 	out := run.Exec("git", "status", "--porcelain").MustString()
 	if out != "" {
-		panic("[lint] Changes of \"go generate\", \"lint auto fix\", etc are not committed:\n" + out)
+		panic("[lint] Changes of \"go generate\", \"lint auto fix\", etc are not git committed:\n" + out)
 	}
 }
