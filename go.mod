@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
-	github.com/alessio/shellescape v1.2.2
+	github.com/alessio/shellescape v1.3.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/bmatcuk/doublestar v1.3.2
 	github.com/creack/pty v1.1.11
@@ -15,7 +15,7 @@ require (
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/karrick/godirwalk v1.16.1
-	github.com/mattn/go-colorable v0.1.7
+	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
