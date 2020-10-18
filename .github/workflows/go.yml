@@ -1,13 +1,17 @@
 name: Go
-on: [push]
+on:
+  push:
+    branches:
+      - '**'
+
+  pull_request:
+
 jobs:
 
   build:
     strategy:
       matrix:
-        os:
-        - ubuntu-latest
-        - macOS-latest
+        os: [ubuntu-latest, macOS-latest]
 
     runs-on: ${{ matrix.os }}
 
