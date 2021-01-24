@@ -254,7 +254,9 @@ func (ctx *GuardContext) watch() {
 			}
 			lastRun = time.Now()
 
-			utils.Log(ctx.prefix, e)
+			// TODO: sometimes the stdout will sallow the \r
+			// Still don't know why
+			utils.Log(ctx.prefix, e, "\r")
 
 			if e.Op == watcher.Create {
 				if e.IsDir() {
